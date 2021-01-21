@@ -50,7 +50,7 @@ type findFileOptions = {
 	extensions?: readonly string[];
 };
 
-async function* findFile(
+async function* findExecutable(
 	name: string,
 	options: findFileOptions = {}
 ): AsyncIterableIterator<string> {
@@ -70,7 +70,10 @@ async function* findFile(
 	}
 }
 
-function* findFileSync(name: string, options: findFileOptions = {}): IterableIterator<string> {
+function* findExecutableSync(
+	name: string,
+	options: findFileOptions = {}
+): IterableIterator<string> {
 	const paths = options.paths
 		? options.paths
 		: (isWinOS ? ['.'] : []).concat(Deno.env.get('PATH')?.split(pathListSeparator) || []);
@@ -96,6 +99,19 @@ async function collect<T>(iterable: AsyncIterable<T> | Iterable<T>) {
 		arr.push(x);
 	}
 	return arr;
+}
+
+/**
+ *  Map function (`(element, index) => result`) over sequence values
+ */
+async function* map<T, U>(
+	iterable: AsyncIterable<T> | Iterable<T>,
+	fn: (element: T, index: number) => U
+) {
+	let index = 0;
+	for await (const x of iterable) {
+		yield fn(x, index);
+	}
 }
 
 /**
@@ -139,17 +155,38 @@ function last<T>(arr: readonly T[]) {
 // );
 // console.log({ files });
 
-const npmPath = first(await collect(take(1, findFile('npm')))) || '';
+const npmPath = first(await collect(take(1, findExecutable('npm')))) || '';
 const npmBinPath = path.dirname(npmPath);
 
 // ref: [deno issue ~ add `caseSensitive` option to `expandGlob`](https://github.com/denoland/deno/issues/9208)
 // ref: [deno/std ~ `expandGlob` discussion](https://github.com/denoland/deno/issues/1856)
-const files = await collect(fs.expandGlob(path.join(npmBinPath, '*.cmd')));
+// const files = await collect(fs.expandGlob(path.join(npmBinPath, '*.cmd')));
+const files = fs.expandGlob(path.join(npmBinPath, '*.cmd'));
 
 // console.log({ npmPath, npmBinPath, files });
 
-const decoder = new TextDecoder('utf-8');
-files.forEach((file) => {
-	const data = decoder.decode(Deno.readFileSync(file.path));
-	console.log({ file, data });
-});
+const decoder = new TextDecoder(); // default == 'utf-8'
+// files.forEach((file) => {
+// 	const data = decoder.decode(Deno.readFileSync(file.path));
+// 	console.log({ file, data });
+// });
+// for await (const file of files) {
+// 	const data = decoder.decode(await Deno.readFile(file.path));
+// 	console.log({ file, data });
+// }
+
+const data = await collect(
+	map(files, async (file) => {
+		const name = file.path;
+		const contents = decoder.decode(await Deno.readFile(name)).replace(/\r?\n|\r/g, '\n');
+		// const target = contents.match(/^\s*\x22%_prog%\x22\s+(\x22[^\x22]\x22)/gm);
+		const target = (contents.match(/^[^\S\n]*\x22%_prog%\x22\s+(\x22[^\x22]*\x22).*$/m) || [])[1];
+		return {
+			name,
+			contents,
+			target,
+		};
+	})
+);
+
+console.log({ data });
