@@ -111,6 +111,21 @@ async function* take<T>(n: number, iterable: AsyncIterable<T> | Iterable<T>) {
 	}
 }
 
+function head<T>(arr: readonly T[]) {
+	return arr.length > 0 ? arr[0] : undefined;
+}
+
+function tail<T>(arr: readonly T[]) {
+	return arr.slice(1);
+}
+
+function first<T>(arr: readonly T[]) {
+	return head<T>(arr);
+}
+function last<T>(arr: readonly T[]) {
+	return arr.slice(-1)[0];
+}
+
 // const npmBinPath = './{kb,fix,djs}*';
 // const files = Array.from(fs.expandGlobSync(npmBinPath));
 // files.forEach((file) => console.log({ file }));
@@ -124,6 +139,17 @@ async function* take<T>(n: number, iterable: AsyncIterable<T> | Iterable<T>) {
 // );
 // console.log({ files });
 
-const npmPath = await collect(take(1, findFile('npm')));
+const npmPath = first(await collect(take(1, findFile('npm')))) || '';
+const npmBinPath = path.dirname(npmPath);
 
-console.log({ npmPath });
+// ref: [deno issue ~ add `caseSensitive` option to `expandGlob`](https://github.com/denoland/deno/issues/9208)
+// ref: [deno/std ~ `expandGlob` discussion](https://github.com/denoland/deno/issues/1856)
+const files = await collect(fs.expandGlob(path.join(npmBinPath, '*.cmd')));
+
+// console.log({ npmPath, npmBinPath, files });
+
+const decoder = new TextDecoder('utf-8');
+files.forEach((file) => {
+	const data = decoder.decode(Deno.readFileSync(file.path));
+	console.log({ file, data });
+});
