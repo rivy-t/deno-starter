@@ -10,6 +10,13 @@
 // * [Generic Type Guard](https://dev.to/krumpet/generic-type-guard-in-typescript-258l) @@ <https://archive.is/9fu95>
 // * [TypeScript FAQs](https://github.com/Microsoft/TypeScript/wiki/FAQ#faqs)
 
+// ToDO: generalize and define more types
+// see Foldable<T> from 'rubico'
+// * ref: <https://github.com/a-synchronous/rubico/issues/179>
+// * ref: <https://github.com/a-synchronous/rubico/blob/master/_internal/iteratorFind.js>
+// * ref: <https://github.com/a-synchronous/rubico/blob/master/_internal/asyncIteratorFind.js>
+// * ref: <https://github.com/a-synchronous/rubico/blob/master/x/find.js>
+
 export async function* from<T>(iterable: AsyncIterable<T> | Iterable<T>) {
 	for await (const e of iterable) {
 		yield e;
