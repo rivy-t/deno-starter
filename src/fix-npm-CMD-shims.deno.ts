@@ -6,10 +6,16 @@
 
 // spell-checker:ignore (abbrev/names) Cygwin MSYS SkyPack
 // spell-checker:ignore (jargon) templating
+// spell-checker:ignore (libraries) rambda
+// spell-checker:ignore (names/people) Frederico Kereki , Packt
 // spell-checker:ignore (shell/cmd) COMSPEC PATHEXT
 
-import * as fs from 'https://deno.land/std@0.83.0/fs/mod.ts';
 import * as path from 'https://deno.land/std@0.83.0/path/mod.ts';
+
+// import * as fs from 'https://deno.land/std@0.83.0/fs/mod.ts';
+import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
+import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
+const fs = { exists, existsSync, expandGlob, expandGlobSync };
 
 // templating engines ~ <https://colorlib.com/wp/top-templating-engines-for-javascript> @@ <https://archive.is/BKYMw>
 
