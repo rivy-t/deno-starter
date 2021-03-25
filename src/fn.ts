@@ -101,6 +101,26 @@ export function collectSync<T>(list: Iterable<T>) {
 	return arr;
 }
 
+export async function toArray<T>(iterable: AsyncIterable<T> | Iterable<T>) {
+	return collect(iterable);
+}
+export function toArraySync<T>(iterable: Iterable<T>) {
+	return collectSync(iterable);
+}
+export async function toList<T>(iterable: AsyncIterable<T> | Iterable<T>) {
+	return collect(iterable);
+}
+export function toListSync<T>(iterable: Iterable<T>) {
+	return collectSync(iterable);
+}
+
+export function enumerate<T>(iterable: AsyncIterable<T> | Iterable<T>) {
+	return zip(range(0, Infinity), iterable);
+}
+export function enumerateSync<T>(iterable: Iterable<T>) {
+	return zipSync(rangeSync(0, Infinity), iterable);
+}
+
 /**
  *  Map function (`(element, index) => result`) over sequence values
  */
@@ -170,15 +190,6 @@ export function* scanSync<T, U>(
 	}
 }
 
-// export const enumerate = (iterable) => zip(range(0, Infinity), iterable);
-
-// const slice = R.curry(function* (start, stop, xs) {
-// 	for (const [i, x] of enumerate(xs)) {
-// 		if (i >= start) yield x;
-// 		if (i >= stop - 1) return;
-// 	}
-// });
-
 /**
  * Converts a (potentially infinite) sequence into a sequence of length `n`
  */
@@ -221,18 +232,18 @@ export function* dropSync<T>(n: number, iterable: Iterable<T>) {
 	}
 }
 
-export async function* range<T>(start: number, end: number) {
+export async function* range<T>(start: number, end: number, step: number = 1) {
 	let idx = start;
 	while (idx < end) {
 		yield idx;
-		idx++;
+		idx = idx + step;
 	}
 }
-export function* rangeSync<T>(start: number, end: number) {
+export function* rangeSync<T>(start: number, end: number, step: number = 1) {
 	let idx = start;
 	while (idx < end) {
 		yield idx;
-		idx++;
+		idx = idx + step;
 	}
 }
 
