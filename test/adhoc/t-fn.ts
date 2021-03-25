@@ -9,10 +9,10 @@
 // console.log({ x });
 
 import * as F from '../../src/fn.ts'; // spell-checker:ignore unnest
-// import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
+import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 
 // const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd']));
-const z = await F.collect(F.enumerate(['a', 'bb', 'ccc', 'dddd']));
+const z = await F.collect(F.enumerate(new Map()));
 const flatZ = await F.collect(F.flatten(z));
 console.log({ z, flatZ });
 
@@ -26,3 +26,14 @@ console.log({
 	reduce: F.reduceSync((acc, e) => acc + e, 0, flatY),
 	scan: F.collectSync(F.scanSync((acc, e) => acc + e, 0, flatY)),
 });
+
+const double = (x: number) => x + x;
+const m = new Map([
+	['x', 1],
+	['y', 2],
+]);
+const a = R.map(double, R.fromPairs(Array.from(m)));
+console.log({ m, a });
+
+const b = R.map(double, await F.toArray(F.flatten(y)));
+console.log({ b });
