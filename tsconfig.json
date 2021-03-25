@@ -1,10 +1,11 @@
 {
-  "compilerOptions": {
-    "allowJs": true,
-    "module": "esnext",
-    "resolveJsonModule": true,
-    "target": "esnext",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+	"compilerOptions": {
+		"allowJs": true,
+		"module": "esnext",
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"target": "esnext",
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true
+	}
 }
