@@ -347,3 +347,26 @@ export function lastSync<T>(list: Iterable<T>) {
 	const arr = collectSync<T>(list);
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
+
+const symbolAsyncIterator = Symbol.asyncIterator;
+const symbolIterator = Symbol.iterator;
+const isPromise = (value: any) => value != null && typeof value.then == 'function';
+const isObject = (value: any) => {
+	if (typeof value === 'undefined' || value === null) {
+		return false;
+	}
+	const typeofValue = typeof value;
+	return typeofValue == 'object' || typeofValue == 'function';
+};
+
+export function f<T>(list: AsyncIterable<T> | Iterable<T> | Map<any, any> | Object) {
+	if (typeof list === 'undefined' || list === null) {
+		return [] as T[];
+	}
+	if (typeof (list as any)[symbolIterator] === 'function') {
+		return list.next();
+	}
+	if (typeof (list as any)[symbolAsyncIterator] === 'function') {
+		return;
+	}
+}
