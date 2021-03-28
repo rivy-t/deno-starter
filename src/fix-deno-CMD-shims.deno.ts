@@ -40,12 +40,12 @@ import * as _ from 'https://cdn.skypack.dev/pin/lodash@v4.17.20-4NISnx5Etf8JOo22
 const decoder = new TextDecoder(); // default == 'utf-8'
 const encoder = new TextEncoder(); // default == 'utf-8'
 
-const cmdShimTemplate = `% <%=targetBinName%> (*revised* Deno CMD shim) %
-@set _DENO_SHIM_0_=%0
+const cmdShimTemplate = `@:: \`<%=targetShimBinName%>\` (*revised* Deno CMD shim; by \`dxi\`) %
 @set "ERRORLEVEL="
-@deno.exe "run" <%=target%>
-@set "ERRORLEVEL=%ERRORLEVEL%"
-@set "_DENO_SHIM_0_="
+@setLocal
+@set _DENO_SHIM_0_=%0
+@set _DENO_SHIM_*_=%*
+@goto _undef_ 2>NUL || @for %%G in ("%COMSPEC%") do @title %%~nG & @deno.exe <%=denoTarget%>
 @set "ERRORLEVEL=" & @goto _undefined_ 2>NUL || @for %%G in ("%COMSPEC%") do @title %%~nG & @"%COMSPEC%" /d/c "@exit %ERRORLEVEL%"
 `;
 
@@ -55,73 +55,6 @@ const pathListSeparator = isWinOS ? /;/ : /:/;
 // const paths = Deno.env.get('PATH')?.split(pathListSeparator) || [];
 const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 const pathCaseSensitive = !isWinOS;
-
-// influenced by code from <https://github.com/npm/node-which/blob/master/which.js> (ISC License)
-// handle PATHEXT for Cygwin or MSYS?
-
-type findFileOptions = {
-	paths?: readonly string[];
-	extensions?: readonly string[];
-};
-
-async function* findExecutable(
-	name: string,
-	options: findFileOptions = {}
-): AsyncIterableIterator<string> {
-	const paths = options.paths
-		? options.paths
-		: (isWinOS ? ['.'] : []).concat(Deno.env.get('PATH')?.split(pathListSeparator) || []);
-	const extensions = options.extensions
-		? options.extensions
-		: (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [''];
-	for (const path of paths) {
-		for (const extension of extensions) {
-			const p = Path.join(path, name) + extension;
-			if ((await fs.exists(p)) && (isWinOS || ((await Deno.lstat(p)).mode || 0) & 0o111)) {
-				yield p;
-			}
-		}
-	}
-}
-function* findExecutableSync(
-	name: string,
-	options: findFileOptions = {}
-): IterableIterator<string> {
-	const paths = options.paths
-		? options.paths
-		: (isWinOS ? ['.'] : []).concat(Deno.env.get('PATH')?.split(pathListSeparator) || []);
-	const extensions = options.extensions
-		? options.extensions
-		: (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [''];
-	for (const path of paths) {
-		for (const extension of extensions) {
-			const p = Path.join(path, name) + extension;
-			if (fs.existsSync(p) && (isWinOS || (Deno.lstatSync(p).mode || 0) & 0o111)) {
-				yield p;
-			}
-		}
-	}
-}
-
-// const npmBinPath = './{kb,fix,djs}*';
-// const files = Array.from(fs.expandGlobSync(npmBinPath));
-// files.forEach((file) => console.log({ file }));
-
-// console.log({ mainModule: Deno.mainModule });
-// console.log({ PATH: Deno.env.get('PATH') });
-// console.log({ paths, pathExtensions });
-
-// const files = await collect(
-// 	take(Infinity, findFile('npm', { extensions: ['', ...pathExtensions] }))
-// );
-// console.log({ files });
-
-// const npmPath = first(await collect(take(1, findExecutable('npm')))) || '';
-// const npmBinPath = Path.dirname(npmPath);
-
-function filterUndefined<T>(ts: (T | undefined)[]): T[] {
-	return ts.filter((t: T | undefined): t is T => !!t);
-}
 
 function joinDefinedPaths(...paths: (string | undefined)[]): string | undefined {
 	if (paths.find((v) => typeof v === 'undefined')) {
@@ -135,15 +68,12 @@ const denoInstallRoot = joinDefinedPaths(
 	'bin'
 );
 
-Deno.stdout.writeSync(
-	encoder.encode(
-		'`deno` binaries folder ' +
-			(denoInstallRoot ? 'found at "' + denoInstallRoot + '"' : 'not found') +
-			'\n'
-	)
-);
-
-if (!denoInstallRoot) {
+if (denoInstallRoot) {
+	Deno.stdout.writeSync(
+		encoder.encode('`deno` binaries folder found at "' + denoInstallRoot + '"\n')
+	);
+} else {
+	Deno.stderr.writeSync(encoder.encode('ERR!: `deno` binaries folder not found\n'));
 	Deno.exit(1);
 }
 
