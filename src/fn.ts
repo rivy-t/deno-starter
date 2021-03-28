@@ -17,74 +17,212 @@
 // * ref: <https://github.com/a-synchronous/rubico/blob/master/_internal/asyncIteratorFind.js>
 // * ref: <https://github.com/a-synchronous/rubico/blob/master/x/find.js>
 
+// const symbolAsyncIterator = Symbol.asyncIterator;
+// const symbolIterator = Symbol.iterator;
+// const isPromise = (value: any) => value != null && typeof value.then == 'function';
+// const isObject = (value: any) => {
+// 	if (typeof value === 'undefined' || value === null) {
+// 		return false;
+// 	}
+// 	const typeofValue = typeof value;
+// 	return typeofValue == 'object' || typeofValue == 'function';
+// };
+
 // note: Iterable<T>, by ECMA2020 default, includes Array<T>, ArrayLike<T>, Map<K,T>, Set<T>, and String
+
 type ObjectKey = number | string | symbol;
+type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
+type MapLike<K, V> =
+	| Map<K, V>
+	| (K extends ObjectKey ? MapLikeObject<K, V> : never)
+	| { entries: () => [K, V][] };
+
+type Enumerable<T, V = GetEnumerateValue<T>, K = GetEnumerateKey<T>> =
+	| MapLike<K, V>
+	| ArrayLike<V>
+	| Iterable<V>;
+
+type AnyEnumerable<T, V = GetEnumerateValue<T>, K = GetEnumerateKey<T>> =
+	| MapLike<K, V>
+	| ArrayLike<V>
+	| AnyIterable<V>;
+
+type GetEnumerateKey<T> = T extends MapLike<infer K, any> ? K : number;
+type GetEnumerateValue<T> = T extends MapLike<any, infer V> | ArrayLike<infer V> | Iterable<infer V>
+	? V
+	: unknown;
+
+export async function* enumerate<T>(enumerable: AnyEnumerable<T>) {
+	type K = GetEnumerateKey<T>;
+	type V = GetEnumerateValue<T>;
+
+	const hasEntries = typeof (enumerable as any).entries === 'function';
+	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
+
+	let idx = 0;
+	if (isIterable) {
+		for await (const e of (enumerable as unknown) as AsyncIterable<T>) {
+			yield (Array.isArray(e) ? e : [idx++, e]) as [K, V];
+		}
+	} else if (hasEntries) {
+		const arr = ((enumerable as unknown) as any).entries() as [K, V][];
+		for (const e of arr) {
+			yield e;
+		}
+	} else {
+		const arr: ObjectKey[] = Reflect.ownKeys(enumerable);
+		for (const k in arr) {
+			yield [k, Reflect.get(enumerable, k)] as [K, V];
+		}
+	}
+}
+export function* enumerateSync<T>(enumerable: Enumerable<T>) {
+	type K = GetEnumerateKey<T>;
+	type V = GetEnumerateValue<T>;
+
+	const hasEntries = typeof (enumerable as any).entries === 'function';
+	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
+
+	let idx = 0;
+	if (isIterable) {
+		for (const e of (enumerable as unknown) as Iterable<T>) {
+			yield (Array.isArray(e) ? e : [idx++, e]) as [K, V];
+		}
+	} else if (hasEntries) {
+		const arr = ((enumerable as unknown) as any).entries() as [K, V][];
+		for (const e of arr) {
+			yield e;
+		}
+	} else {
+		const arr: ObjectKey[] = Reflect.ownKeys(enumerable);
+		for (const k in arr) {
+			yield [k, Reflect.get(enumerable, k)] as [K, V];
+		}
+	}
+}
+
 // type ObjectKey = number | string; // [2021-03-27; rivy] ~ Deno/TS has poor symbol handling; see <https://github.com/microsoft/TypeScript/issues/1863>
-type Object<K extends ObjectKey, T> = { [P in K]: T };
-// type Enumerable<T> = AnyIterable<T> | Object<T>;
+// type EnumerableObject<K, V> = { [P in string]: V };
+// type Enumerable<T> = AnyIterable<T> | EnumerableObject<T>;
 // type Iterant<T> = AnyIterable<T>;
-type AnyEnumerable<T> = AsyncIterable<T> | Enumerable<T>;
-type Enumerable<T> = Iterable<T> | Object<ObjectKey, T>;
+// type AnyEnumerable<T, V, K = number> = T extends AsyncIterable<V>
+// 	? Enumerable<T, number, V>
+// 	: Enumerable<T, V, K>;
+// type AnyEnumerable<T extends AnyIterable<V> | ArrayLike<V> | MapLike<K, V>, V = void, K = void> = T;
+// type Enumerable<T, K, V> = T extends Iterable<V> ? Enumerable<T, number, V> : MapLike<K, V>;
+// type Enumerable<T extends (eArrayLike<V> | MapLike<K,V>), V = void, K = void> = T extends eArrayLike<
+// 	V extends any ? V : never,
+// 	K extends number ? number : never
+// >
+// type Enumerable<
+// 	T extends MapLike<TK, TV> | ArrayLike<TV> | Iterable<TV>,
+// 	TV = GetEnumerateValue<T>,
+// 	TK = GetEnumerateKey<T>
+// > = T;
 type AnyIterable<T> = AsyncIterable<T> | Iterable<T>;
 // | AsyncIterableIterator<T>
 // | IterableIterator<T>;
 type ValueOrArray<T> = T | Array<ValueOrArray<T>>;
+type ValueOrKeyValuePair<K, T> = T | [K, T];
+// ArrayLike; ref: <https://2ality.com/2013/05/quirk-array-like-objects.html> @@ <https://archive.is/9lfox>
+// type ArrayLike<T> = Array<T> | Set<T> | { [n: number]: T; length: () => number };
+// type MapLike<K, V> = Map<K, V> | { entries: () => [K, V][] };
+type KeyValuePair<K, V> = [K, V];
+type KV<K, V> = [K, V];
 
-const symbolAsyncIterator = Symbol.asyncIterator;
-const symbolIterator = Symbol.iterator;
-const isPromise = (value: any) => value != null && typeof value.then == 'function';
-const isObject = (value: any) => {
-	if (typeof value === 'undefined' || value === null) {
-		return false;
-	}
-	const typeofValue = typeof value;
-	return typeofValue == 'object' || typeofValue == 'function';
-};
+type ty = MapLikeObject<string, bigint>;
+type tu = GetEnumerateKey<ty>;
+type tz = GetEnumerateKey<Array<boolean>>;
+
+type my_t1<V, K> = Enumerable<Map<K, V>, V, K>;
+type my_t2 = Enumerable<boolean[]>;
+type my_t3 = Enumerable<String>;
+type my_t4 = Enumerable<Map<number, string>>;
+
+const m_1 = new Map([['a', 1]]);
+const it_1 = m_1[Symbol.iterator]();
+const n = it_1.next();
+let [k, v] = !n.done ? n.value : [];
 
 export async function* iter<T>(iterable: AnyIterable<T>) {
-	// export async function* iter<T>(iterable: AnyEnumerable<T>) {
-	// if (typeof (iterable as any).next === 'function') {
-	// 	yield* (iterable as any) as AsyncIterator<T, void, void>;
-	// } else if (typeof (iterable as any)[Symbol.asyncIterator] === 'function') {
-	// 	for await (const e of (iterable as any) as AsyncIterator<T, void, void>) {
+	const isIterable = typeof (iterable as any)[Symbol.asyncIterator] === 'function';
+	const isIterator = typeof (iterable as any).next === 'function';
+	if (isIterator) {
+		yield* (iterable as unknown) as AsyncGenerator<T, void, void>;
+	} else if (isIterable && !(iterable instanceof String)) {
+		for await (const e of (iterable as unknown) as AsyncIterable<T>) {
+			yield (Array.isArray(e) ? e[1] : e) as T;
+		}
+	}
+	// else if (iterable instanceof String) {
+	// 	for await (const e of Array.from((iterable as unknown) as string)) {
 	// 		yield e;
 	// 	}
-	// } else {
-	// 	for (const key of Reflect.ownKeys(iterable)) {
-	// 		yield [key, iterable[key as string]];
-	// 	}
 	// }
-	for await (const e of iterable) {
-		yield e;
-	}
 }
 export function* iterSync<T>(iterable: Iterable<T>) {
-	// export function* iterSync<T>(iterable: Enumerable<T>) {
-	// if (typeof (iterable as any).next === 'function') {
-	// 	yield* (iterable as unknown) as Iterator<T, void, void>;
-	// } else if (typeof (iterable as any)[Symbol.iterator] === 'function') {
-	// 	for (const e of (iterable as unknown) as Iterator<T, void, void>) {
+	const isIterable = typeof (iterable as any)[Symbol.iterator] === 'function';
+	const isIterator = typeof (iterable as any).next === 'function';
+	if (isIterator) {
+		yield* (iterable as unknown) as Generator<T, void, void>;
+	} else if (isIterable && !(iterable instanceof String)) {
+		for (const e of (iterable as unknown) as Iterable<T>) {
+			yield (Array.isArray(e) ? e[1] : e) as T;
+		}
+	}
+	// else if (iterable instanceof String) {
+	// 	for (const e in Array.from((iterable as unknown) as string)) {
 	// 		yield e;
 	// 	}
-	// } else {
-	// 	for (const key of Reflect.ownKeys(iterable)) {
-	// 		yield [key, iterable[key as string]];
-	// 	}
 	// }
-	for (const e of iterable) {
-		yield e;
-	}
 }
 
-export function* toIterator<T>(obj: Object<ObjectKey, T>): Generator<[ObjectKey, T], void, void> {
-	// if (typeof obj.next === 'function') {
-	// 	yield* (obj as unknown) as Iterator<T>;
-	// } else {
-	for (const key of Reflect.ownKeys(obj)) {
-		yield [key, obj[key as string]];
-	}
-	// }
-}
+// // export async function collectKeys<K, T>(list: AnyEnumerable<K, T>) {
+// export async function collectKeysS<T, V = void, K = void>(list: Enumerable<T>) {
+// 	// if (Array.isArray(list)) {
+// 	// 	const len = list.length;
+// 	// 	return collectValuesSync(rangeSync(0, len));
+// 	// }
+// 	let idx = 0;
+// 	const it = iter<T>(list);
+// 	const arr: K[] = [];
+// 	for await (const e of it) {
+// 		arr.push(Array.isArray(e) ? (e[0] as K) : idx++);
+// 	}
+// 	return arr;
+// }
+// export function collectKeysSync<K, T>(list: Enumerable<K, T>) {
+// 	if (Array.isArray(list)) {
+// 		const len = list.length;
+// 		return collectValuesSync(rangeSync(0, len));
+// 	}
+// 	let idx = 0;
+// 	const it = iterSync(list);
+// 	const arr: K[] | number[] = [];
+// 	for (const e of it) {
+// 		arr.push(Array.isArray(e) ? e[0] : idx++);
+// 	}
+// 	return arr;
+// }
+
+// export async function* iter<T>(enumerable: AnyEnumerable<T>) {
+// 	// Iterable vs Iterator ... ref: <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols> @@ <https://archive.is/njvmp>
+// 	const isIterable =
+// 		typeof ((enumerable as any)[Symbol.asyncIterator] || (enumerable as any)[Symbol.iterator]) ===
+// 		'function';
+// 	const isIterator = typeof (enumerable as any).next === 'function';
+// 	if (isIterator) {
+// 		yield* (enumerable as unknown) as AsyncGenerator<T | [K, T], void, void>;
+// 	} else if (isIterable) {
+// 		for await (const e of enumerable) {
+// 			yield e as T;
+// 		}
+// 	} else {
+// 		for (const key of Reflect.ownKeys(enumerable)) {
+// 			yield [key, (enumerable as any)[key as string]] as [K, T];
+// 		}
+// 	}
+// }
 
 export async function* flatten<T>(
 	iterable: AnyIterable<ValueOrArray<T>>
@@ -154,33 +292,45 @@ export function* unnestSync<T>(
  *  Collect all sequence values into a promised array (`Promise<T[]>`)
  */
 export async function collect<T>(list: AnyIterable<T>) {
+	// type V = GetEnumerateValue<T>;
 	// O(n); O(1) by specialization for arrays
 	if (Array.isArray(list)) {
 		return list as T[];
 	}
-	// const it =
-	// 	typeof (list as any).next === 'function' ? list : toIterator(list as Object<ObjectKey, T>);
-	const it = list;
+	const it = iter(list);
 	const arr: T[] = [];
 	for await (const e of it) {
-		arr.push(e);
+		arr.push(Array.isArray(e) ? e[1] : e);
 	}
 	return arr;
 }
 export function collectSync<T>(list: Iterable<T>) {
+	// type V = GetEnumerateValue<T>;
 	// O(n); O(1) by specialization for arrays
 	if (Array.isArray(list)) {
 		console.log('here');
 		return list as T[];
 	}
-	// const it = typeof (list as any).next === 'function' ? list : toIterator(list);
-	const it = list;
-	// const it = iter(list);
+	const it = iterSync(list);
 	const arr: T[] = [];
 	for (const e of it) {
-		arr.push(e);
+		arr.push(Array.isArray(e) ? e[1] : e);
 	}
 	return arr;
+}
+
+// export async function collectValues<T>(list: AnyEnumerable<T>) {
+// 	return collect(list);
+// }
+// export function collectValuesSync<T>(list: Enumerable<T>) {
+// 	return collectSync(list);
+// }
+
+export async function collectEntries<T>(list: AnyEnumerable<T>) {
+	return enumerate(list);
+}
+export function collectEntriesSync<T>(list: Enumerable<T>) {
+	return enumerateSync(list);
 }
 
 export async function toArray<T>(iterable: AnyIterable<T>) {
@@ -194,13 +344,6 @@ export async function toList<T>(iterable: AnyIterable<T>) {
 }
 export function toListSync<T>(iterable: Iterable<T>) {
 	return collectSync(iterable);
-}
-
-export function enumerate<T>(iterable: AnyIterable<T>) {
-	return zip(range(0, Infinity), iterable);
-}
-export function enumerateSync<T>(iterable: Iterable<T>) {
-	return zipSync(rangeSync(0, Infinity), iterable);
 }
 
 /**
@@ -223,7 +366,6 @@ export async function reduce<T, U>(
 	iterable: AnyIterable<T>
 ) {
 	let acc = initialValue;
-	let idx = 0;
 	for await (const e of iterable) {
 		acc = fn(acc, e);
 	}
@@ -306,14 +448,22 @@ export function* dropSync<T>(n: number, iterable: Iterable<T>) {
 	}
 }
 
-export async function* range<T>(start: number, end: number, step: number = 1) {
+export async function* range(
+	start: number,
+	end: number,
+	step: number = 1
+): AsyncGenerator<number, void, void> {
 	let idx = start;
 	while (idx < end) {
 		yield idx;
 		idx = idx + step;
 	}
 }
-export function* rangeSync<T>(start: number, end: number, step: number = 1) {
+export function* rangeSync(
+	start: number,
+	end: number,
+	step: number = 1
+): Generator<number, void, void> {
 	let idx = start;
 	while (idx < end) {
 		yield idx;
@@ -395,7 +545,7 @@ export async function last<T>(list: AnyIterable<T>) {
 	if (Array.isArray(list)) {
 		return list.length > 0 ? (list[list.length - 1] as T) : undefined;
 	}
-	const arr = await collect(list);
+	const arr = (await collect(list)) as T[];
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
 export function lastSync<T>(list: Iterable<T>) {
@@ -404,6 +554,6 @@ export function lastSync<T>(list: Iterable<T>) {
 		console.log('here');
 		return list.length > 0 ? (list[list.length - 1] as T) : undefined;
 	}
-	const arr = collectSync<T>(list);
+	const arr = collectSync<T>(list) as T[];
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
