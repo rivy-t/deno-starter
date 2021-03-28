@@ -32,8 +32,15 @@ const m = new Map([
 	['x', 1],
 	['y', 2],
 ]);
-const a = R.map(double, R.fromPairs(Array.from(m)));
+const sbl = Symbol('unique');
+let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
+const set = new Set(['one', 2, 'help', {}]);
+const a = await F.collect(F.map(double, m.values()));
 console.log({ m, a });
 
 const b = R.map(double, await F.toArray(F.flatten(y)));
 console.log({ b });
+
+console.log({ m, all: await F.collect(m), first: await F.first(m) });
+console.log({ o, all: await F.collect(F.toIterator(o)) });
+console.log({ set, all: await F.collect(set), first: await F.first(set) });
