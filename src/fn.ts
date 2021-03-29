@@ -44,26 +44,32 @@ type MapLike<K, V> = Map<K, V> | MapLikeObject<ObjectKey, V> | { entries: () => 
 
 type Enumerable<T, K = TypeOfEnumerableKey<T>, V = TypeOfEnumerableValue<T>> =
 	| MapLike<K, V>
+	| Generator<K, V>
 	| ArrayLike<V>
 	| Iterable<V>;
 
 type AnyEnumerable<T, K = TypeOfEnumerableKey<T>, V = TypeOfEnumerableValue<T>> =
 	| MapLike<K, V>
+	| AsyncGenerator<K, V>
+	| Generator<K, V>
 	| ArrayLike<V>
 	| AnyIterable<V>;
 
-// type TypeOfEnumerableKey<T> = T extends
-// | MapLike<infer K, any>
-// | AsyncGenerator<[infer K, any], any, any>
-// | Generator<[infer K, any], any, any>
-// ? K
-// : number;
-type TypeOfEnumerableKey<T> = T extends MapLike<infer K, any> ? K : void;
+type TypeOfEnumerableKey<T> = T extends ArrayLike<any>
+	? number
+	: T extends
+			| MapLike<infer K, any>
+			| AsyncGenerator<[infer K, any], any, any>
+			| Generator<[infer K, any], any, any>
+	? K
+	: T extends Iterator<any>
+	? number
+	: never;
 type TypeOfEnumerableValue<T> = T extends
+	| ArrayLike<infer V>
 	| MapLike<any, infer V>
 	| AsyncGenerator<[any, infer V], any, any>
 	| Generator<[any, infer V], any, any>
-	| ArrayLike<infer V>
 	| Iterable<infer V>
 	? V
 	: unknown;
@@ -76,11 +82,12 @@ const n = it_1.next();
 let [k, v] = !n.done ? n.value : [];
 
 const o = { 1: 1, 2: 2 };
-const x = collect(
-	enumerate(
-		new Map<string, number>([['a', 1]])
-	)
+const e = enumerate(
+	// new Map<string, number>([['a', 1]])
+	new Map<string, [number]>([['a', [1]]])
+	// [1, 2]
 );
+const c = collect(e);
 
 type ty = MapLikeObject<string, bigint>;
 type tu = TypeOfEnumerableValue<Map<string, bigint>>;
@@ -93,6 +100,45 @@ type my_t3 = Enumerable<String>;
 type my_t4 = Enumerable<Map<number, string>>;
 
 // ####
+
+/**
+ *  Collect all sequence values into a promised array (`Promise<T[]>`)
+ */
+export async function collect<
+	T extends AnyEnumerable<any, any, any>
+	// ,
+	// TKey = TypeOfEnumerableValue<T>,
+	// TValue = TypeOfEnumerableValue<T>
+>(list: T) {
+	type TKey = TypeOfEnumerableKey<T>;
+	type TValue = TypeOfEnumerableValue<T>;
+
+	// O(n); O(1) by specialization for arrays
+	if (Array.isArray(list)) {
+		return list as TValue[];
+	}
+	const it = enumerate(list);
+	const arr: TValue[] = [];
+	for await (const e of it) {
+		arr.push(Array.isArray(e) ? e[1] : e);
+	}
+	return arr;
+}
+export function collectSync<T extends Enumerable<any, any, any>>(list: T) {
+	// type TKey = TypeOfEnumerableKey<T>;
+	type TValue = TypeOfEnumerableValue<T>;
+	// O(n); O(1) by specialization for arrays
+	if (Array.isArray(list)) {
+		console.log('here');
+		return list as TValue[];
+	}
+	const it = enumerateSync(list);
+	const arr: TValue[] = [];
+	for (const e of it) {
+		arr.push(Array.isArray(e) ? e[1] : e);
+	}
+	return arr;
+}
 
 export async function* enumerate<
 	T extends AnyEnumerable<T>,
@@ -122,9 +168,11 @@ export async function* enumerate<
 		}
 	}
 }
-export function* enumerateSync<T, TKey = TypeOfEnumerableKey<T>, TValue = TypeOfEnumerableValue<T>>(
-	enumerable: Enumerable<T>
-) {
+export function* enumerateSync<
+	T extends Enumerable<T>,
+	TKey = TypeOfEnumerableKey<T>,
+	TValue = TypeOfEnumerableValue<T>
+>(enumerable: T): Generator<[TKey, TValue], void, void> {
 	const hasEntries = typeof (enumerable as any).entries === 'function';
 	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
 
@@ -319,47 +367,14 @@ export function* unnestSync<T>(
 	yield* flatNSync<T>(n, iterable);
 }
 
-/**
- *  Collect all sequence values into a promised array (`Promise<T[]>`)
- */
-export async function collect<T>(list: AnyEnumerable<T>) {
-	// type TKey = TypeOfEnumerableKey<T>;
-	type TValue = TypeOfEnumerableValue<T>;
-	// O(n); O(1) by specialization for arrays
-	if (Array.isArray(list)) {
-		return list as TValue[];
-	}
-	const it = enumerate(list);
-	const arr: TValue[] = [];
-	for await (const e of it) {
-		arr.push(Array.isArray(e) ? e[1] : e);
-	}
-	return arr;
-}
-export function collectSync<T>(list: Enumerable<T>) {
-	// type TKey = TypeOfEnumerableKey<T>;
-	type TValue = TypeOfEnumerableValue<T>;
-	// O(n); O(1) by specialization for arrays
-	if (Array.isArray(list)) {
-		console.log('here');
-		return list as TValue[];
-	}
-	const it = enumerateSync(list);
-	const arr: TValue[] = [];
-	for (const e of it) {
-		arr.push(Array.isArray(e) ? e[1] : e);
-	}
-	return arr;
-}
-
-export async function collectValues<T>(list: AnyEnumerable<T>) {
+export async function collectValues<T extends AnyEnumerable<T>>(list: T) {
 	return collect(list);
 }
-export function collectValuesSync<T>(list: Enumerable<T>) {
+export function collectValuesSync<T extends Enumerable<T>>(list: T) {
 	return collectSync(list);
 }
 
-export async function collectEntries<T>(list: AnyEnumerable<T>) {
+export async function collectEntries<T extends AnyEnumerable<T>>(list: T) {
 	type TKey = TypeOfEnumerableKey<T>;
 	type TValue = TypeOfEnumerableValue<T>;
 	const en = enumerate(list);
@@ -369,7 +384,7 @@ export async function collectEntries<T>(list: AnyEnumerable<T>) {
 	}
 	return arr;
 }
-export function collectEntriesSync<T>(list: Enumerable<T>) {
+export function collectEntriesSync<T extends Enumerable<T>>(list: T) {
 	type TKey = TypeOfEnumerableKey<T>;
 	type TValue = TypeOfEnumerableValue<T>;
 	const en = enumerateSync(list);
@@ -581,10 +596,10 @@ export function* tailSync<T>(iterable: Iterable<T>) {
 }
 
 export async function first<T>(iterable: AnyIterable<T>) {
-	return head<T>(iterable);
+	return head(iterable);
 }
 export function firstSync<T>(iterable: Iterable<T>) {
-	return headSync<T>(iterable);
+	return headSync(iterable);
 }
 
 export async function last<T>(list: AnyIterable<T>) {
@@ -592,16 +607,15 @@ export async function last<T>(list: AnyIterable<T>) {
 	if (Array.isArray(list)) {
 		return list.length > 0 ? (list[list.length - 1] as T) : undefined;
 	}
-	const arr = (await collect<AnyIterable<T>>(list)) as T[];
+	const arr = await collect(list);
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
 export function lastSync<T>(list: Iterable<T>) {
 	// O(n) for iterators, but O(1) by specialization for arrays
 	if (Array.isArray(list)) {
-		console.log('here');
 		return list.length > 0 ? (list[list.length - 1] as T) : undefined;
 	}
-	const arr = collectSync<Iterable<T>>(list);
+	const arr = collectSync(list);
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
 
