@@ -254,53 +254,6 @@ export function* iterSync<T>(iterable: Enumerable<T>) {
 	// }
 }
 
-// // export async function collectKeys<K, T>(list: AnyEnumerable<K, T>) {
-// export async function collectKeysS<T, V = void, K = void>(list: Enumerable<T>) {
-// 	// if (Array.isArray(list)) {
-// 	// 	const len = list.length;
-// 	// 	return collectValuesSync(rangeSync(0, len));
-// 	// }
-// 	let idx = 0;
-// 	const it = iter<T>(list);
-// 	const arr: K[] = [];
-// 	for await (const e of it) {
-// 		arr.push(Array.isArray(e) ? (e[0] as K) : idx++);
-// 	}
-// 	return arr;
-// }
-// export function collectKeysSync<K, T>(list: Enumerable<K, T>) {
-// 	if (Array.isArray(list)) {
-// 		const len = list.length;
-// 		return collectValuesSync(rangeSync(0, len));
-// 	}
-// 	let idx = 0;
-// 	const it = iterSync(list);
-// 	const arr: K[] | number[] = [];
-// 	for (const e of it) {
-// 		arr.push(Array.isArray(e) ? e[0] : idx++);
-// 	}
-// 	return arr;
-// }
-
-// export async function* iter<T>(enumerable: AnyEnumerable<T>) {
-// 	// Iterable vs Iterator ... ref: <https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols> @@ <https://archive.is/njvmp>
-// 	const isIterable =
-// 		typeof ((enumerable as any)[Symbol.asyncIterator] || (enumerable as any)[Symbol.iterator]) ===
-// 		'function';
-// 	const isIterator = typeof (enumerable as any).next === 'function';
-// 	if (isIterator) {
-// 		yield* (enumerable as unknown) as AsyncGenerator<T | [K, T], void, void>;
-// 	} else if (isIterable) {
-// 		for await (const e of enumerable) {
-// 			yield e as T;
-// 		}
-// 	} else {
-// 		for (const key of Reflect.ownKeys(enumerable)) {
-// 			yield [key, (enumerable as any)[key as string]] as [K, T];
-// 		}
-// 	}
-// }
-
 export async function* flatten<T>(
 	iterable: AnyIterable<ValueOrArray<T>>
 ): AsyncGenerator<T, void, void> {
@@ -328,13 +281,16 @@ export async function* flatN<T>(
 	n: number,
 	iterable: AnyIterable<ValueOrArray<T>>
 ): AsyncGenerator<ValueOrArray<T>, void, void> {
+	console.warn({ iterable });
 	for await (const e of iterable) {
 		if (Array.isArray(e) && n > 0) {
-			const it = flatN(n - 1, e);
-			for await (const x of it) {
-				yield x;
-			}
-		} else yield e;
+			const y = flatN(n - 1, e);
+			console.warn('yielding', { collect: collect(y) });
+			yield* y;
+		} else {
+			console.warn('yielding', { collect: collect(e) });
+			yield e;
+		}
 	}
 }
 export function* flatNSync<T>(
@@ -343,10 +299,7 @@ export function* flatNSync<T>(
 ): Generator<ValueOrArray<T>, void, void> {
 	for (const e of iterable) {
 		if (Array.isArray(e) && n > 0) {
-			const it = flatNSync(n - 1, e);
-			for (const x of it) {
-				yield x;
-			}
+			yield* flatNSync(n - 1, e);
 		} else yield e;
 	}
 }
@@ -356,13 +309,13 @@ export async function* unnest<T>(
 	n: number,
 	iterable: AnyIterable<ValueOrArray<T>>
 ): AsyncGenerator<ValueOrArray<T>, void, void> {
-	yield* flatN<T>(n, iterable);
+	yield* flatN(n, iterable);
 }
 export function* unnestSync<T>(
 	n: number,
 	iterable: Iterable<ValueOrArray<T>>
 ): Generator<ValueOrArray<T>, void, void> {
-	yield* flatNSync<T>(n, iterable);
+	yield* flatNSync(n, iterable);
 }
 
 export async function collectValues<T extends AnyEnumerable<T>>(list: T) {
@@ -370,6 +323,27 @@ export async function collectValues<T extends AnyEnumerable<T>>(list: T) {
 }
 export function collectValuesSync<T extends Enumerable<T>>(list: T) {
 	return collectSync(list);
+}
+
+export async function collectKeys<T extends AnyEnumerable<T>>(list: T) {
+	type TKey = TypeOfEnumerableKey<T>;
+	type TValue = TypeOfEnumerableValue<T>;
+	const en = enumerate(list);
+	const arr: TKey[] = [];
+	for await (const e of en) {
+		arr.push(e[0]);
+	}
+	return arr;
+}
+export function collectEntriesKeys<T extends Enumerable<T>>(list: T) {
+	type TKey = TypeOfEnumerableKey<T>;
+	type TValue = TypeOfEnumerableValue<T>;
+	const en = enumerateSync(list);
+	const arr: TKey[] = [];
+	for (const e of en) {
+		arr.push(e[0]);
+	}
+	return arr;
 }
 
 export async function collectEntries<T extends AnyEnumerable<T>>(list: T) {
