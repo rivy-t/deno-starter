@@ -145,14 +145,12 @@ export async function* enumerate<
 	TKey = TypeOfEnumerableKey<T>,
 	TValue = TypeOfEnumerableValue<T>
 >(enumerable: T): AsyncGenerator<[TKey, TValue], void, void> {
-	// type TKey = TypeOfEnumerableKey<T>;
-	// type TValue = TypeOfEnumerableValue<T>;
-
 	const hasEntries = typeof (enumerable as any).entries === 'function';
+	const isAsyncIterable = typeof (enumerable as any)[Symbol.asyncIterator] === 'function';
 	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
 
 	let idx = 0;
-	if (isIterable) {
+	if (isAsyncIterable || isIterable) {
 		for await (const e of (enumerable as unknown) as AsyncIterable<[TKey, TValue]>) {
 			yield (Array.isArray(e) ? e : [idx++, e]) as [TKey, TValue];
 		}
