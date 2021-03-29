@@ -13,7 +13,8 @@ import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 
 // const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd']));
 const z = await F.collect(F.enumerate(new Map()));
-const flatZ = await F.collect(F.flatten(z));
+const zz = await F.collect(F.enumerate(new Map([['a', 1]])));
+const flatZ = await F.collect(F.flatten(zz));
 console.log({ z, flatZ });
 
 const y = [1, [2, [3, 4], [5, 6], 7], [8, 9], [[10, [11, 12]], 13]];
