@@ -153,13 +153,13 @@ export async function* enumerate<
 
 	let idx = 0;
 	if (hasEntries) {
-		// [K, V] enumerables first
+		// [K, V] enumerates first
 		const arr = ((enumerable as unknown) as any).entries() as [TKey, TValue][];
 		for (const e of arr) {
 			yield e;
 		}
 	} else if (isAsyncIterable || isIterable) {
-		// [V] enumerables
+		// [V] enumerates
 		for await (const e of (enumerable as unknown) as AsyncIterable<[TKey, TValue]>) {
 			yield ([idx++, e] as unknown) as [TKey, TValue];
 		}
@@ -182,14 +182,16 @@ export function* enumerateSync<
 	const isObject = enumerable instanceof Object;
 
 	let idx = 0;
-	if (isIterable) {
-		for (const e of (enumerable as unknown) as Iterable<[TKey, TValue]>) {
-			yield (Array.isArray(e) ? e : [idx++, e]) as [TKey, TValue];
-		}
-	} else if (hasEntries) {
+	if (hasEntries) {
+		// [K, V] enumerates first
 		const arr = ((enumerable as unknown) as any).entries() as [TKey, TValue][];
 		for (const e of arr) {
 			yield e;
+		}
+	} else if (isIterable) {
+		// [V] enumerates after [K,V]
+		for (const e of (enumerable as unknown) as Iterable<[TKey, TValue]>) {
+			yield ([idx++, e] as unknown) as [TKey, TValue];
 		}
 	} else if (isObject) {
 		const arr: ObjectKey[] = Reflect.ownKeys(enumerable);
