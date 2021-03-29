@@ -120,7 +120,8 @@ export async function collect<
 	const it = enumerate(list);
 	const arr: TValue[] = [];
 	for await (const e of it) {
-		arr.push(Array.isArray(e) ? e[1] : e);
+		// console.warn('collect', { e });
+		arr.push(e[1]);
 	}
 	return arr;
 }
@@ -148,22 +149,27 @@ export async function* enumerate<
 	const hasEntries = typeof (enumerable as any).entries === 'function';
 	const isAsyncIterable = typeof (enumerable as any)[Symbol.asyncIterator] === 'function';
 	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
+	const isObject = enumerable instanceof Object;
 
 	let idx = 0;
-	if (isAsyncIterable || isIterable) {
-		for await (const e of (enumerable as unknown) as AsyncIterable<[TKey, TValue]>) {
-			yield (Array.isArray(e) ? e : [idx++, e]) as [TKey, TValue];
-		}
-	} else if (hasEntries) {
+	if (hasEntries) {
+		// [K, V] enumerables first
 		const arr = ((enumerable as unknown) as any).entries() as [TKey, TValue][];
 		for (const e of arr) {
 			yield e;
 		}
-	} else {
+	} else if (isAsyncIterable || isIterable) {
+		// [V] enumerables
+		for await (const e of (enumerable as unknown) as AsyncIterable<[TKey, TValue]>) {
+			yield ([idx++, e] as unknown) as [TKey, TValue];
+		}
+	} else if (isObject) {
 		const arr: ObjectKey[] = Reflect.ownKeys(enumerable);
 		for (const k in arr) {
 			yield ([k, Reflect.get(enumerable, k)] as unknown) as [TKey, TValue];
 		}
+	} else {
+		yield ([idx++, enumerable] as unknown) as [TKey, TValue];
 	}
 }
 export function* enumerateSync<
@@ -173,6 +179,7 @@ export function* enumerateSync<
 >(enumerable: T): Generator<[TKey, TValue], void, void> {
 	const hasEntries = typeof (enumerable as any).entries === 'function';
 	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
+	const isObject = enumerable instanceof Object;
 
 	let idx = 0;
 	if (isIterable) {
@@ -184,11 +191,13 @@ export function* enumerateSync<
 		for (const e of arr) {
 			yield e;
 		}
-	} else {
+	} else if (isObject) {
 		const arr: ObjectKey[] = Reflect.ownKeys(enumerable);
 		for (const k in arr) {
 			yield ([k, Reflect.get(enumerable, k)] as unknown) as [TKey, TValue];
 		}
+	} else {
+		yield ([idx++, enumerable] as unknown) as [TKey, TValue];
 	}
 }
 
@@ -281,14 +290,17 @@ export async function* flatN<T>(
 	n: number,
 	iterable: AnyIterable<ValueOrArray<T>>
 ): AsyncGenerator<ValueOrArray<T>, void, void> {
-	console.warn({ iterable });
+	// console.warn({ iterable });
 	for await (const e of iterable) {
 		if (Array.isArray(e) && n > 0) {
-			const y = flatN(n - 1, e);
-			console.warn('yielding', { collect: collect(y) });
-			yield* y;
+			// console.warn('to sub');
+			const it = flatN(n - 1, e);
+			for await (const f of it) {
+				// console.warn(n, 'yielding', { f });
+				yield f;
+			}
 		} else {
-			console.warn('yielding', { collect: collect(e) });
+			// console.warn(n, 'yielding', { e });
 			yield e;
 		}
 	}
