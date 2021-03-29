@@ -24,6 +24,7 @@ const flatZZ = await F.collect(F.flatten(zz));
 console.log({ mm, zz, flatZZ });
 
 const y = [1, [2, [3, 4], [5, 6], 7], [8, 9], [[10, [11, 12]], 13]];
+
 const flatY = F.collectSync(F.flattenSync(y));
 const unNestY1 = await F.collect(F.unnest(1, y));
 const unNestY2 = await F.collect(F.unnest(2, y));
@@ -34,21 +35,53 @@ console.log({
 	scan: F.collectSync(F.scanSync((acc, e) => acc + e, 0, flatY)),
 });
 
-// const double = (x: number) => x + x;
-// const m = new Map([
-// 	['x', 1],
-// 	['y', 2],
-// ]);
-// const sbl = Symbol('unique');
-// let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
-// const set = new Set(['one', 2, 'help', {}]);
-// const str = 'a string';
-// const a = await F.collect(F.map(double, m.values()));
-// console.log({ m, a });
+const double = (x: number) => x + x;
+const m = new Map([
+	['x', 1],
+	['y', 2],
+]);
+const sbl = Symbol('unique');
+let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
+const set = new Set(['one', 2, 'help', {}]);
+const str = 'a string';
+const aa = await F.collect(F.map(double, m.values()));
+console.log({ m, aa });
 
-// const b = R.map(double, await F.toArray(F.flatten(y)));
-// console.log({ b });
+const b = R.map(double, await F.toArray(F.flatten(y)));
+console.log({ b });
 
-// console.log({ m, all: await F.collect(m), first: await F.first(m) });
-// console.log({ o, all: await F.collect(F.enumerate(o)) });
-// console.log({ set, all: await F.collect(F.enumerate(set)), first: await F.first(set) });
+const a = y;
+console.log({
+	a,
+	collect: await F.collect(a),
+	entry: await F.collectEntries(a),
+	keys: await F.collectKeys(a),
+	vals: await F.collectValues(a),
+	first: await F.first(a),
+});
+console.log({
+	m,
+	collect: await F.collect(m),
+	entry: await F.collectEntries(m),
+	keys: await F.collectKeys(m),
+	vals: await F.collectValues(m),
+	first: await F.first(m),
+});
+console.log({
+	o,
+	collectEnum: await F.collect(F.enumerate(o)),
+	entry: await F.collectEntries(o),
+	keys: await F.collectKeys(o),
+	vals: await F.collectValues(o),
+	// first: await F.first(o),
+});
+console.log({
+	set,
+	collectEnum: await F.collect(F.enumerate(set)),
+	entry: await F.collectEntries(set),
+	keys: await F.collectKeys(set),
+	vals: await F.collectValues(set),
+	first: await F.first(set),
+});
+
+// problems: first() is not working; collecting/enumerating for objects is faulty for non-numeric keys and sets show duplicate values
