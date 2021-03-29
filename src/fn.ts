@@ -46,29 +46,35 @@ type AnySyncGenerator<T = unknown, TReturn = any, TNext = unknown> =
 	| AsyncGenerator<T, TReturn, TNext>
 	| Generator<T, TReturn, TNext>;
 
-type Enumerable<T, K = EnumerableKeyTOf<T>, V = EnumerableValueTOf<T>> =
+type Enumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
 	| Generator<V>
 	| ArrayLike<V>
-	| Iterable<V>;
+	| Iterable<V>
+	| Set<V>;
 
-type AnySyncEnumerable<T, K = EnumerableKeyTOf<T>, V = EnumerableValueTOf<T>> =
+type AnySyncEnumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
 	| AnySyncGenerator<V>
 	| ArrayLike<V>
 	| AnySyncIterable<V>;
 
-type EnumerableKeyTOf<T> = T extends ArrayLike<any>
+type EnumerableKeyOfT<T> = T extends ArrayLike<any>
 	? number
-	: T extends MapLike<infer K, any> | AnySyncGenerator<[infer K, any], any, any>
+	: T extends
+			| MapLike<infer K, any>
+			| Set<infer K>
+			| AnySyncGenerator<[infer K, any], any, any>
+			| AnySyncGenerator<any, any, any>
 	? K
 	: T extends Iterator<any>
 	? number
-	: never;
-type EnumerableValueTOf<T> = T extends
+	: unknown;
+type EnumerableValueOfT<T> = T extends
 	| ArrayLike<infer V>
 	| MapLike<any, infer V>
 	| AnySyncGenerator<[any, infer V], any, any>
+	| AnySyncGenerator<infer V, any, any>
 	| Iterable<infer V>
 	? V
 	: unknown;
@@ -76,6 +82,8 @@ type EnumerableValueTOf<T> = T extends
 // ####
 
 const m_1 = new Map([['a', 'z']]);
+const set_1 = new Set([1, 10, 100]);
+type tsk = EnumerableKeyOfT<Set<string | number>>;
 const it_1 = m_1[Symbol.iterator]();
 const n = it_1.next();
 let [k, v] = !n.done ? n.value : [];
@@ -89,9 +97,9 @@ const e = enumerate(
 const c = collect(e);
 
 type ty = MapLikeObject<string, bigint>;
-type tu = EnumerableValueTOf<Map<string, bigint>>;
+type tu = EnumerableValueOfT<Map<string, bigint>>;
 // type tz = EnumerableKeyTOf<AsyncGenerator<[bigint, number], void, void>>;
-type tz = EnumerableKeyTOf<ty>;
+type tz = EnumerableKeyOfT<ty>;
 
 type my_t1<V, K> = Enumerable<Map<K, V>, V, K>;
 type my_t2 = Enumerable<boolean[]>;
@@ -103,14 +111,9 @@ type my_t4 = Enumerable<Map<number, string>>;
 /**
  *  Collect all sequence values into a promised array (`Promise<T[]>`)
  */
-export async function collect<
-	T extends AnySyncEnumerable<any, any, any>
-	// ,
-	// TKey = EnumerableValueTOf<T>,
-	// TValue = EnumerableValueTOf<T>
->(list: T) {
-	type TKey = EnumerableKeyTOf<T>;
-	type TValue = EnumerableValueTOf<T>;
+export async function collect<T extends AnySyncEnumerable<any, any, any>>(list: T) {
+	type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
 
 	// O(n); O(1) by specialization for arrays
 	if (Array.isArray(list)) {
@@ -119,14 +122,13 @@ export async function collect<
 	const it = enumerate(list);
 	const arr: TValue[] = [];
 	for await (const e of it) {
-		// console.warn('collect', { e });
 		arr.push(e[1]);
 	}
 	return arr;
 }
 export function collectSync<T extends Enumerable<any, any, any>>(list: T) {
-	// type TKey = EnumerableKeyTOf<T>;
-	type TValue = EnumerableValueTOf<T>;
+	type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
 	// O(n); O(1) by specialization for arrays
 	if (Array.isArray(list)) {
 		console.log('here');
@@ -135,15 +137,15 @@ export function collectSync<T extends Enumerable<any, any, any>>(list: T) {
 	const it = enumerateSync(list);
 	const arr: TValue[] = [];
 	for (const e of it) {
-		arr.push(Array.isArray(e) ? e[1] : e);
+		arr.push(e[1]);
 	}
 	return arr;
 }
 
 export async function* enumerate<
 	T extends AnySyncEnumerable<T>,
-	TKey = EnumerableKeyTOf<T>,
-	TValue = EnumerableValueTOf<T>
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
 >(enumerable: T): AsyncGenerator<[TKey, TValue], void, void> {
 	const hasEntries = typeof (enumerable as any).entries === 'function';
 	const isAsyncIterable = typeof (enumerable as any)[Symbol.asyncIterator] === 'function';
@@ -173,8 +175,8 @@ export async function* enumerate<
 }
 export function* enumerateSync<
 	T extends Enumerable<T>,
-	TKey = EnumerableKeyTOf<T>,
-	TValue = EnumerableValueTOf<T>
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
 >(enumerable: T): Generator<[TKey, TValue], void, void> {
 	const hasEntries = typeof (enumerable as any).entries === 'function';
 	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
@@ -217,7 +219,7 @@ export function* enumerateSync<
 // >
 // type Enumerable<
 // 	T extends MapLike<TK, TV> | ArrayLike<TV> | Iterable<TV>,
-// 	TV = EnumerableValueTOf<T>,
+// 	TV = EnumerableValueOfT<T>,
 // 	TK = EnumerableKeyTOf<T>
 // > = T;
 type AnySyncIterable<T> = AsyncIterable<T> | Iterable<T>;
@@ -339,8 +341,8 @@ export function collectValuesSync<T extends Enumerable<T>>(list: T) {
 }
 
 export async function collectKeys<T extends AnySyncEnumerable<T>>(list: T) {
-	type TKey = EnumerableKeyTOf<T>;
-	type TValue = EnumerableValueTOf<T>;
+	type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
 	const en = enumerate(list);
 	const arr: TKey[] = [];
 	for await (const e of en) {
@@ -349,8 +351,8 @@ export async function collectKeys<T extends AnySyncEnumerable<T>>(list: T) {
 	return arr;
 }
 export function collectEntriesKeys<T extends Enumerable<T>>(list: T) {
-	type TKey = EnumerableKeyTOf<T>;
-	type TValue = EnumerableValueTOf<T>;
+	type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
 	const en = enumerateSync(list);
 	const arr: TKey[] = [];
 	for (const e of en) {
@@ -360,8 +362,8 @@ export function collectEntriesKeys<T extends Enumerable<T>>(list: T) {
 }
 
 export async function collectEntries<T extends AnySyncEnumerable<T>>(list: T) {
-	type TKey = EnumerableKeyTOf<T>;
-	type TValue = EnumerableValueTOf<T>;
+	type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
 	const en = enumerate(list);
 	const arr: [TKey, TValue][] = [];
 	for await (const e of en) {
@@ -370,8 +372,8 @@ export async function collectEntries<T extends AnySyncEnumerable<T>>(list: T) {
 	return arr;
 }
 export function collectEntriesSync<T extends Enumerable<T>>(list: T) {
-	type TKey = EnumerableKeyTOf<T>;
-	type TValue = EnumerableValueTOf<T>;
+	type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
 	const en = enumerateSync(list);
 	const arr: [TKey, TValue][] = [];
 	for (const e of en) {
