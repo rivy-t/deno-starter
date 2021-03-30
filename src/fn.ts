@@ -138,7 +138,7 @@ type my_t4 = EnumerableSync<Map<number, string>>;
 type AnySyncIterable<T> = AsyncIterable<T> | Iterable<T>;
 // | AsyncIterableIterator<T>
 // | IterableIterator<T>;
-type ValueOrArray<T> = T | Array<ValueOrArray<T>>;
+export type ValueOrArray<T> = T | Array<ValueOrArray<T>>;
 type ValueOrKeyValuePair<K, T> = T | [K, T];
 // ArrayLike; ref: <https://2ality.com/2013/05/quirk-array-like-objects.html> @@ <https://archive.is/9lfox>
 // type ArrayLike<T> = Array<T> | Set<T> | { [n: number]: T; length: () => number };
@@ -421,6 +421,7 @@ export function* rangeSync(
 // ## terminology? list vs iterate vs enumerate ...
 // ## re-evaluate above function types at some point as well
 // ## * check via Intellisense determination about variable types after using above functions
+// ## TKey, TValue better in function declaration line `(... TKey = EnumberableKeyOfT<T>...)` or as internal `type...` lines
 
 /**
  *  Map function (`(element, key) => result`) over sequence values
@@ -623,6 +624,34 @@ export function lastSync<T extends EnumerableSync<T, any, any>>(list: T) {
 	}
 	const arr = collectSync(list);
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
+}
+
+export async function* firstN<T extends Enumerable<T, any, any>>(n: number, en: T) {
+	yield* take(n, en);
+}
+export function* firstNSync<T extends EnumerableSync<T, any, any>>(n: number, en: T) {
+	yield* takeSync(n, en);
+}
+
+export async function lastN<T extends Enumerable<T, any, any>>(n: number, list: T) {
+	// type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
+	// O(n) for iterators, but O(1) by specialization for arrays
+	if (Array.isArray(list)) {
+		return list.slice(-n) as TValue[];
+	}
+	const arr = await collect(list);
+	return arr.slice(-n) as TValue[];
+}
+export function lastNSync<T extends EnumerableSync<T, any, any>>(n: number, list: T) {
+	// type TKey = EnumerableKeyOfT<T>;
+	type TValue = EnumerableValueOfT<T>;
+	// O(n) for iterators, but O(1) by specialization for arrays
+	if (Array.isArray(list)) {
+		return list.slice(-n) as TValue[];
+	}
+	const arr = collectSync(list);
+	return arr.slice(-n) as TValue[];
 }
 
 // ####
