@@ -329,49 +329,80 @@ export function collectEntriesSync<
 	return arr;
 }
 
-// export async function collectAsMap<
-// 	T extends ArrayLike<T>,
-// 	TKey = number,
-// 	TValue = EnumerableValueOfT<T>,
-// 	TVKey = EnumerableKeyOfT<TValue>,
-// 	TVValue = EnumerableValueOfT<TValue>
-// >(list: T): Promise<Map<TVKey, TVValue>> {
-// 	const arr = await collectEntries<T, TKey, TValue>(list);
-// 	return new Map(arr);
-// }
-// export function collectAsMapSync<
-// 	T extends EnumerableSync<T>,
-// 	TKey = EnumerableKeyOfT<T>,
-// 	TValue = EnumerableValueOfT<T>,
-// 	TVKey = EnumerableKeyOfT<TValue>,
-// 	TVValue = EnumerableValueOfT<TValue>
-// >(list: T): Map<TVKey, TVValue> {
-// 	const arr: [TVKey, TVValue][] = collectSync<T, TKey, [TVKey, TVValue]>(list);
-// 	return new Map(arr);
-// }
-
-export async function toArray<T extends Enumerable<T>>(list: T) {
-	return collect(list);
+export async function collectToMap<TKey, TValue>(
+	list: AsyncIterable<[TKey, TValue]>
+): Promise<Map<TKey, TValue>> {
+	let arr: [TKey, TValue][] = [];
+	if (Array.isArray(list)) {
+		arr = list;
+	} else {
+		for await (const e of list) {
+			arr.push(e);
+		}
+	}
+	return new Map(arr);
 }
-export function toArraySync<T extends EnumerableSync<T>>(list: T) {
+export function collectToMapSync<TKey, TValue>(list: Iterable<[TKey, TValue]>): Map<TKey, TValue> {
+	let arr: [TKey, TValue][] = [];
+	if (Array.isArray(list)) {
+		arr = list;
+	} else {
+		for (const e of list) {
+			arr.push(e);
+		}
+	}
+	return new Map(arr);
+}
+
+export async function collectToObject<TKey extends ObjectKey, TValue>(
+	list: AsyncIterable<[TKey, TValue]>
+): Promise<MapLikeObject<TKey, TValue>> {
+	let obj: MapLikeObject<TKey, TValue> = {} as MapLikeObject<TKey, TValue>;
+	for await (const e of list) {
+		obj[e[0]] = e[1];
+	}
+	return obj;
+}
+export function collectToObjectSync<TKey extends ObjectKey, TValue>(
+	list: Iterable<[TKey, TValue]>
+): MapLikeObject<TKey, TValue> {
+	let obj: MapLikeObject<TKey, TValue> = {} as MapLikeObject<TKey, TValue>;
+	for (const e of list) {
+		obj[e[0]] = e[1];
+	}
+	return obj;
+}
+
+export async function collectToArray<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(list: T): Promise<TValue[]> {
+	return collect<T, TKey, TValue>(list);
+}
+export function collectToArraySync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(list: T): TValue[] {
 	return collectSync(list);
 }
-export async function toList<T extends EnumerableSync<T>>(list: T) {
-	return toArray(list);
+export async function collectToList<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(list: T): Promise<TValue[]> {
+	return collectToArray(list);
 }
-export function toListSync<T extends EnumerableSync<T>>(list: T) {
-	return toArraySync(list);
+export function collectToListSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(list: T): TValue[] {
+	return collectToArraySync(list);
 }
-// export async function toMap<
-// 	T extends Enumerable<T>,
-// 	TKey = EnumerableKeyOfT<T>,
-// 	TValue = EnumerableValueOfT<T>
-// >(list: T): Promise<Map<TKey, TValue>> {
-// 	return new Map(await collectEntries<T, TKey, TValue>(list));
-// }
-// export function toMapSync<T>(list: EnumerableSync<T>) {
-// 	return collectSync(list);
-// }
+
+// ####
 
 export async function* flatten<T>(
 	iterable: AnySyncIterable<ValueOrArray<T>>
