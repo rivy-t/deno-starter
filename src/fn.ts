@@ -59,26 +59,28 @@ type Enumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| ArrayLike<V>
 	| AnySyncIterable<V>;
 
-type EnumerableKeyOfT<T> = T extends ArrayLike<any>
+type EnumerableKeyOfT<T> = T extends [infer K, any][]
+	? K
+	: T extends ArrayLike<any>
 	? number
-	: T extends
-			| MapLikeObject<infer K, any>
-			| MapLike<infer K, any>
-			| Set<infer K>
-			| AnySyncGenerator<[infer K, any], any, any>
+	: T extends MapLikeObject<infer K, any> | MapLike<infer K, any> | Set<infer K>
 	? K
 	: T extends Iterator<any> | AnySyncGenerator<any, any, any>
 	? number
+	: T extends Enumerable<any, infer K, any>
+	? K
 	: unknown;
-type EnumerableValueOfT<T> = T extends
-	| ArrayLike<infer V>
-	| MapLike<any, infer V>
-	| AnySyncGenerator<[any, infer V], any, any>
-	| Iterable<infer V>
+// | AnySyncGenerator<[infer K, any], any, any> => K
+type EnumerableValueOfT<T> = T extends [any, infer V][]
+	? V
+	: T extends ArrayLike<infer V> | MapLike<any, infer V> | Iterable<infer V>
 	? V
 	: T extends AnySyncGenerator<infer V, any, any>
 	? V
+	: T extends Enumerable<any, any, infer V>
+	? V
 	: unknown;
+// | AnySyncGenerator<[any, infer V], any, any> => V
 
 // ####
 
