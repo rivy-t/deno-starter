@@ -454,8 +454,9 @@ export function* scanSync<T, U>(
 /**
  * Converts a (potentially infinite) sequence into a sequence of length `n`
  */
-export async function* take<T>(n: number, iterable: AnySyncIterable<T>) {
-	for await (const e of iterable) {
+export async function* take<T extends Enumerable<T, any, any>>(n: number, en: T) {
+	const it = iter(en);
+	for await (const e of it) {
 		if (n <= 0) {
 			break; // closes iterable
 		}
@@ -463,8 +464,9 @@ export async function* take<T>(n: number, iterable: AnySyncIterable<T>) {
 		yield e;
 	}
 }
-export function* takeSync<T>(n: number, iterable: Iterable<T>) {
-	for (const e of iterable) {
+export function* takeSync<T extends EnumerableSync<T, any, any>>(n: number, en: T) {
+	const it = iterSync(en);
+	for (const e of it) {
 		if (n <= 0) {
 			break; // closes iterable
 		}
@@ -574,10 +576,10 @@ export function headSync<T extends EnumerableSync<T, any, any>>(en: T) {
 }
 
 export async function* tail<T extends Enumerable<T, any, any>>(en: T) {
-	return drop(1, en);
+	yield* drop(1, en);
 }
 export function* tailSync<T extends EnumerableSync<T, any, any>>(en: T) {
-	return dropSync(1, en);
+	yield* dropSync(1, en);
 }
 
 export async function first<T extends Enumerable<T, any, any>>(en: T) {
