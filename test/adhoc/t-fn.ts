@@ -52,7 +52,7 @@ const mInitArrayOfTuples: [string, number][] = [
 ];
 const m = new Map(mInitArrayOfTuples);
 const m_entries = F.collectEntriesSync(m);
-// const m_entries_ToMap = F.collectAsMapSync(m_entries);
+const m_entries_ToMap = F.collectToMapSync(m_entries);
 const sbl = Symbol('unique');
 let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
 const set = new Set(['one', 2, 'help', {}]);
@@ -60,18 +60,18 @@ const str = 'a string';
 const double_m = await F.collect(F.map(double, m));
 const double_mKV = await F.collect(F.mapKV(double, m));
 const double_mKV_newMap = new Map(double_mKV);
-// const double_mKV_asMap = await F.collectAsMap(F.mapKV(double, m));
+const double_mKV_asMap = await F.collectToMap(F.mapKV(double, m));
 console.log({
 	m,
 	m_entries,
-	// m_entries_ToMap,
+	m_entries_ToMap,
 	double_m,
 	double_mKV,
 	double_mKV_newMap,
-	// double_mKV_asMap,
+	double_mKV_asMap,
 });
 
-const b = R.map(double, await F.toArray(F.flatten(y)));
+const b = R.map(double, await F.collectToArray(F.flatten(y)));
 console.log({ b });
 
 const a = y;
