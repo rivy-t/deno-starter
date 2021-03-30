@@ -15,13 +15,15 @@ import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 const z = await F.collect(F.enumerate(new Map()));
 const flatZ = await F.collect(F.flatten(z));
 console.log({ z, flatZ });
-const mm = new Map([
+const m1 = new Map([
 	['a', 1],
 	['b', 20],
 ]);
-const zz = await F.collect(F.enumerate(mm));
-const flatZZ = await F.collect(F.flatten(zz));
-console.log({ mm, zz, flatZZ });
+const e_m1 = await F.collect(F.enumerate(m1));
+const z_m1 = await F.collect(F.zip(F.range(10, Infinity), m1));
+const flat_e_m1 = await F.collect(F.flatten(e_m1));
+const flat_z_m1 = await F.collect(F.flatten(z_m1));
+console.log({ m1, e_m1, z_m1, flat_e_m1, flat_z_m1 });
 
 const y = [1, [2, [3, 4], [5, 6], 7], [8, 9], [[10, [11, 12]], 13]];
 
@@ -39,6 +41,7 @@ const double = (x: number) => x + x;
 const m = new Map([
 	['x', 1],
 	['y', 2],
+	['z', 30],
 ]);
 const sbl = Symbol('unique');
 let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
@@ -58,6 +61,10 @@ console.log({
 	keys: await F.collectKeys(a),
 	vals: await F.collectValues(a),
 	first: await F.first(a),
+	tail: await F.collect(F.tail(a)),
+	last: await F.last(a),
+	take: await F.collect(F.take(2, a)),
+	drop: await F.collect(F.drop(2, a)),
 });
 console.log({
 	m,
@@ -66,6 +73,10 @@ console.log({
 	keys: await F.collectKeys(m),
 	vals: await F.collectValues(m),
 	first: await F.first(m),
+	tail: await F.collect(F.tail(m)),
+	last: await F.last(m),
+	take: await F.collect(F.take(2, m)),
+	drop: await F.collect(F.drop(2, m)),
 });
 console.log({
 	o,
@@ -73,7 +84,11 @@ console.log({
 	entry: await F.collectEntries(o),
 	keys: await F.collectKeys(o),
 	vals: await F.collectValues(o),
-	// first: await F.first(o),
+	first: await F.first(o),
+	tail: await F.collectEntries(F.tail(o)),
+	last: await F.last(o),
+	take: await F.collect(F.take(2, o)),
+	drop: await F.collect(F.drop(2, o)),
 });
 console.log({
 	set,
@@ -82,6 +97,10 @@ console.log({
 	keys: await F.collectKeys(set),
 	vals: await F.collectValues(set),
 	first: await F.first(set),
+	tail: await F.collectEntries(F.tail(set)),
+	last: await F.last(set),
+	take: await F.collect(F.take(2, set)),
+	drop: await F.collect(F.drop(2, set)),
 });
 
 // problems: first() is not working; collecting/enumerating for objects is faulty for non-numeric keys and sets show duplicate values
