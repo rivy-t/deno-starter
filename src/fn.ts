@@ -242,17 +242,17 @@ type KeyValuePair<K, V> = [K, V];
 type KV<K, V> = [K, V];
 
 export async function* iter<T extends Enumerable<T>, TValue = EnumerableValueOfT<T>>(
-	iterable: T
+	list: T
 ): AsyncGenerator<TValue, void, void> {
-	const it = enumerate(iterable);
+	const it = enumerate(list);
 	for await (const e of it) {
 		yield e[1] as TValue;
 	}
 }
 export function* iterSync<T extends EnumerableSync<T>, TValue = EnumerableValueOfT<T>>(
-	iterable: T
+	list: T
 ): Generator<TValue, void, void> {
-	const it = enumerateSync(iterable);
+	const it = enumerateSync(list);
 	for (const e of it) {
 		yield e[1] as TValue;
 	}
@@ -378,17 +378,17 @@ export async function collectEntriesSync<T extends EnumerableSync<any, any, any>
 	return arr;
 }
 
-export async function toArray<T>(iterable: Enumerable<T>) {
-	return collect(iterable);
+export async function toArray<T>(list: Enumerable<T>) {
+	return collect(list);
 }
-export function toArraySync<T>(iterable: EnumerableSync<T>) {
-	return collectSync(iterable);
+export function toArraySync<T>(list: EnumerableSync<T>) {
+	return collectSync(list);
 }
-export async function toList<T>(iterable: Enumerable<T>) {
-	return collect(iterable);
+export async function toList<T>(list: Enumerable<T>) {
+	return collect(list);
 }
-export function toListSync<T>(iterable: EnumerableSync<T>) {
-	return collectSync(iterable);
+export function toListSync<T>(list: EnumerableSync<T>) {
+	return collectSync(list);
 }
 
 /**
@@ -583,22 +583,22 @@ export function* tailSync<T extends EnumerableSync<T, any, any>>(en: T) {
 export async function first<T extends Enumerable<T, any, any>>(en: T) {
 	return head(en);
 }
-export function firstSync<T extends Enumerable<T, any, any>>(en: T) {
+export function firstSync<T extends EnumerableSync<T, any, any>>(en: T) {
 	return headSync(en);
 }
 
-export async function last<T>(list: AnySyncIterable<T>) {
+export async function last<T extends Enumerable<T, any, any>>(list: T) {
 	// O(n) for iterators, but O(1) by specialization for arrays
 	if (Array.isArray(list)) {
-		return list.length > 0 ? (list[list.length - 1] as T) : undefined;
+		return list.length > 0 ? (list[list.length - 1] as EnumerableValueOfT<T>) : undefined;
 	}
 	const arr = await collect(list);
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
-export function lastSync<T>(list: Iterable<T>) {
+export function lastSync<T extends EnumerableSync<T, any, any>>(list: T) {
 	// O(n) for iterators, but O(1) by specialization for arrays
 	if (Array.isArray(list)) {
-		return list.length > 0 ? (list[list.length - 1] as T) : undefined;
+		return list.length > 0 ? (list[list.length - 1] as EnumerableValueOfT<T>) : undefined;
 	}
 	const arr = collectSync(list);
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
