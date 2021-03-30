@@ -258,16 +258,17 @@ export function* iterSync<T extends EnumerableSync<T>, TValue = EnumerableValueO
 	}
 }
 
-export async function* flatten<T>(
-	iterable: AnySyncIterable<ValueOrArray<T>>
-): AsyncGenerator<T, void, void> {
-	for await (const e of iterable) {
+export async function* flatten<T extends Enumerable<T>, TValue = EnumerableValueOfT<T>>(
+	list: T
+): AsyncGenerator<TValue, void, void> {
+	const it = iter(list);
+	for await (const e of it) {
 		if (Array.isArray(e)) {
-			const it = flatten(e);
-			for await (const x of it) {
-				yield x;
+			const itOfE = flatten(e);
+			for await (const x of itOfE) {
+				yield x as TValue;
 			}
-		} else yield e;
+		} else yield e as TValue;
 	}
 }
 export function* flattenSync<T>(iterable: Iterable<ValueOrArray<T>>): Generator<T, void, void> {
