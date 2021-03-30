@@ -12,6 +12,13 @@ import * as F from '../../src/fn.ts'; // spell-checker:ignore unnest
 import type { ValueOrArray } from '../../src/fn.ts'; // spell-checker:ignore unnest
 import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 
+const double = (x: number) => x + x;
+const sum = (acc: number, x: number) => acc + x;
+
+// function sumGeneric<T extends number | string>(acc: T, e: T) {
+// 	return acc + e;
+// }
+
 // const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd']));
 const z = await F.collect(F.enumerate(new Map()));
 const flatZ = await F.collect(F.flatten(z));
@@ -34,22 +41,35 @@ const unNestY2 = await F.collect(F.unnest(2, y));
 console.log({ y, flatY, unNestY1, unNestY2, last: F.lastSync(flatY) });
 console.log({
 	flatY,
-	reduce: F.reduceSync((acc, e) => acc + e, 0, flatY),
-	scan: F.collectSync(F.scanSync((acc, e) => acc + e, 0, flatY)),
+	reduce: F.reduceSync(sum, 0, flatY),
+	scan: F.collectSync(F.scanSync(sum, 0, flatY)),
 });
 
-const double = (x: number) => x + x;
-const m = new Map([
+const mInitArrayOfTuples: [string, number][] = [
 	['x', 1],
 	['y', 2],
 	['z', 30],
-]);
+];
+const m = new Map(mInitArrayOfTuples);
+const m_entries = F.collectEntriesSync(m);
+// const m_entries_ToMap = F.collectAsMapSync(m_entries);
 const sbl = Symbol('unique');
 let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
 const set = new Set(['one', 2, 'help', {}]);
 const str = 'a string';
-const double_m_vals = await F.collect(F.map(double, m.values()));
-console.log({ m, double_m_vals });
+const double_m = await F.collect(F.map(double, m));
+const double_mKV = await F.collect(F.mapKV(double, m));
+const double_mKV_newMap = new Map(double_mKV);
+// const double_mKV_asMap = await F.collectAsMap(F.mapKV(double, m));
+console.log({
+	m,
+	m_entries,
+	// m_entries_ToMap,
+	double_m,
+	double_mKV,
+	double_mKV_newMap,
+	// double_mKV_asMap,
+});
 
 const b = R.map(double, await F.toArray(F.flatten(y)));
 console.log({ b });
@@ -58,9 +78,9 @@ const a = y;
 console.log({
 	a,
 	collect: await F.collect(a),
-	entry: await F.collectEntries(a),
+	entries: await F.collectEntries(a),
 	keys: await F.collectKeys(a),
-	vals: await F.collectValues(a),
+	values: await F.collectValues(a),
 	first: await F.first(a),
 	tail: await F.collect(F.tail(a)),
 	last: await F.last(a),
@@ -72,9 +92,9 @@ console.log({
 console.log({
 	m,
 	collect: await F.collect(m),
-	entry: await F.collectEntries(m),
+	entries: await F.collectEntries(m),
 	keys: await F.collectKeys(m),
-	vals: await F.collectValues(m),
+	values: await F.collectValues(m),
 	first: await F.first(m),
 	tail: await F.collect(F.tail(m)),
 	last: await F.last(m),
@@ -86,9 +106,9 @@ console.log({
 console.log({
 	o,
 	collectEnum: await F.collect(F.enumerate(o)),
-	entry: await F.collectEntries(o),
+	entries: await F.collectEntries(o),
 	keys: await F.collectKeys(o),
-	vals: await F.collectValues(o),
+	values: await F.collectValues(o),
 	first: await F.first(o),
 	tail: await F.collect(F.tail(o)),
 	last: await F.last(o),
@@ -100,9 +120,9 @@ console.log({
 console.log({
 	set,
 	collectEnum: await F.collect(F.enumerate(set)),
-	entry: await F.collectEntries(set),
+	entries: await F.collectEntries(set),
 	keys: await F.collectKeys(set),
-	vals: await F.collectValues(set),
+	values: await F.collectValues(set),
 	first: await F.first(set),
 	tail: await F.collect(F.tail(set)),
 	last: await F.last(set),
@@ -114,9 +134,9 @@ console.log({
 console.log({
 	str,
 	collectEnum: await F.collect(F.enumerate(str)),
-	entry: await F.collectEntries(str),
+	entries: await F.collectEntries(str),
 	keys: await F.collectKeys(str),
-	vals: await F.collectValues(str),
+	values: await F.collectValues(str),
 	first: await F.first(str),
 	tail: await F.collect(F.tail(str)),
 	last: await F.last(str),
