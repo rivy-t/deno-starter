@@ -66,7 +66,9 @@ type EnumerableKeyOfT<T> = T extends [infer K, unknown][]
 	? K
 	: T extends ArrayLike<unknown>
 	? number
-	: T extends MapLikeObject<infer K, unknown> | MapLike<infer K, unknown> | Set<infer K>
+	: T extends Set<infer K>
+	? K
+	: T extends MapLikeObject<infer K, unknown> | MapLike<infer K, unknown>
 	? K
 	: T extends Iterator<unknown> | AnySyncGenerator<unknown, unknown, unknown>
 	? number
