@@ -87,7 +87,7 @@ console.log({
 	firstN3: await F.collect(F.firstN(3, a)),
 	take2: await F.collect(F.take(2, a)),
 	drop2: await F.collect(F.drop(2, a)),
-	lastN3: await F.lastN(3, a),
+	lastN3: await F.collect(F.lastN(3, a)),
 });
 console.log({
 	m,
@@ -101,7 +101,7 @@ console.log({
 	firstN3: await F.collect(F.firstN(3, m)),
 	take2: await F.collect(F.take(2, m)),
 	drop2: await F.collect(F.drop(2, m)),
-	lastN3: await F.lastN(3, m),
+	lastN3: await F.collect(F.lastN(3, m)),
 });
 console.log({
 	o,
@@ -115,7 +115,7 @@ console.log({
 	firstN3: await F.collect(F.firstN(3, o)),
 	take2: await F.collect(F.take(2, o)),
 	drop2: await F.collect(F.drop(2, o)),
-	lastN3: await F.lastN(3, o),
+	lastN3: await F.collect(F.lastN(3, o)),
 });
 console.log({
 	set,
@@ -129,7 +129,7 @@ console.log({
 	firstN3: await F.collect(F.firstN(3, set)),
 	take2: await F.collect(F.take(2, set)),
 	drop2: await F.collect(F.drop(2, set)),
-	lastN3: await F.lastN(3, set),
+	lastN3: await F.collect(F.lastN(3, set)),
 });
 console.log({
 	str,
@@ -143,7 +143,7 @@ console.log({
 	firstN3: await F.collect(F.firstN(3, str)),
 	take2: await F.collect(F.take(2, str)),
 	drop2: await F.collect(F.drop(2, str)),
-	lastN3: await F.lastN(3, str),
+	lastN3: await F.collect(F.lastN(3, str)),
 });
 
 // problems: first() is not working; collecting/enumerating for objects is faulty for non-numeric keys and sets show duplicate values
