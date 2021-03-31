@@ -14,10 +14,12 @@ import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 
 const double = (x: number) => x + x;
 const sum = (acc: number, x: number) => acc + x;
+const concat = (acc: string, s: string) => acc + s;
 
-// function sumGeneric<T extends number | string>(acc: T, e: T) {
-// 	return acc + e;
-// }
+function sumGeneric<T extends number | string>(acc: T, e: T): T;
+function sumGeneric(acc: any, e: any) {
+	return acc + e;
+}
 
 const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd']));
 // const z = await F.collect(F.enumerate(new Map()));
@@ -146,6 +148,7 @@ console.log({
 	take2: await F.collect(F.take(2, str)),
 	drop2: await F.collect(F.drop(2, str)),
 	lastN3: await F.collect(F.lastN(3, str)),
+	scanConcat: await F.collect(F.scan(concat, '', str)),
 });
 
 console.log(await F.collect(F.take(10, F.range(100, 0, 0))));
