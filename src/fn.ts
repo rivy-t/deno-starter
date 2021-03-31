@@ -502,7 +502,8 @@ export async function* range(
 	step: number = 1
 ): AsyncGenerator<number, void, unknown> {
 	let idx = start;
-	while (idx < end) {
+	let positiveIncrement = step > 0;
+	while (positiveIncrement ? idx < end : idx > end) {
 		yield idx;
 		idx = idx + step;
 	}
@@ -513,7 +514,8 @@ export function* rangeSync(
 	step: number = 1
 ): Generator<number, void, unknown> {
 	let idx = start;
-	while (idx < end) {
+	let positiveIncrement = step > 0;
+	while (positiveIncrement ? idx < end : idx > end) {
 		yield idx;
 		idx = idx + step;
 	}
