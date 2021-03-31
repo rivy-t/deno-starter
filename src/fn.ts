@@ -109,7 +109,7 @@ type oxv = EnumerableValueOfT<typeof ox>;
 
 type ty = MapLikeObject<string, bigint>;
 type tu = EnumerableValueOfT<Map<string, bigint>>;
-// type tz = EnumerableKeyTOf<AsyncGenerator<[bigint, number], void, void>>;
+// type tz = EnumerableKeyTOf<AsyncGenerator<[bigint, number], void, unknown>>;
 type tz = EnumerableKeyOfT<ty>;
 
 type my_t1<V, K> = EnumerableSync<Map<K, V>, V, K>;
@@ -152,7 +152,7 @@ export async function* enumerate<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
->(enumerable: T): AsyncGenerator<[TKey, TValue], void, void> {
+>(enumerable: T): AsyncGenerator<[TKey, TValue], void, unknown> {
 	const hasEntries = typeof (enumerable as any).entries === 'function';
 	const isAsyncIterable = typeof (enumerable as any)[Symbol.asyncIterator] === 'function';
 	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
@@ -183,7 +183,7 @@ export function* enumerateSync<
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
->(enumerable: T): Generator<[TKey, TValue], void, void> {
+>(enumerable: T): Generator<[TKey, TValue], void, unknown> {
 	const hasEntries = typeof (enumerable as any).entries === 'function';
 	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
 	const isObject = enumerable instanceof Object;
@@ -212,7 +212,7 @@ export function* enumerateSync<
 
 export async function* iter<T extends Enumerable<T>, TValue = EnumerableValueOfT<T>>(
 	list: T
-): AsyncGenerator<TValue, void, void> {
+): AsyncGenerator<TValue, void, unknown> {
 	const it = enumerate(list);
 	for await (const e of it) {
 		yield e[1] as TValue;
@@ -220,7 +220,7 @@ export async function* iter<T extends Enumerable<T>, TValue = EnumerableValueOfT
 }
 export function* iterSync<T extends EnumerableSync<T>, TValue = EnumerableValueOfT<T>>(
 	list: T
-): Generator<TValue, void, void> {
+): Generator<TValue, void, unknown> {
 	const it = enumerateSync(list);
 	for (const e of it) {
 		yield e[1] as TValue;
@@ -425,7 +425,7 @@ export function collectToListSync<
 
 export async function* flatten<T>(
 	iterable: AnySyncIterable<ValueOrArray<T>>
-): AsyncGenerator<T, void, void> {
+): AsyncGenerator<T, void, unknown> {
 	for await (const e of iterable) {
 		if (Array.isArray(e)) {
 			const it = flatten(e);
@@ -435,7 +435,7 @@ export async function* flatten<T>(
 		} else yield e;
 	}
 }
-export function* flattenSync<T>(iterable: Iterable<ValueOrArray<T>>): Generator<T, void, void> {
+export function* flattenSync<T>(iterable: Iterable<ValueOrArray<T>>): Generator<T, void, unknown> {
 	for (const e of iterable) {
 		if (Array.isArray(e)) {
 			const it = flattenSync(e);
@@ -449,7 +449,7 @@ export function* flattenSync<T>(iterable: Iterable<ValueOrArray<T>>): Generator<
 export async function* flatN<T>(
 	n: number,
 	iterable: AnySyncIterable<ValueOrArray<T>>
-): AsyncGenerator<ValueOrArray<T>, void, void> {
+): AsyncGenerator<ValueOrArray<T>, void, unknown> {
 	for await (const e of iterable) {
 		if (Array.isArray(e) && n > 0) {
 			const it = flatN(n - 1, e);
@@ -464,7 +464,7 @@ export async function* flatN<T>(
 export function* flatNSync<T>(
 	n: number,
 	iterable: Iterable<ValueOrArray<T>>
-): Generator<ValueOrArray<T>, void, void> {
+): Generator<ValueOrArray<T>, void, unknown> {
 	for (const e of iterable) {
 		if (Array.isArray(e) && n > 0) {
 			const it = flatNSync(n - 1, e);
@@ -481,13 +481,13 @@ export function* flatNSync<T>(
 export async function* unnest<T>(
 	n: number,
 	iterable: AnySyncIterable<ValueOrArray<T>>
-): AsyncGenerator<ValueOrArray<T>, void, void> {
+): AsyncGenerator<ValueOrArray<T>, void, unknown> {
 	yield* flatN(n, iterable);
 }
 export function* unnestSync<T>(
 	n: number,
 	iterable: Iterable<ValueOrArray<T>>
-): Generator<ValueOrArray<T>, void, void> {
+): Generator<ValueOrArray<T>, void, unknown> {
 	yield* flatNSync(n, iterable);
 }
 
@@ -495,7 +495,7 @@ export async function* range(
 	start: number,
 	end: number,
 	step: number = 1
-): AsyncGenerator<number, void, void> {
+): AsyncGenerator<number, void, unknown> {
 	let idx = start;
 	while (idx < end) {
 		yield idx;
@@ -506,7 +506,7 @@ export function* rangeSync(
 	start: number,
 	end: number,
 	step: number = 1
-): Generator<number, void, void> {
+): Generator<number, void, unknown> {
 	let idx = start;
 	while (idx < end) {
 		yield idx;
@@ -529,7 +529,7 @@ export async function* map<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableKeyOfT<T>
->(fn: (element: TValue, key?: TKey) => U, en: T): AsyncGenerator<U, void, void> {
+>(fn: (element: TValue, key?: TKey) => U, en: T): AsyncGenerator<U, void, unknown> {
 	const it = enumerate<T, TKey, TValue>(en);
 	for await (const e of it) {
 		yield fn(e[1], e[0]);
@@ -540,7 +540,7 @@ export function* mapSync<
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
->(fn: (element: TValue, key?: TKey) => U, en: T): Generator<U, void, void> {
+>(fn: (element: TValue, key?: TKey) => U, en: T): Generator<U, void, unknown> {
 	const it = enumerateSync<T, TKey, TValue>(en);
 	for (const e of it) {
 		yield fn(e[1], e[0]);
@@ -552,7 +552,7 @@ export async function* mapKV<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableKeyOfT<T>
->(fn: (element: TValue, key?: TKey) => U, en: T): AsyncGenerator<[TKey, U], void, void> {
+>(fn: (element: TValue, key?: TKey) => U, en: T): AsyncGenerator<[TKey, U], void, unknown> {
 	const it = enumerate<T, TKey, TValue>(en);
 	for await (const e of it) {
 		yield [e[0], fn(e[1], e[0])];
@@ -563,7 +563,7 @@ export function* mapKVSync<
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
->(fn: (element: TValue, key?: TKey) => U, en: T): Generator<[TKey, U], void, void> {
+>(fn: (element: TValue, key?: TKey) => U, en: T): Generator<[TKey, U], void, unknown> {
 	const it = enumerateSync<T, TKey, TValue>(en);
 	for (const e of it) {
 		yield [e[0], fn(e[1], e[0])];
@@ -719,7 +719,7 @@ export async function* zip<
 	T2 extends Enumerable<T2>,
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
->(iterable_0: T1, iterable_1: T2): AsyncGenerator<[T1Value, T2Value], void, void> {
+>(iterable_0: T1, iterable_1: T2): AsyncGenerator<[T1Value, T2Value], void, unknown> {
 	const it_0 = iter(iterable_0);
 	const it_1 = iter(iterable_1);
 	let next_0 = await it_0.next();
@@ -735,7 +735,7 @@ export function* zipSync<
 	T2 extends EnumerableSync<T2>,
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
->(iterable_0: T1, iterable_1: T2): Generator<[T1Value, T2Value], void, void> {
+>(iterable_0: T1, iterable_1: T2): Generator<[T1Value, T2Value], void, unknown> {
 	const it_0 = iterSync(iterable_0);
 	const it_1 = iterSync(iterable_1);
 	let next_0 = it_0.next();
