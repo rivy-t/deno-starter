@@ -19,8 +19,8 @@ const sum = (acc: number, x: number) => acc + x;
 // 	return acc + e;
 // }
 
-// const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd']));
-const z = await F.collect(F.enumerate(new Map()));
+const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd']));
+// const z = await F.collect(F.enumerate(new Map()));
 const flatZ = await F.collect(F.flatten(z));
 console.log({ z, flatZ });
 const m1 = new Map([
@@ -147,3 +147,5 @@ console.log({
 	drop2: await F.collect(F.drop(2, str)),
 	lastN3: await F.collect(F.lastN(3, str)),
 });
+
+console.log(await F.collect(F.take(10, F.range(100, 0, 0))));
