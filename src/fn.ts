@@ -747,16 +747,18 @@ export function* zipSync<
 	}
 }
 
-export async function head<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
+export async function head<T extends Enumerable<T>, TKey = unknown, TValue = EnumerableValueOfT<T>>(
 	en: T
-) {
+): Promise<TValue | undefined> {
 	const it = iter(en);
 	const next = await it.next();
 	return next.done ? undefined : next.value;
 }
-export function headSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	en: T
-) {
+export function headSync<
+	T extends EnumerableSync<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(en: T): TValue | undefined {
 	const it = iterSync(en);
 	const next = it.next();
 	return next.done ? undefined : next.value;
