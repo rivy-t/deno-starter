@@ -578,7 +578,7 @@ export async function reduce<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableKeyOfT<T>
->(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T) {
+>(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T): Promise<U> {
 	let acc = initialValue;
 	const it = enumerate<T, TKey, TValue>(en);
 	for await (const e of it) {
@@ -591,7 +591,7 @@ export function reduceSync<
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableKeyOfT<T>
->(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T) {
+>(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T): U {
 	let acc = initialValue;
 	const it = enumerateSync<T, TKey, TValue>(en);
 	for (const e of it) {
@@ -605,7 +605,11 @@ export async function* scan<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableKeyOfT<T>
->(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T) {
+>(
+	fn: (accumulator: U, element: TValue, key?: TKey) => U,
+	initialValue: U,
+	en: T
+): AsyncGenerator<U, void, unknown> {
 	let acc = initialValue;
 	const it = enumerate<T, TKey, TValue>(en);
 	for await (const e of it) {
@@ -618,7 +622,11 @@ export function* scanSync<
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableKeyOfT<T>
->(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T) {
+>(
+	fn: (accumulator: U, element: TValue, key?: TKey) => U,
+	initialValue: U,
+	en: T
+): Generator<U, void, unknown> {
 	let acc = initialValue;
 	const it = enumerateSync<T, TKey, TValue>(en);
 	for (const e of it) {
@@ -627,13 +635,49 @@ export function* scanSync<
 	}
 }
 
+export async function* scanKV<
+	U,
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableKeyOfT<T>
+>(
+	fn: (accumulator: U, element: TValue, key?: TKey) => U,
+	initialValue: U,
+	en: T
+): AsyncGenerator<[TKey, U], void, unknown> {
+	let acc = initialValue;
+	const it = enumerate<T, TKey, TValue>(en);
+	for await (const e of it) {
+		acc = fn(acc, e[1], e[0]);
+		yield [e[0], acc];
+	}
+}
+export function* scanKVSync<
+	U,
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableKeyOfT<T>
+>(
+	fn: (accumulator: U, element: TValue, key?: TKey) => U,
+	initialValue: U,
+	en: T
+): Generator<[TKey, U], void, unknown> {
+	let acc = initialValue;
+	const it = enumerateSync<T, TKey, TValue>(en);
+	for (const e of it) {
+		acc = fn(acc, e[1], e[0]);
+		yield [e[0], acc];
+	}
+}
+
 /**
  * Converts a (potentially infinite) sequence into a sequence of length `n`
  */
-export async function* take<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	n: number,
-	en: T
-) {
+export async function* take<
+	T extends Enumerable<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): AsyncGenerator<TValue, void, unknown> {
 	const it = iter(en);
 	for await (const e of it) {
 		if (n <= 0) {
@@ -643,11 +687,41 @@ export async function* take<T extends Enumerable<T, EnumerableKeyOfT<T>, Enumera
 		yield e;
 	}
 }
-export function* takeSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	n: number,
-	en: T
-) {
+export function* takeSync<
+	T extends EnumerableSync<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): Generator<TValue, void, unknown> {
 	const it = iterSync(en);
+	for (const e of it) {
+		if (n <= 0) {
+			break; // closes iterable
+		}
+		n--;
+		yield e;
+	}
+}
+
+export async function* takeKV<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): AsyncGenerator<[TKey, TValue], void, unknown> {
+	const it = enumerate<T, TKey, TValue>(en);
+	for await (const e of it) {
+		if (n <= 0) {
+			break; // closes iterable
+		}
+		n--;
+		yield e;
+	}
+}
+export function* takeKVSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): Generator<[TKey, TValue], void, unknown> {
+	const it = enumerateSync<T, TKey, TValue>(en);
 	for (const e of it) {
 		if (n <= 0) {
 			break; // closes iterable
@@ -660,10 +734,11 @@ export function* takeSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, Enume
 /**
  * Drop (iterate past) firstSync `n` elements of sequence
  */
-export async function* drop<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	n: number,
-	en: T
-) {
+export async function* drop<
+	T extends Enumerable<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): AsyncGenerator<TValue, void, unknown> {
 	const it = iter(en);
 	for await (const e of it) {
 		if (n <= 0) {
@@ -672,10 +747,11 @@ export async function* drop<T extends Enumerable<T, EnumerableKeyOfT<T>, Enumera
 		n--;
 	}
 }
-export function* dropSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	n: number,
-	en: T
-) {
+export function* dropSync<
+	T extends EnumerableSync<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): Generator<TValue, void, unknown> {
 	const it = iterSync(en);
 	for (const e of it) {
 		if (n <= 0) {
@@ -685,20 +761,41 @@ export function* dropSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, Enume
 	}
 }
 
-// export async function* slice<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(start: number, end: number, en: T) {
-// 	let idx = 0;
-// 	const it = iter(en);
-// 	for await (const e of it) {
-// 		if (idx < start) {
-// 			idx++;
-// 		} else if (idx < end) {
-// 			yield e;
-// 		}
-// 	}
-// }
-export async function* slice<T>(start: number, end: number, iterable: AnySyncIterable<T>) {
+export async function* dropKV<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): AsyncGenerator<[TKey, TValue], void, unknown> {
+	const it = enumerate<T, TKey, TValue>(en);
+	for await (const e of it) {
+		if (n <= 0) {
+			yield e;
+		}
+		n--;
+	}
+}
+export function* dropKVSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, en: T): Generator<[TKey, TValue], void, unknown> {
+	const it = enumerateSync<T, TKey, TValue>(en);
+	for (const e of it) {
+		if (n <= 0) {
+			yield e;
+		}
+		n--;
+	}
+}
+
+export async function* slice<
+	T extends Enumerable<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(start: number, end: number, en: T): AsyncGenerator<TValue, void, unknown> {
 	let idx = 0;
-	for await (const e of iterable) {
+	const it = iter(en);
+	for await (const e of it) {
 		if (idx < start) {
 			idx++;
 		} else if (idx < end) {
@@ -706,9 +803,45 @@ export async function* slice<T>(start: number, end: number, iterable: AnySyncIte
 		}
 	}
 }
-export function* sliceSync<T>(start: number, end: number, iterable: Iterable<T>) {
+export function* sliceSync<
+	T extends EnumerableSync<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(start: number, end: number, en: T): Generator<TValue, void, unknown> {
 	let idx = 0;
-	for (const e of iterable) {
+	const it = iterSync(en);
+	for (const e of it) {
+		if (idx < start) {
+			idx++;
+		} else if (idx < end) {
+			yield e;
+		}
+	}
+}
+
+export async function* sliceKV<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(start: number, end: number, en: T): AsyncGenerator<[TKey, TValue], void, unknown> {
+	let idx = 0;
+	const it = enumerate<T, TKey, TValue>(en);
+	for await (const e of it) {
+		if (idx < start) {
+			idx++;
+		} else if (idx < end) {
+			yield e;
+		}
+	}
+}
+export function* sliceKVSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(start: number, end: number, en: T): Generator<[TKey, TValue], void, unknown> {
+	let idx = 0;
+	const it = enumerateSync<T, TKey, TValue>(en);
+	for (const e of it) {
 		if (idx < start) {
 			idx++;
 		} else if (idx < end) {
@@ -750,6 +883,46 @@ export function* zipSync<
 	}
 }
 
+export async function* zipKV<
+	T1 extends Enumerable<T1>,
+	T2 extends Enumerable<T2>,
+	T1Key = EnumerableKeyOfT<T1>,
+	T2Key = EnumerableKeyOfT<T2>,
+	T1Value = EnumerableValueOfT<T1>,
+	T2Value = EnumerableValueOfT<T2>
+>(
+	iterable_0: T1,
+	iterable_1: T2
+): AsyncGenerator<[[T1Key, T1Value], [T2Key, T2Value]], void, unknown> {
+	const it_0 = enumerate<T1, T1Key, T1Value>(iterable_0);
+	const it_1 = enumerate<T2, T2Key, T2Value>(iterable_1);
+	let next_0 = await it_0.next();
+	let next_1 = await it_1.next();
+	while (!(next_0.done || next_1.done)) {
+		yield [next_0.value, next_1.value] as [[T1Key, T1Value], [T2Key, T2Value]];
+		next_0 = await it_0.next();
+		next_1 = await it_1.next();
+	}
+}
+export function* zipKVSync<
+	T1 extends EnumerableSync<T1>,
+	T2 extends EnumerableSync<T2>,
+	T1Key = EnumerableKeyOfT<T1>,
+	T2Key = EnumerableKeyOfT<T2>,
+	T1Value = EnumerableValueOfT<T1>,
+	T2Value = EnumerableValueOfT<T2>
+>(iterable_0: T1, iterable_1: T2): Generator<[[T1Key, T1Value], [T2Key, T2Value]], void, unknown> {
+	const it_0 = enumerateSync<T1, T1Key, T1Value>(iterable_0);
+	const it_1 = enumerateSync<T2, T2Key, T2Value>(iterable_1);
+	let next_0 = it_0.next();
+	let next_1 = it_1.next();
+	while (!(next_0.done || next_1.done)) {
+		yield [next_0.value, next_1.value] as [[T1Key, T1Value], [T2Key, T2Value]];
+		next_0 = it_0.next();
+		next_1 = it_1.next();
+	}
+}
+
 export async function head<T extends Enumerable<T>, TKey = unknown, TValue = EnumerableValueOfT<T>>(
 	en: T
 ): Promise<TValue | undefined> {
@@ -767,11 +940,37 @@ export function headSync<
 	return next.done ? undefined : next.value;
 }
 
+export async function headKV<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(en: T): Promise<[TKey, TValue] | undefined> {
+	const it = enumerate<T, TKey, TValue>(en);
+	const next = await it.next();
+	return next.done ? undefined : next.value;
+}
+export function headKVSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(en: T): [TKey, TValue] | undefined {
+	const it = enumerateSync<T, TKey, TValue>(en);
+	const next = it.next();
+	return next.done ? undefined : next.value;
+}
+
 export async function* tail<T extends Enumerable<T>>(en: T) {
 	yield* drop(1, en);
 }
 export function* tailSync<T extends EnumerableSync<T>>(en: T) {
 	yield* dropSync(1, en);
+}
+
+export async function* tailKV<T extends Enumerable<T>>(en: T) {
+	yield* dropKV(1, en);
+}
+export function* tailKVSync<T extends EnumerableSync<T>>(en: T) {
+	yield* dropKVSync(1, en);
 }
 
 export async function first<T extends Enumerable<T>>(en: T) {
@@ -781,9 +980,16 @@ export function firstSync<T extends EnumerableSync<T>>(en: T) {
 	return headSync(en);
 }
 
-export async function last<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
+export async function firstKV<T extends Enumerable<T>>(en: T) {
+	return headKV(en);
+}
+export function firstKVSync<T extends EnumerableSync<T>>(en: T) {
+	return headKVSync(en);
+}
+
+export async function last<T extends Enumerable<T>, TKey = unknown, TValue = EnumerableValueOfT<T>>(
 	list: T
-) {
+): Promise<TValue | undefined> {
 	// O(n) for iterators, but O(1) by specialization for arrays
 	if (Array.isArray(list)) {
 		return list.length > 0 ? (list[list.length - 1] as EnumerableValueOfT<T>) : undefined;
@@ -791,9 +997,11 @@ export async function last<T extends Enumerable<T, EnumerableKeyOfT<T>, Enumerab
 	const arr = await collect(list);
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
-export function lastSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	list: T
-) {
+export function lastSync<
+	T extends EnumerableSync<T>,
+	TKey = unknown,
+	TValue = EnumerableValueOfT<T>
+>(list: T): TValue | undefined {
 	// O(n) for iterators, but O(1) by specialization for arrays
 	if (Array.isArray(list)) {
 		return list.length > 0 ? (list[list.length - 1] as EnumerableValueOfT<T>) : undefined;
@@ -802,43 +1010,109 @@ export function lastSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, Enumer
 	return arr.length > 0 ? arr[arr.length - 1] : undefined;
 }
 
-export async function* firstN<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	n: number,
-	en: T
-) {
+export async function lastKV<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(list: T): Promise<[TKey, TValue] | undefined> {
+	// O(n) for iterators, but O(1) by specialization for arrays
+	if (Array.isArray(list)) {
+		return list.length > 0 ? (list[list.length - 1] as EnumerableValueOfT<T>) : undefined;
+	}
+	const arr = await collectEntries<T, TKey, TValue>(list);
+	return arr.length > 0 ? arr[arr.length - 1] : undefined;
+}
+export function lastKVSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(list: T): [TKey, TValue] | undefined {
+	// O(n) for iterators, but O(1) by specialization for arrays
+	if (Array.isArray(list)) {
+		return list.length > 0 ? (list[list.length - 1] as EnumerableValueOfT<T>) : undefined;
+	}
+	const arr = collectEntriesSync<T, TKey, TValue>(list);
+	return arr.length > 0 ? arr[arr.length - 1] : undefined;
+}
+
+export async function* firstN<T extends Enumerable<T>>(n: number, en: T) {
 	yield* take(n, en);
 }
-export function* firstNSync<
-	T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>
->(n: number, en: T) {
+export function* firstNSync<T extends EnumerableSync<T>>(n: number, en: T) {
 	yield* takeSync(n, en);
 }
 
-export async function lastN<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	n: number,
-	list: T
-) {
-	// type TKey = EnumerableKeyOfT<T>;
-	type TValue = EnumerableValueOfT<T>;
-	// O(n) for iterators, but O(1) by specialization for arrays
-	if (Array.isArray(list)) {
-		return list.slice(-n) as TValue[];
-	}
-	const arr = await collect(list);
-	return arr.slice(-n) as TValue[];
+export async function* firstNKV<T extends Enumerable<T>>(n: number, en: T) {
+	yield* takeKV(n, en);
 }
-export function lastNSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	n: number,
-	list: T
-) {
-	// type TKey = EnumerableKeyOfT<T>;
-	type TValue = EnumerableValueOfT<T>;
+export function* firstNKVSync<T extends EnumerableSync<T>>(n: number, en: T) {
+	yield* takeKVSync(n, en);
+}
+
+export async function* lastN<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, list: T): AsyncGenerator<TValue, void, unknown> {
 	// O(n) for iterators, but O(1) by specialization for arrays
+	let arr: TValue[] = [];
 	if (Array.isArray(list)) {
-		return list.slice(-n) as TValue[];
+		arr = list;
 	}
-	const arr = collectSync(list);
-	return arr.slice(-n) as TValue[];
+	arr = await collect(list);
+	arr = arr.slice(-n);
+	for (const e of arr) {
+		yield e;
+	}
+}
+export function* lastNSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, list: T): Generator<TValue, void, unknown> {
+	// O(n) for iterators, but O(1) by specialization for arrays
+	let arr: TValue[] = [];
+	if (Array.isArray(list)) {
+		arr = list;
+	}
+	arr = collectSync(list);
+	arr = arr.slice(-n);
+	for (const e of arr) {
+		yield e;
+	}
+}
+
+export async function* lastNKV<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, list: T): AsyncGenerator<[TKey, TValue], void, unknown> {
+	// O(n) for iterators, but O(1) by specialization for arrays
+	let arr: [TKey, TValue][] = [];
+	if (Array.isArray(list)) {
+		arr = list;
+	}
+	arr = await collectEntries(list);
+	arr = arr.slice(-n);
+	for (const e of arr) {
+		yield e;
+	}
+}
+export function* lastNKVSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(n: number, list: T): Generator<[TKey, TValue], void, unknown> {
+	// O(n) for iterators, but O(1) by specialization for arrays
+	let arr: [TKey, TValue][] = [];
+	if (Array.isArray(list)) {
+		arr = list;
+	}
+	arr = collectEntriesSync(list);
+	arr = arr.slice(-n);
+	for (const e of arr) {
+		yield e;
+	}
 }
 
 // ####
