@@ -1,3 +1,6 @@
+// spell-checker:ignore (names) Packt Rambda Ramda Rubico
+// spell-checker:ignore (people) Federico Kereki
+
 // ToDO: look at `rambda` for automatic handling of async (see <https://www.skypack.dev/view/rambda>)
 // inspirations/refs
 // * <https://exploringjs.com/es6/ch_iteration.html#sec_take_closing> , <https://2ality.com/2016/10/asynchronous-iteration.html>
@@ -519,7 +522,7 @@ export function* rangeSync(
 // ## terminology? list vs iterate vs enumerate ...
 // ## re-evaluate above function types at some point as well
 // ## * check via Intellisense determination about variable types after using above functions
-// ## TKey, TValue better in function declaration line `(... TKey = EnumberableKeyOfT<T>...)` or as internal `type...` lines
+// ## TKey, TValue better in function declaration line `(... TKey = EnumerableKeyOfT<T>...)` or as internal `type...` lines
 
 /**
  *  Map function (`(element, key) => result`) over sequence values
