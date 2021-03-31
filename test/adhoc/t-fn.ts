@@ -55,7 +55,9 @@ const m_entries = F.collectEntriesSync(m);
 const m_entries_ToMap = F.collectToMapSync(m_entries);
 const sbl = Symbol('unique');
 let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
-const set = new Set(['one', 2, 'help', {}]);
+// const set = new Set<string | number | {}>(['one', 2, 'help', {}]);
+// const set = new Set(['one', 2, 'help', {}]);
+const set = new Set(['one', 2, 'help']);
 const str = 'a string with 丝😃';
 const double_m = await F.collect(F.map(double, m));
 const double_mKV = await F.collect(F.mapKV(double, m));
@@ -145,5 +147,3 @@ console.log({
 	drop2: await F.collect(F.drop(2, str)),
 	lastN3: await F.collect(F.lastN(3, str)),
 });
-
-// problems: first() is not working; collecting/enumerating for objects is faulty for non-numeric keys and sets show duplicate values
