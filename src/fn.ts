@@ -577,6 +577,65 @@ export function* mapKVSync<
 	}
 }
 
+export async function* filter<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableKeyOfT<T>
+>(
+	predicate: (element: TValue, key?: TKey) => boolean,
+	en: T
+): AsyncGenerator<TValue, void, unknown> {
+	const it = enumerate<T, TKey, TValue>(en);
+	for await (const e of it) {
+		if (predicate(e[1], e[0])) {
+			yield e[1];
+		}
+	}
+}
+export function* filterSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(predicate: (element: TValue, key?: TKey) => boolean, en: T): Generator<TValue, void, unknown> {
+	const it = enumerateSync<T, TKey, TValue>(en);
+	for (const e of it) {
+		if (predicate(e[1], e[0])) {
+			yield e[1];
+		}
+	}
+}
+
+export async function* filterKV<
+	T extends Enumerable<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableKeyOfT<T>
+>(
+	predicate: (element: TValue, key?: TKey) => boolean,
+	en: T
+): AsyncGenerator<[TKey, TValue], void, unknown> {
+	const it = enumerate<T, TKey, TValue>(en);
+	for await (const e of it) {
+		if (predicate(e[1], e[0])) {
+			yield e;
+		}
+	}
+}
+export function* filterKVSync<
+	T extends EnumerableSync<T>,
+	TKey = EnumerableKeyOfT<T>,
+	TValue = EnumerableValueOfT<T>
+>(
+	predicate: (element: TValue, key?: TKey) => boolean,
+	en: T
+): Generator<[TKey, TValue], void, unknown> {
+	const it = enumerateSync<T, TKey, TValue>(en);
+	for (const e of it) {
+		if (predicate(e[1], e[0])) {
+			yield e;
+		}
+	}
+}
+
 export async function reduce<
 	U,
 	T extends Enumerable<T>,
