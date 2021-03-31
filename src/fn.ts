@@ -710,24 +710,34 @@ export function* sliceSync<T>(start: number, end: number, iterable: Iterable<T>)
 	}
 }
 
-export async function* zip<T, U>(iterable_0: AnySyncIterable<T>, iterable_1: AnySyncIterable<U>) {
+export async function* zip<
+	T1 extends Enumerable<T1>,
+	T2 extends Enumerable<T2>,
+	T1Value = EnumerableValueOfT<T1>,
+	T2Value = EnumerableValueOfT<T2>
+>(iterable_0: T1, iterable_1: T2): AsyncGenerator<[T1Value, T2Value], void, void> {
 	const it_0 = iter(iterable_0);
 	const it_1 = iter(iterable_1);
 	let next_0 = await it_0.next();
 	let next_1 = await it_1.next();
 	while (!(next_0.done || next_1.done)) {
-		yield [next_0.value, next_1.value] as [T, U];
+		yield [next_0.value, next_1.value] as [T1Value, T2Value];
 		next_0 = await it_0.next();
 		next_1 = await it_1.next();
 	}
 }
-export function* zipSync<T, U>(iterable_0: Iterable<T>, iterable_1: Iterable<U>) {
-	const it_0 = iterable_0[Symbol.iterator]();
-	const it_1 = iterable_1[Symbol.iterator]();
+export function* zipSync<
+	T1 extends EnumerableSync<T1>,
+	T2 extends EnumerableSync<T2>,
+	T1Value = EnumerableValueOfT<T1>,
+	T2Value = EnumerableValueOfT<T2>
+>(iterable_0: T1, iterable_1: T2): Generator<[T1Value, T2Value], void, void> {
+	const it_0 = iterSync(iterable_0);
+	const it_1 = iterSync(iterable_1);
 	let next_0 = it_0.next();
 	let next_1 = it_1.next();
 	while (!(next_0.done || next_1.done)) {
-		yield [next_0.value, next_1.value] as [T, U];
+		yield [next_0.value, next_1.value] as [T1Value, T2Value];
 		next_0 = it_0.next();
 		next_1 = it_1.next();
 	}
