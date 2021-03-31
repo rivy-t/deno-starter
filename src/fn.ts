@@ -232,7 +232,7 @@ export function* iterSync<T extends EnumerableSync<T>, TValue = EnumerableValueO
  */
 export async function collect<
 	T extends Enumerable<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): Promise<TValue[]> {
 	// O(n); O(1) by specialization for arrays
@@ -248,7 +248,7 @@ export async function collect<
 }
 export function collectSync<
 	T extends EnumerableSync<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): TValue[] {
 	// O(n); O(1) by specialization for arrays
@@ -266,14 +266,14 @@ export function collectSync<
 
 export async function collectValues<
 	T extends Enumerable<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): Promise<TValue[]> {
 	return collect(list);
 }
 export function collectValuesSync<
 	T extends EnumerableSync<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): TValue[] {
 	return collectSync(list);
@@ -282,7 +282,7 @@ export function collectValuesSync<
 export async function collectKeys<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableValueOfT<T>
+	TValue = unknown
 >(list: T): Promise<TKey[]> {
 	const en = enumerate<T, TKey, TValue>(list);
 	const arr: TKey[] = [];
@@ -294,7 +294,7 @@ export async function collectKeys<
 export function collectKeysSync<
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableValueOfT<T>
+	TValue = unknown
 >(list: T): TKey[] {
 	const en = enumerateSync<T, TKey, TValue>(list);
 	const arr: TKey[] = [];
@@ -329,25 +329,29 @@ export function collectEntriesSync<
 	return arr;
 }
 
-export async function collectToMap<TKey, TValue>(
-	list: AsyncIterable<[TKey, TValue]>
-): Promise<Map<TKey, TValue>> {
-	let arr: [TKey, TValue][] = [];
+export async function collectToMap<Key, Value>(
+	list: Enumerable<unknown, unknown, [Key, Value]>
+): Promise<Map<Key, Value>> {
+	let arr: [Key, Value][] = [];
 	if (Array.isArray(list)) {
 		arr = list;
 	} else {
-		for await (const e of list) {
+		const it = iter(list);
+		for await (const e of it) {
 			arr.push(e);
 		}
 	}
 	return new Map(arr);
 }
-export function collectToMapSync<TKey, TValue>(list: Iterable<[TKey, TValue]>): Map<TKey, TValue> {
-	let arr: [TKey, TValue][] = [];
+export function collectToMapSync<Key, Value>(
+	list: EnumerableSync<unknown, unknown, [Key, Value]>
+): Map<Key, Value> {
+	let arr: [Key, Value][] = [];
 	if (Array.isArray(list)) {
 		arr = list;
 	} else {
-		for (const e of list) {
+		const it = iterSync(list);
+		for (const e of it) {
 			arr.push(e);
 		}
 	}
@@ -380,7 +384,7 @@ export async function collectToString<T extends string>(list: AsyncIterable<T>):
 	}
 	return str;
 }
-export function collectToString<T extends string>(list: Iterable<T>): Promise<string> {
+export function collectToStringSync<T extends string>(list: Iterable<T>): string {
 	let str = '';
 	for (const e of list) {
 		str += e;
@@ -390,28 +394,28 @@ export function collectToString<T extends string>(list: Iterable<T>): Promise<st
 
 export async function collectToArray<
 	T extends Enumerable<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): Promise<TValue[]> {
-	return collect<T, TKey, TValue>(list);
+	return collect(list);
 }
 export function collectToArraySync<
 	T extends EnumerableSync<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): TValue[] {
 	return collectSync(list);
 }
 export async function collectToList<
 	T extends EnumerableSync<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): Promise<TValue[]> {
 	return collectToArray(list);
 }
 export function collectToListSync<
 	T extends EnumerableSync<T>,
-	TKey = EnumerableKeyOfT<T>,
+	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(list: T): TValue[] {
 	return collectToArraySync(list);
