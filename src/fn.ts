@@ -764,25 +764,17 @@ export function headSync<
 	return next.done ? undefined : next.value;
 }
 
-export async function* tail<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	en: T
-) {
+export async function* tail<T extends Enumerable<T>>(en: T) {
 	yield* drop(1, en);
 }
-export function* tailSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	en: T
-) {
+export function* tailSync<T extends EnumerableSync<T>>(en: T) {
 	yield* dropSync(1, en);
 }
 
-export async function first<T extends Enumerable<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	en: T
-) {
+export async function first<T extends Enumerable<T>>(en: T) {
 	return head(en);
 }
-export function firstSync<T extends EnumerableSync<T, EnumerableKeyOfT<T>, EnumerableValueOfT<T>>>(
-	en: T
-) {
+export function firstSync<T extends EnumerableSync<T>>(en: T) {
 	return headSync(en);
 }
 
