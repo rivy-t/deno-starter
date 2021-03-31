@@ -373,22 +373,20 @@ export function collectToObjectSync<TKey extends ObjectKey, TValue>(
 	return obj;
 }
 
-// export async function collectToString(list: AsyncIterable<T>): Promise<string> {
-// 	let string = '';
-// 	for await (const e of list) {
-// 		obj[e[0]] = e[1];
-// 	}
-// 	return obj;
-// }
-// export function collectToStringSync<TKey extends ObjectKey, TValue>(
-// 	list: Iterable<[TKey, TValue]>
-// ): MapLikeObject<TKey, TValue> {
-// 	let obj: MapLikeObject<TKey, TValue> = {} as MapLikeObject<TKey, TValue>;
-// 	for (const e of list) {
-// 		obj[e[0]] = e[1];
-// 	}
-// 	return obj;
-// }
+export async function collectToString<T extends string>(list: AsyncIterable<T>): Promise<string> {
+	let str = '';
+	for await (const e of list) {
+		str += e;
+	}
+	return str;
+}
+export function collectToString<T extends string>(list: Iterable<T>): Promise<string> {
+	let str = '';
+	for (const e of list) {
+		str += e;
+	}
+	return str;
+}
 
 export async function collectToArray<
 	T extends Enumerable<T>,
