@@ -50,14 +50,14 @@ type AnySyncGenerator<T = unknown, TReturn = unknown, TNext = unknown> =
 	| AsyncGenerator<T, TReturn, TNext>
 	| Generator<T, TReturn, TNext>;
 
-type EnumerableSync<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
+export type EnumerableSync<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
 	| Generator<V>
 	| ArrayLike<V>
 	| Iterable<V>
 	| Set<V>;
 
-type Enumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
+export type Enumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
 	| AnySyncGenerator<V>
 	| ArrayLike<V>
