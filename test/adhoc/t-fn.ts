@@ -8,8 +8,8 @@
 
 // console.log({ x });
 
-import * as F from '../../src/fn.ts'; // spell-checker:ignore unnest
-import type { ValueOrArray } from '../../src/fn.ts'; // spell-checker:ignore unnest
+import * as F from '../../src/funk.ts'; // spell-checker:ignore unnest
+import type { ValueOrArray } from '../../src/funk.ts'; // spell-checker:ignore unnest
 import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 
 const double = (x: number) => x + x;

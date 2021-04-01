@@ -20,7 +20,7 @@ import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expa
 import { walk, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync, walk, walkSync };
 
-import { collect } from './fn.ts';
+import { collect } from './funk.ts';
 
 // templating engines ~ <https://colorlib.com/wp/top-templating-engines-for-javascript> @@ <https://archive.is/BKYMw>
 
