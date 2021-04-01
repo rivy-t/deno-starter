@@ -104,7 +104,7 @@ const e = enumerate(
 	// [1, 2]
 );
 const c = collect(e);
-const d = collect(iter([1, 2]));
+const d = collect(iterate([1, 2]));
 let sy = Symbol('unique');
 let ox = { 1: 'one', 2: 'two', sym: 10, truthy: true };
 type oxk = EnumerableKeyOfT<typeof ox>;
@@ -216,7 +216,7 @@ export function* enumerateSync<
 	}
 }
 
-export async function* iter<T extends Enumerable<T>, TValue = EnumerableValueOfT<T>>(
+export async function* iterate<T extends Enumerable<T>, TValue = EnumerableValueOfT<T>>(
 	list: T
 ): AsyncGenerator<TValue, void, unknown> {
 	const it = enumerate(list);
@@ -224,7 +224,7 @@ export async function* iter<T extends Enumerable<T>, TValue = EnumerableValueOfT
 		yield e[1] as TValue;
 	}
 }
-export function* iterSync<T extends EnumerableSync<T>, TValue = EnumerableValueOfT<T>>(
+export function* iterateSync<T extends EnumerableSync<T>, TValue = EnumerableValueOfT<T>>(
 	list: T
 ): Generator<TValue, void, unknown> {
 	const it = enumerateSync(list);
@@ -342,7 +342,7 @@ export async function collectToMap<Key, Value>(
 	if (Array.isArray(list)) {
 		arr = list;
 	} else {
-		const it = iter(list);
+		const it = iterate(list);
 		for await (const e of it) {
 			arr.push(e);
 		}
@@ -356,7 +356,7 @@ export function collectToMapSync<Key, Value>(
 	if (Array.isArray(list)) {
 		arr = list;
 	} else {
-		const it = iterSync(list);
+		const it = iterateSync(list);
 		for (const e of it) {
 			arr.push(e);
 		}
@@ -812,7 +812,7 @@ export async function* take<
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(n: number, enumer: T): AsyncGenerator<TValue, void, unknown> {
-	const it = iter(enumer);
+	const it = iterate(enumer);
 	// * exhausts input enumer
 	// for await (const e of it) {
 	// 	if (n <= 0) {
@@ -833,7 +833,7 @@ export function* takeSync<
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(n: number, enumer: T): Generator<TValue, void, unknown> {
-	const it = iterSync(enumer);
+	const it = iterateSync(enumer);
 	for (; n > 0; n--) {
 		const next = it.next();
 		if (!next.done) {
@@ -877,7 +877,7 @@ export async function* drop<
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(n: number, en: T): AsyncGenerator<TValue, void, unknown> {
-	const it = iter(en);
+	const it = iterate(en);
 	for await (const e of it) {
 		if (n <= 0) {
 			yield e;
@@ -890,7 +890,7 @@ export function* dropSync<
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(n: number, en: T): Generator<TValue, void, unknown> {
-	const it = iterSync(en);
+	const it = iterateSync(en);
 	for (const e of it) {
 		if (n <= 0) {
 			yield e;
@@ -932,7 +932,7 @@ export async function* slice<
 	TValue = EnumerableValueOfT<T>
 >(start: number, end: number, en: T): AsyncGenerator<TValue, void, unknown> {
 	let idx = 0;
-	const it = iter(en);
+	const it = iterate(en);
 	for await (const e of it) {
 		if (idx < start) {
 			idx++;
@@ -947,7 +947,7 @@ export function* sliceSync<
 	TValue = EnumerableValueOfT<T>
 >(start: number, end: number, en: T): Generator<TValue, void, unknown> {
 	let idx = 0;
-	const it = iterSync(en);
+	const it = iterateSync(en);
 	for (const e of it) {
 		if (idx < start) {
 			idx++;
@@ -994,8 +994,8 @@ export async function* zip<
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
 >(iterable_0: T1, iterable_1: T2): AsyncGenerator<[T1Value, T2Value], void, unknown> {
-	const it_0 = iter(iterable_0);
-	const it_1 = iter(iterable_1);
+	const it_0 = iterate(iterable_0);
+	const it_1 = iterate(iterable_1);
 	let next_0 = await it_0.next();
 	let next_1 = await it_1.next();
 	while (!(next_0.done || next_1.done)) {
@@ -1010,8 +1010,8 @@ export function* zipSync<
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
 >(iterable_0: T1, iterable_1: T2): Generator<[T1Value, T2Value], void, unknown> {
-	const it_0 = iterSync(iterable_0);
-	const it_1 = iterSync(iterable_1);
+	const it_0 = iterateSync(iterable_0);
+	const it_1 = iterateSync(iterable_1);
 	let next_0 = it_0.next();
 	let next_1 = it_1.next();
 	while (!(next_0.done || next_1.done)) {
@@ -1064,7 +1064,7 @@ export function* zipKVSync<
 export async function head<T extends Enumerable<T>, TKey = unknown, TValue = EnumerableValueOfT<T>>(
 	en: T
 ): Promise<TValue | undefined> {
-	const it = iter(en);
+	const it = iterate(en);
 	const next = await it.next();
 	return next.done ? undefined : next.value;
 }
@@ -1073,7 +1073,7 @@ export function headSync<
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
 >(en: T): TValue | undefined {
-	const it = iterSync(en);
+	const it = iterateSync(en);
 	const next = it.next();
 	return next.done ? undefined : next.value;
 }
