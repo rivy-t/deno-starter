@@ -16,6 +16,11 @@ const double = (x: number) => x + x;
 const sum = (acc: number, x: number) => acc + x;
 const concat = (acc: string, s: string) => acc + s;
 
+const isPrime = (n: number) => {
+	for (let i = 2, s = Math.sqrt(n); i <= s; i++) if (n % i === 0) return false;
+	return n > 1;
+};
+
 function sumGeneric<T extends number | string>(acc: T, e: T): T;
 function sumGeneric(acc: any, e: any) {
 	return acc + e;
@@ -152,3 +157,35 @@ console.log({
 });
 
 console.log(await F.collect(F.take(10, F.range(100, 0, 0))));
+
+const allPositiveIntegers = () => F.range(0, Infinity);
+const primesOf = <T extends F.Enumerable<T>>(en: T) => F.filter(isPrime, en);
+
+const p = primesOf(allPositiveIntegers());
+
+const firstPrime = await F.head(p);
+const next10primes = F.take(10, p);
+const andNext10primes = F.take(10, p);
+// let result = await F.collect(first10primes);
+
+console.log({
+	first: firstPrime,
+	then10: await F.collect(next10primes),
+	next10: await F.collect(andNext10primes),
+});
+
+// result = await F.collect(F.take(10, primes));
+
+// console.log(await F.collect(F.take(10, primes)));
+
+// console.log({ result });
+
+const Rprimes = R.filter(isPrime, R.range(0, 100));
+const R10primes = R.take(10, Rprimes);
+const Rnext10primes = R.take(10, Rprimes);
+
+console.log({ R10primes, Rnext10primes });
+
+// const Rnext10primes = R.take(10, Rprimes);
+
+// console.log({ Rnext10primes });
