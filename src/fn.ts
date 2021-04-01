@@ -810,28 +810,34 @@ export async function* take<
 	T extends Enumerable<T>,
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
->(n: number, en: T): AsyncGenerator<TValue, void, unknown> {
-	const it = iter(en);
-	for await (const e of it) {
-		if (n <= 0) {
-			break; // closes iterable
+>(n: number, enumer: T): AsyncGenerator<TValue, void, unknown> {
+	const it = iter(enumer);
+	// * exhausts input enumer
+	// for await (const e of it) {
+	// 	if (n <= 0) {
+	// 		break; // closes iterable
+	// 	}
+	// 	n--;
+	// 	yield e;
+	// }
+	for (; n > 0; n--) {
+		const next = await it.next();
+		if (!next.done) {
+			yield next.value;
 		}
-		n--;
-		yield e;
 	}
 }
 export function* takeSync<
 	T extends EnumerableSync<T>,
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
->(n: number, en: T): Generator<TValue, void, unknown> {
-	const it = iterSync(en);
-	for (const e of it) {
-		if (n <= 0) {
-			break; // closes iterable
+>(n: number, enumer: T): Generator<TValue, void, unknown> {
+	const it = iterSync(enumer);
+	for (; n > 0; n--) {
+		const next = it.next();
+		if (!next.done) {
+			yield next.value;
 		}
-		n--;
-		yield e;
 	}
 }
 
@@ -839,28 +845,26 @@ export async function* takeKV<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
->(n: number, en: T): AsyncGenerator<[TKey, TValue], void, unknown> {
-	const it = enumerate<T, TKey, TValue>(en);
-	for await (const e of it) {
-		if (n <= 0) {
-			break; // closes iterable
+>(n: number, enumer: T): AsyncGenerator<[TKey, TValue], void, unknown> {
+	const it = enumerate<T, TKey, TValue>(enumer);
+	for (; n > 0; n--) {
+		const next = await it.next();
+		if (!next.done) {
+			yield next.value;
 		}
-		n--;
-		yield e;
 	}
 }
 export function* takeKVSync<
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
->(n: number, en: T): Generator<[TKey, TValue], void, unknown> {
-	const it = enumerateSync<T, TKey, TValue>(en);
-	for (const e of it) {
-		if (n <= 0) {
-			break; // closes iterable
+>(n: number, enumer: T): Generator<[TKey, TValue], void, unknown> {
+	const it = enumerateSync<T, TKey, TValue>(enumer);
+	for (; n > 0; n--) {
+		const next = it.next();
+		if (!next.done) {
+			yield next.value;
 		}
-		n--;
-		yield e;
 	}
 }
 
