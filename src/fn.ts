@@ -1,5 +1,6 @@
 // spell-checker:ignore (names) Packt Rambda Ramda Rubico
 // spell-checker:ignore (people) Federico Kereki
+// spell-checker:ignore (vars) en enumer it iter
 
 // ToDO: look at `rambda` for automatic handling of async (see <https://www.skypack.dev/view/rambda>)
 // inspirations/refs
