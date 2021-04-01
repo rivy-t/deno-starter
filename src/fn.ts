@@ -1254,3 +1254,70 @@ export function* lastNKVSync<
 }
 
 // ####
+
+// function curry(func) {
+// 	return function curried(...args) {
+// 		if (args.length >= func.length) {
+// 			return func.apply(this, args);
+// 		} else {
+// 			return function (...args2) {
+// 				return curried.apply(this, args.concat(args2));
+// 			};
+// 		}
+// 	};
+// }
+
+// ref: <https://stackoverflow.com/questions/51859461/generic-curry-function-with-typescript-3>
+
+// type CurryFirst<T> = T extends (x: infer U, ...rest: any) => any ? U : never;
+// type CurryRest<T> = T extends (x: infer U) => infer V
+// 	? U
+// 	: T extends (x: infer U, ...rest: infer V) => infer W
+// 	? Curried<(...args: V) => W>
+// 	: never;
+
+// type Curried<T extends (...args: any) => any> = (x: CurryFirst<T>) => CurryRest<T>;
+
+// export const curry = <T extends (...args: any) => any>(fn: T): Curried<T> => {
+// 	if (!fn.length) {
+// 		return fn();
+// 	}
+// 	return (arg: CurryFirst<T>): CurryRest<T> => {
+// 		return curry(fn.bind(null, arg) as any) as any;
+// 	};
+// };
+
+// type TupleSplit<T extends any[], L extends number, F = (...a: T) => void> = [
+// 	{ init: []; rest: T },
+// 	F extends (a: infer A, ...z: infer Z) => void ? { init: [A]; rest: Z } : never,
+// 	F extends (a: infer A, b: infer B, ...z: infer Z) => void ? { init: [A, B]; rest: Z } : never,
+// 	F extends (a: infer A, b: infer B, c: infer C, ...z: infer Z) => void
+// 		? { init: [A, B, C]; rest: Z }
+// 		: never,
+// 	// etc etc for tuples of length 4 and greater
+// 	...{ init: T; rest: [] }[]
+// ][L];
+
+// type Curried<A extends any[], R> = <L extends TupleSplit<A, number>['init']>(
+// 	...args: L
+// ) => 0 extends L['length']
+// 	? never
+// 	: 0 extends TupleSplit<A, L['length']>['rest']['length']
+// 	? R
+// 	: Curried<TupleSplit<A, L['length']>['rest'], R>;
+
+// declare function curry<A extends any[], R>(f: (...args: A) => R): Curried<A, R>;
+
+// function add(x: number, y: number) {
+// 	return x + y;
+// }
+// const curriedAdd = curry(add);
+
+// const addTwo = curriedAdd(2); // Curried<[number], number>
+// const three = addTwo(1); // number
+// const four = curriedAdd(2, 2); // number
+// const willBeAnError = curriedAdd(); // never
+
+// const isPositive = (n: number) => n > 0;
+// const curriedFilter = curry(filter);
+// const cFilter = curriedFilter(isPositive);
