@@ -46,7 +46,7 @@ type ObjectKey = number | string | symbol;
 type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
 type MapLike<K, V> = Map<K, V> | MapLikeObject<ObjectKey, V> | { entries: () => [K, V][] };
 
-type AnySyncGenerator<T = unknown, TReturn = unknown, TNext = unknown> =
+type AnyGenerator<T = unknown, TReturn = unknown, TNext = unknown> =
 	| AsyncGenerator<T, TReturn, TNext>
 	| Generator<T, TReturn, TNext>;
 
@@ -59,9 +59,9 @@ export type EnumerableSync<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>
 
 export type Enumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
-	| AnySyncGenerator<V>
+	| AnyGenerator<V>
 	| ArrayLike<V>
-	| AnySyncIterable<V>;
+	| AnyIterable<V>;
 
 type EnumerableKeyOfT<T> = T extends [infer K, unknown][]
 	? K
@@ -71,7 +71,7 @@ type EnumerableKeyOfT<T> = T extends [infer K, unknown][]
 	? K
 	: T extends MapLikeObject<infer K, unknown> | MapLike<infer K, unknown>
 	? K
-	: T extends Iterator<unknown> | AnySyncGenerator<unknown, unknown, unknown>
+	: T extends Iterator<unknown> | AnyGenerator<unknown, unknown, unknown>
 	? number
 	: T extends Enumerable<unknown, infer K, unknown>
 	? K
@@ -81,7 +81,7 @@ type EnumerableValueOfT<T> = T extends [unknown, infer V][]
 	? V
 	: T extends ArrayLike<infer V> | MapLike<unknown, infer V> | Iterable<infer V>
 	? V
-	: T extends AnySyncGenerator<infer V, unknown, unknown>
+	: T extends AnyGenerator<infer V, unknown, unknown>
 	? V
 	: T extends Enumerable<unknown, unknown, infer V>
 	? V
@@ -143,7 +143,7 @@ type my_t4 = EnumerableSync<Map<number, string>>;
 // 	TV = EnumerableValueOfT<T>,
 // 	TK = EnumerableKeyTOf<T>
 // > = T;
-type AnySyncIterable<T> = AsyncIterable<T> | Iterable<T>;
+type AnyIterable<T> = AsyncIterable<T> | Iterable<T>;
 // | AsyncIterableIterator<T>
 // | IterableIterator<T>;
 export type ValueOrArray<T> = T | Array<ValueOrArray<T>>;
@@ -430,7 +430,7 @@ export function collectToListSync<
 // ####
 
 export async function* flatten<T>(
-	iterable: AnySyncIterable<ValueOrArray<T>>
+	iterable: AnyIterable<ValueOrArray<T>>
 ): AsyncGenerator<T, void, unknown> {
 	for await (const e of iterable) {
 		if (Array.isArray(e)) {
@@ -454,7 +454,7 @@ export function* flattenSync<T>(iterable: Iterable<ValueOrArray<T>>): Generator<
 
 export async function* flatN<T>(
 	n: number,
-	iterable: AnySyncIterable<ValueOrArray<T>>
+	iterable: AnyIterable<ValueOrArray<T>>
 ): AsyncGenerator<ValueOrArray<T>, void, unknown> {
 	for await (const e of iterable) {
 		if (Array.isArray(e) && n > 0) {
@@ -486,7 +486,7 @@ export function* flatNSync<T>(
 // spell-checker:ignore unnest
 export async function* unnest<T>(
 	n: number,
-	iterable: AnySyncIterable<ValueOrArray<T>>
+	iterable: AnyIterable<ValueOrArray<T>>
 ): AsyncGenerator<ValueOrArray<T>, void, unknown> {
 	yield* flatN(n, iterable);
 }
