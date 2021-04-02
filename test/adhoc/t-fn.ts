@@ -61,7 +61,12 @@ const m = new Map(mInitArrayOfTuples);
 const m_entries = F.collectEntriesSync(m);
 const m_entries_ToMap = F.collectToMapSync(m_entries);
 const sbl = Symbol('unique');
-let o = { 1: 'one', 2: 'two', sym: 10, [sbl]: 'symbol-here' };
+let o: F.MapLikeObject<F.ObjectKey, number | string> = {
+	1: 'one',
+	2: 'two',
+	sym: 10,
+	[sbl]: 'symbol-here',
+};
 // const set = new Set<string | number | {}>(['one', 2, 'help', {}]);
 // const set = new Set(['one', 2, 'help', {}]);
 const set = new Set(['one', 2, 'help']);
