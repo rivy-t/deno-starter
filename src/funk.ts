@@ -34,34 +34,40 @@
 
 // note: Iterable<T>, by ECMA2020 default, includes Array<T>, ArrayLike<T>, Map<K,T>, Set<T>, and String
 
-type ObjectKey = number | string | symbol;
-// type ObjectKey = number | string;
-// type ObjectKey = string | symbol;
-// type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
-// interface MapLikeObject<K, T> {
-// 	[key: number]: T;
-// 	[key: string]: T;
-// 	// [key: symbol]: T;
-// }
-type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
-type MapLike<K, V> = Map<K, V> | MapLikeObject<ObjectKey, V> | { entries: () => [K, V][] };
+export type ObjectKey = number | string | symbol;
+export type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
+export type MapLike<K, V> =
+	| Map<K, V>
+	| MapLikeObject<ObjectKey, V>
+	| Record<ObjectKey, V>
+	| { entries: () => [K, V][] };
 
 type AnyGenerator<T = unknown, TReturn = unknown, TNext = unknown> =
 	| AsyncGenerator<T, TReturn, TNext>
 	| Generator<T, TReturn, TNext>;
 
+type AnyIterable<T> = AsyncIterable<T> | Iterable<T>;
+
+type AnyIterableIterator<T> = AsyncIterableIterator<T> | IterableIterator<T>;
+
+type AnyIterator<T> = AsyncIterator<T> | Iterator<T>;
+
 export type EnumerableSync<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
 	| Generator<V>
 	| ArrayLike<V>
+	| IterableIterator<V>
 	| Iterable<V>
+	| Iterator<V>
 	| Set<V>;
 
 export type Enumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
 	| AnyGenerator<V>
 	| ArrayLike<V>
-	| AnyIterable<V>;
+	| AnyIterableIterator<V>
+	| AnyIterable<V>
+	| AnyIterator<V>;
 
 type EnumerableKeyOfT<T> = T extends [infer K, unknown][]
 	? K
@@ -71,7 +77,7 @@ type EnumerableKeyOfT<T> = T extends [infer K, unknown][]
 	? K
 	: T extends MapLikeObject<infer K, unknown> | MapLike<infer K, unknown>
 	? K
-	: T extends Iterator<unknown> | AnyGenerator<unknown, unknown, unknown>
+	: T extends AnyGenerator<unknown, unknown, unknown> | AnyIterable<unknown> | AnyIterator<unknown>
 	? number
 	: T extends Enumerable<unknown, infer K, unknown>
 	? K
@@ -79,7 +85,12 @@ type EnumerableKeyOfT<T> = T extends [infer K, unknown][]
 // | AnySyncGenerator<[infer K, unknown], unknown, unknown> => K
 type EnumerableValueOfT<T> = T extends [unknown, infer V][]
 	? V
-	: T extends ArrayLike<infer V> | MapLike<unknown, infer V> | Iterable<infer V>
+	: T extends
+			| ArrayLike<infer V>
+			| MapLike<unknown, infer V>
+			| AnyIterable<infer V>
+			| AnyIterableIterator<infer V>
+			| AnyIterator<infer V>
 	? V
 	: T extends AnyGenerator<infer V, unknown, unknown>
 	? V
@@ -143,7 +154,6 @@ type my_t4 = EnumerableSync<Map<number, string>>;
 // 	TV = EnumerableValueOfT<T>,
 // 	TK = EnumerableKeyTOf<T>
 // > = T;
-type AnyIterable<T> = AsyncIterable<T> | Iterable<T>;
 // | AsyncIterableIterator<T>
 // | IterableIterator<T>;
 export type ValueOrArray<T> = T | Array<ValueOrArray<T>>;
@@ -336,7 +346,7 @@ export function collectEntriesSync<
 }
 
 export async function collectToMap<Key, Value>(
-	list: Enumerable<unknown, unknown, [Key, Value]>
+	list: AsyncIterable<[Key, Value]>
 ): Promise<Map<Key, Value>> {
 	let arr: [Key, Value][] = [];
 	if (Array.isArray(list)) {
@@ -349,9 +359,7 @@ export async function collectToMap<Key, Value>(
 	}
 	return new Map(arr);
 }
-export function collectToMapSync<Key, Value>(
-	list: EnumerableSync<unknown, unknown, [Key, Value]>
-): Map<Key, Value> {
+export function collectToMapSync<Key, Value>(list: Iterable<[Key, Value]>): Map<Key, Value> {
 	let arr: [Key, Value][] = [];
 	if (Array.isArray(list)) {
 		arr = list;
@@ -993,7 +1001,7 @@ export async function* zip<
 	T2 extends Enumerable<T2>,
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
->(iterable_0: T1, iterable_1: T2): AsyncGenerator<[T1Value, T2Value], void, unknown> {
+>(iterable_0: T1, iterable_1: T2): AsyncGenerator<[T1Value, T2Value]> {
 	const it_0 = iterate(iterable_0);
 	const it_1 = iterate(iterable_1);
 	let next_0 = await it_0.next();
@@ -1009,7 +1017,7 @@ export function* zipSync<
 	T2 extends EnumerableSync<T2>,
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
->(iterable_0: T1, iterable_1: T2): Generator<[T1Value, T2Value], void, unknown> {
+>(iterable_0: T1, iterable_1: T2): Generator<[T1Value, T2Value]> {
 	const it_0 = iterateSync(iterable_0);
 	const it_1 = iterateSync(iterable_1);
 	let next_0 = it_0.next();
