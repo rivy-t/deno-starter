@@ -46,7 +46,7 @@ const cmdShimTemplate = `% \`<%=shimBinName%>\` (*revised* Deno CMD shim; by \`d
 @setLocal
 @set _DENO_SHIM_0_=%0
 @set _DENO_SHIM_*_=%*
-@goto _undef_ 2>NUL || @for %%G in ("%COMSPEC%") do @title %%~nG & @deno.exe "run" <%=denoRunOptions%> <%=denoRunTarget%> %*
+@goto _undef_ 2>NUL || @for %%G in ("%COMSPEC%") do @title %%~nG & @deno.exe "run" <%=denoRunOptions%> -- <%=denoRunTarget%> %*
 `;
 
 const isWinOS = Deno.build.os === 'windows';
@@ -149,11 +149,16 @@ const updates = await collect(
 				// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
 				/^@deno[.]exe\s+\x22run\x22\s+(\x22.*\x22)\s+(\x22[^\x22]*\x22)\s+%*.*$/m
 			) || [];
-		const [match, denoRunOptions, denoRunTarget] = reMatchArray;
-		// const contentsUpdated = eol.CRLF(cmdShimTemplate(targetBinPath));
+		const [match, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
+		// remove trailing "--" (quoted or not), if it exists (avoid collision with "--" added by template)
+		const denoRunOptions = (denoRunOptionsRaw || '').replace(/\s+\x22?--\x22?\s*\$/, '');
 		const shimBinName = Path.parse(shimPath).name;
 		const contentsUpdated = eol.CRLF(
-			_.template(cmdShimTemplate)({ denoRunOptions, denoRunTarget, shimBinName })
+			_.template(cmdShimTemplate)({
+				denoRunOptions,
+				denoRunTarget,
+				shimBinName,
+			})
 		);
 		return {
 			shimPath,
