@@ -17,6 +17,8 @@ import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync };
 
+import { first, collect, map } from './funk.ts';
+
 // templating engines ~ <https://colorlib.com/wp/top-templating-engines-for-javascript> @@ <https://archive.is/BKYMw>
 
 // lodash
@@ -69,6 +71,23 @@ const pathListSeparator = isWinOS ? /;/ : /:/;
 // const paths = Deno.env.get('PATH')?.split(pathListSeparator) || [];
 const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 
+// EOL handler
+const eol = () => {};
+eol.newline_ = /\r?\n|\n/g;
+eol.CR_ = '\r';
+eol.LF_ = '\n';
+eol.CRLF_ = '\r\n';
+eol.CR = function (s: string) {
+	return s.replace(eol.newline_, eol.CR_);
+};
+eol.CRLF = function (s: string) {
+	return s.replace(eol.newline_, eol.CRLF_);
+};
+eol.LF = function (s: string) {
+	return s.replace(eol.newline_, eol.LF_);
+};
+// ---
+
 // influenced by code from <https://github.com/npm/node-which/blob/master/which.js> (ISC License)
 // handle PATHEXT for Cygwin or MSYS?
 
@@ -117,129 +136,30 @@ function* findExecutableSync(
 	}
 }
 
-// ToDO: look at `rambda` for automatic handling of async (see <https://www.skypack.dev/view/rambda>)
-// inspirations/refs
-// * <https://exploringjs.com/es6/ch_iteration.html#sec_take_closing> , <https://2ality.com/2016/10/asynchronous-iteration.html>
-// * <https://medium.com/@patarkf/synchronize-your-asynchronous-code-using-javascripts-async-await-5f3fa5b1366d>
-// * <https://stackoverflow.com/questions/58668361/how-can-i-convert-an-async-iterator-to-an-array>
-// * <https://javascript.info/async-iterators-generators>
-// * <https://github.com/selfrefactor/rambda/search?q=async>
-// * "Working with async functions"; [Mastering JavaScript Functional Programming, 2ndE [by Federico Kereki]{Packt, 2020-01(Jan)}], pp.137-44
+const npmPath = await first(findExecutable('npm'));
+const npmBinPath = npmPath ? path.dirname(npmPath) : void 0;
 
-/**
- *  Collect all sequence values into a promised array (`Promise<T[]>`)
- */
-async function collect<T>(iterable: AsyncIterable<T> | Iterable<T>) {
-	const arr: T[] = [];
-	for await (const x of iterable) {
-		arr.push(x);
-	}
-	return arr;
+if (npmBinPath) {
+	Deno.stdout.writeSync(
+		encoder.encode('`npm` binaries folder found at "' + npmBinPath + '"' + '\n')
+	);
+} else {
+	Deno.stderr.writeSync(encoder.encode('`npm` binaries folder not found\n'));
+	Deno.exit(1);
 }
-
-/**
- *  Map function (`(element, index) => result`) over sequence values
- */
-async function* map<T, U>(
-	iterable: AsyncIterable<T> | Iterable<T>,
-	fn: (element: T, index: number) => U
-) {
-	let index = 0;
-	for await (const x of iterable) {
-		yield fn(x, index);
-	}
-}
-
-/**
- * Converts a (potentially infinite) sequence into a sequence of length `n`
- */
-async function* take<T>(n: number, iterable: AsyncIterable<T> | Iterable<T>) {
-	for await (const x of iterable) {
-		if (n <= 0) {
-			break; // closes iterable
-		}
-		n--;
-		yield x;
-	}
-}
-
-function head<T>(arr: readonly T[]) {
-	return arr.length > 0 ? arr[0] : undefined;
-}
-
-// function head<T>(iterable: Iterable<T>) {
-// 	const iterator = iterable[Symbol.iterator]();
-// 	return iterator.next().value;
-// }
-
-function tail<T>(arr: readonly T[]) {
-	return arr.slice(1);
-}
-
-function first<T>(arr: readonly T[]) {
-	return head<T>(arr);
-}
-function last<T>(arr: readonly T[]) {
-	return arr.length > 0 ? arr[arr.length - 1] : undefined;
-}
-
-// const npmBinPath = './{kb,fix,djs}*';
-// const files = Array.from(fs.expandGlobSync(npmBinPath));
-// files.forEach((file) => console.log({ file }));
-
-// console.log({ mainModule: Deno.mainModule });
-// console.log({ PATH: Deno.env.get('PATH') });
-// console.log({ paths, pathExtensions });
-
-// const files = await collect(
-// 	take(Infinity, findFile('npm', { extensions: ['', ...pathExtensions] }))
-// );
-// console.log({ files });
-
-const npmPath = first(await collect(take(1, findExecutable('npm')))) || '';
-const npmBinPath = path.dirname(npmPath);
-
-Deno.stdout.writeSync(encoder.encode('`npm` binaries folder found at "' + npmPath + '"' + '\n'));
 
 // ref: [deno issue ~ add `caseSensitive` option to `expandGlob`](https://github.com/denoland/deno/issues/9208)
 // ref: [deno/std ~ `expandGlob` discussion](https://github.com/denoland/deno/issues/1856)
 // const files = await collect(fs.expandGlob(path.join(npmBinPath, '*.cmd')));
 const files = fs.expandGlob(path.join(npmBinPath, '*.cmd'));
 
-// console.log({ npmPath, npmBinPath, files });
-
-// files.forEach((file) => {
-// 	const data = decoder.decode(Deno.readFileSync(file.path));
-// 	console.log({ file, data });
-// });
-// for await (const file of files) {
-// 	const data = decoder.decode(await Deno.readFile(file.path));
-// 	console.log({ file, data });
-// }
-
-const eol = () => {};
-eol.newline_ = /\r?\n|\n/g;
-eol.CR_ = '\r';
-eol.LF_ = '\n';
-eol.CRLF_ = '\r\n';
-eol.CR = function (s: string) {
-	return s.replace(eol.newline_, eol.CR_);
-};
-eol.CRLF = function (s: string) {
-	return s.replace(eol.newline_, eol.CRLF_);
-};
-eol.LF = function (s: string) {
-	return s.replace(eol.newline_, eol.LF_);
-};
-
 const updates = await collect(
-	map(files, async function (file) {
+	map(async function (file) {
 		const name = file.path;
 		const contentsOriginal = eol.LF(decoder.decode(await Deno.readFile(name)));
 		const targetBinPath =
 			(contentsOriginal.match(/^[^\S\n]*\x22%_prog%\x22\s+\x22([^\x22]*)\x22.*$/m) || [])[1] ||
 			undefined;
-		// const contentsUpdated = eol.CRLF(cmdShimTemplate(targetBinPath));
 		const targetBinName = targetBinPath ? path.parse(targetBinPath).name : undefined;
 		const contentsUpdated = eol.CRLF(_.template(cmdShimTemplate)({ targetBinName, targetBinPath }));
 		return {
@@ -248,7 +168,7 @@ const updates = await collect(
 			contentsOriginal,
 			contentsUpdated,
 		};
-	})
+	}, files)
 );
 
 for await (const update of updates) {
