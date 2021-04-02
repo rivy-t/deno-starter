@@ -536,7 +536,7 @@ export async function* map<
 	U,
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(fn: (element: TValue, key?: TKey) => U, en: T): AsyncGenerator<U, void, unknown> {
 	const it = enumerate<T, TKey, TValue>(en);
 	for await (const e of it) {
@@ -559,7 +559,7 @@ export async function* mapKV<
 	U,
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(fn: (element: TValue, key?: TKey) => U, en: T): AsyncGenerator<[TKey, U], void, unknown> {
 	const it = enumerate<T, TKey, TValue>(en);
 	for await (const e of it) {
@@ -581,7 +581,7 @@ export function* mapKVSync<
 export async function* filter<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	predicate: (element: TValue, key?: TKey) => boolean,
 	en: T
@@ -609,7 +609,7 @@ export function* filterSync<
 export async function* filterKV<
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	predicate: (element: TValue, key?: TKey) => boolean,
 	en: T
@@ -641,7 +641,7 @@ export async function* filterMap<
 	U,
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (element: TValue, key?: TKey) => U,
 	predicate: (element: TValue, key?: TKey) => boolean,
@@ -658,7 +658,7 @@ export function* filterMapSync<
 	U,
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (element: TValue, key?: TKey) => U,
 	predicate: (element: TValue, key?: TKey) => boolean,
@@ -676,7 +676,7 @@ export async function* filterMapKV<
 	U,
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (element: TValue, key?: TKey) => U,
 	predicate: (element: TValue, key?: TKey) => boolean,
@@ -693,7 +693,7 @@ export function* filterMapKVSync<
 	U,
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (element: TValue, key?: TKey) => U,
 	predicate: (element: TValue, key?: TKey) => boolean,
@@ -711,7 +711,7 @@ export async function reduce<
 	U,
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T): Promise<U> {
 	let acc = initialValue;
 	const it = enumerate<T, TKey, TValue>(en);
@@ -724,7 +724,7 @@ export function reduceSync<
 	U,
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(fn: (accumulator: U, element: TValue, key?: TKey) => U, initialValue: U, en: T): U {
 	let acc = initialValue;
 	const it = enumerateSync<T, TKey, TValue>(en);
@@ -738,7 +738,7 @@ export async function* scan<
 	U,
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (accumulator: U, element: TValue, key?: TKey) => U,
 	initialValue: U,
@@ -755,7 +755,7 @@ export function* scanSync<
 	U,
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (accumulator: U, element: TValue, key?: TKey) => U,
 	initialValue: U,
@@ -773,7 +773,7 @@ export async function* scanKV<
 	U,
 	T extends Enumerable<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (accumulator: U, element: TValue, key?: TKey) => U,
 	initialValue: U,
@@ -790,7 +790,7 @@ export function* scanKVSync<
 	U,
 	T extends EnumerableSync<T>,
 	TKey = EnumerableKeyOfT<T>,
-	TValue = EnumerableKeyOfT<T>
+	TValue = EnumerableValueOfT<T>
 >(
 	fn: (accumulator: U, element: TValue, key?: TKey) => U,
 	initialValue: U,
