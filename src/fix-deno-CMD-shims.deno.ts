@@ -41,12 +41,12 @@ const decoder = new TextDecoder(); // default == 'utf-8'
 const encoder = new TextEncoder(); // default == 'utf-8'
 
 const cmdShimTemplate = `% \`<%=shimBinName%>\` (*revised* Deno CMD shim; by \`dxi\`) %
-@rem:: spell-checker:ignore (shell/CMD) COMSPEC ; (bin) <%=shimBinName%> <%=denoRunTarget%>
+@rem:: spell-checker:ignore (shell/CMD) COMSPEC ERRORLEVEL ; (deno) hrtime ; (bin) <%=shimBinName%> <%=denoRunTarget%>
 @set "ERRORLEVEL="
 @setLocal
 @set _DENO_SHIM_0_=%0
 @set _DENO_SHIM_*_=%*
-@goto _undef_ 2>NUL || @for %%G in ("%COMSPEC%") do @title %%~nG & @deno.exe "run" <%=denoRunOptions%> -- <%=denoRunTarget%> %*
+@goto _undef_ 2>NUL || @for %%G in ("%COMSPEC%") do @title %%~nG & @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %*
 `;
 
 const isWinOS = Deno.build.os === 'windows';
@@ -128,11 +128,11 @@ const fileEntries = await collect(
 		})
 	)
 );
-console.log({
-	denoInstallRoot,
-	res,
-	fileEntries,
-});
+// console.log({
+// 	denoInstallRoot,
+// 	res,
+// 	fileEntries,
+// });
 
 function isString(x: any): x is string {
 	return typeof x === 'string';
@@ -147,11 +147,14 @@ const updates = await collect(
 		const reMatchArray =
 			contentsOriginal.match(
 				// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
-				/^@deno[.]exe\s+\x22run\x22\s+(\x22.*\x22)\s+(\x22[^\x22]*\x22)\s+%*.*$/m
+				/^@deno[.]exe\s+\x22run\x22\s+(\x22.*\x22\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m
 			) || [];
 		const [match, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
-		// remove trailing "--" (quoted or not), if it exists (avoid collision with "--" added by template)
-		const denoRunOptions = (denoRunOptionsRaw || '').replace(/\s+\x22?--\x22?\s*\$/, '');
+		// remove trailing "--" (quoted or not) , if it exists (avoid collision with "--" added by template)
+		const denoRunOptions = (denoRunOptionsRaw || '')
+			.replace(/^\s+/, '')
+			.replace(/\s+$/, '')
+			.replace(/\s+\x22?--\x22?\s*\$/, '');
 		const shimBinName = Path.parse(shimPath).name;
 		const contentsUpdated = eol.CRLF(
 			_.template(cmdShimTemplate)({
@@ -171,12 +174,12 @@ const updates = await collect(
 
 for await (const update of updates) {
 	// if (options.debug) {
-	console.log({ update });
-	console.log(update.contentsUpdated);
+	// console.log({ update });
+	// console.log(update.contentsUpdated);
 	// }
-	// if (update.needsUpdate) {
-	// 	Deno.stdout.writeSync(encoder.encode(Path.basename(update.shimPath) + '...'));
-	// 	Deno.writeFileSync(update.shimPath, encoder.encode(update.contentsUpdated));
-	// 	Deno.stdout.writeSync(encoder.encode('updated' + '\n'));
-	// }
+	if (update.needsUpdate) {
+		Deno.stdout.writeSync(encoder.encode(Path.basename(update.shimPath) + '...'));
+		Deno.writeFileSync(update.shimPath, encoder.encode(update.contentsUpdated));
+		Deno.stdout.writeSync(encoder.encode('updated' + '\n'));
+	}
 }

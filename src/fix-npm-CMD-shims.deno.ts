@@ -10,6 +10,8 @@
 // spell-checker:ignore (names/people) Frederico Kereki , Packt
 // spell-checker:ignore (shell/cmd) COMSPEC PATHEXT
 
+console.log({ args: Deno.args, execPath: Deno.execPath, main: Deno.mainModule });
+
 import * as path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
 // import * as fs from 'https://deno.land/std@0.83.0/fs/mod.ts';

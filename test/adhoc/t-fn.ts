@@ -185,12 +185,12 @@ console.log({
 
 // console.log({ result });
 
-const Rprimes = R.filter(isPrime, R.range(0, 100));
-const R10primes = R.take(10, Rprimes);
-const Rnext10primes = R.take(10, Rprimes);
+const RPrimes = R.filter(isPrime, R.range(0, 100));
+const R10primes = R.take(10, RPrimes);
+const RNext10primes = R.take(10, RPrimes);
 
-console.log({ R10primes, Rnext10primes });
+console.log({ R10primes, RNext10primes });
 
-// const Rnext10primes = R.take(10, Rprimes);
+// const RNext10primes = R.take(10, RPrimes);
 
-// console.log({ Rnext10primes });
+// console.log({ RNext10primes });
