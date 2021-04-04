@@ -22,6 +22,7 @@ const isPrime = (n: number) => {
 };
 
 function sumGeneric<T extends number | string>(acc: T, e: T): T;
+// deno-lint-ignore no-explicit-any
 function sumGeneric(acc: any, e: any) {
 	return acc + e;
 }
@@ -34,11 +35,11 @@ const m1 = new Map([
 	['a', 1],
 	['b', 20],
 ]);
-const e_m1 = await F.collect(F.enumerate(m1));
-const z_m1 = await F.collect(F.zip(F.range(10, Infinity), m1));
-const flat_e_m1 = await F.collect(F.flatten(e_m1));
-const flat_z_m1 = await F.collect(F.flatten(z_m1));
-console.log({ m1, e_m1, z_m1, flat_e_m1, flat_z_m1 });
+const mE1 = await F.collect(F.enumerate(m1));
+const mZ1 = await F.collect(F.zip(F.range(10, Infinity), m1));
+const mFlatE1 = await F.collect(F.flatten(mE1));
+const mFlatZ1 = await F.collect(F.flatten(mZ1));
+console.log({ m1, mE1, mZ1, mFlatE1, mFlatZ1 });
 
 const y: ValueOrArray<number>[] = [1, [2, [3, 4], [5, 6], 7], [8, 9], [[10, [11, 12]], 13]];
 
@@ -58,10 +59,10 @@ const mInitArrayOfTuples: [string, number][] = [
 	['z', 30],
 ];
 const m = new Map(mInitArrayOfTuples);
-const m_entries = F.collectEntriesSync(m);
-const m_entries_ToMap = F.collectToMapSync(m_entries);
+const mEntries = F.collectEntriesSync(m);
+const mEntriesToMap = F.collectToMapSync(mEntries);
 const sbl = Symbol('unique');
-let o: F.MapLikeObject<F.ObjectKey, number | string> = {
+const o: F.MapLikeObject<F.ObjectKey, number | string> = {
 	1: 'one',
 	2: 'two',
 	sym: 10,
@@ -71,18 +72,18 @@ let o: F.MapLikeObject<F.ObjectKey, number | string> = {
 // const set = new Set(['one', 2, 'help', {}]);
 const set = new Set(['one', 2, 'help']);
 const str = 'a string with 丝😃';
-const double_m = await F.collect(F.map(double, m));
-const double_mKV = await F.collect(F.mapKV(double, m));
-const double_mKV_newMap = new Map(double_mKV);
-const double_mKV_asMap = await F.collectToMap(F.mapKV(double, m));
+const mDouble = await F.collect(F.map(double, m));
+const mDoubleKV = await F.collect(F.mapKV(double, m));
+const mDoubleKVToNewMap = new Map(mDoubleKV);
+const mDoubleKVToMap = await F.collectToMap(F.mapKV(double, m));
 console.log({
 	m,
-	m_entries,
-	m_entries_ToMap,
-	double_m,
-	double_mKV,
-	double_mKV_newMap,
-	double_mKV_asMap,
+	mEntries,
+	mEntriesToMap,
+	mDouble,
+	mDoubleKV,
+	mDoubleKVToNewMap,
+	mDoubleKVToMap,
 });
 
 const b = R.map(double, await F.collectToArray(F.flatten(y)));

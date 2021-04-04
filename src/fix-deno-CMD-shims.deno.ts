@@ -165,6 +165,7 @@ const fileEntries = await collect(
 // 	fileEntries,
 // });
 
+// deno-lint-ignore no-explicit-any
 function isString(x: any): x is string {
 	return typeof x === 'string';
 }

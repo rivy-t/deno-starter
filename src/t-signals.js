@@ -1,5 +1,5 @@
 // ref: <>
-
+// deno-lint-ignore-file no-undef
 [`SIGINT`, `SIGUSR1`, `SIGUSR2`, `uncaughtException`, `SIGTERM`].forEach((eventType) => {
 	process.on(eventType, catchSignal.bind(null, eventType));
 });

@@ -111,12 +111,12 @@ type EnumerableValueOfT<T> = T extends [unknown, infer V][]
 
 // ####
 
-const m_1 = new Map([['a', 'z']]);
-const set_1 = new Set([1, 10, 100]);
-type tsk = EnumerableKeyOfT<Set<string | number>>;
-const it_1 = m_1[Symbol.iterator]();
-const n = it_1.next();
-let [k, v] = !n.done ? n.value : [];
+const mN1 = new Map([['a', 'z']]);
+// const set_1 = new Set([1, 10, 100]);
+// type tsk = EnumerableKeyOfT<Set<string | number>>;
+const itN1 = mN1[Symbol.iterator]();
+const n = itN1.next();
+const [k, v] = !n.done ? n.value : [];
 
 const o = { 1: 1, 2: 2 };
 const e = enumerate(
@@ -126,8 +126,8 @@ const e = enumerate(
 );
 const c = collect(e);
 const d = collect(iterate([1, 2]));
-let sy = Symbol('unique');
-let ox = { 1: 'one', 2: 'two', sym: 10, truthy: true };
+const sy = Symbol('unique');
+const ox = { 1: 'one', 2: 'two', sym: 10, truthy: true };
 type oxk = EnumerableKeyOfT<typeof ox>;
 type oxv = EnumerableValueOfT<typeof ox>;
 // const eox = enumerate(ox);
@@ -139,10 +139,10 @@ type tu = EnumerableValueOfT<Map<string, bigint>>;
 // type tz = EnumerableKeyTOf<AsyncGenerator<[bigint, number], void, unknown>>;
 type tz = EnumerableKeyOfT<ty>;
 
-type my_t1<V, K> = EnumerableSync<Map<K, V>, V, K>;
-type my_t2 = EnumerableSync<boolean[]>;
-type my_t3 = EnumerableSync<String>;
-type my_t4 = EnumerableSync<Map<number, string>>;
+type mytN1<V, K> = EnumerableSync<Map<K, V>, V, K>;
+type mytN2 = EnumerableSync<boolean[]>;
+type mytN3 = EnumerableSync<string>;
+type mytN4 = EnumerableSync<Map<number, string>>;
 
 // ####
 
@@ -179,21 +179,22 @@ export async function* enumerate<
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
 >(enumerable: T): AsyncGenerator<[TKey, TValue], void, unknown> {
-	const hasEntries = typeof (enumerable as any).entries === 'function';
-	const isAsyncIterable = typeof (enumerable as any)[Symbol.asyncIterator] === 'function';
-	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
+	const hasEntries = typeof (enumerable as MapLike<unknown, unknown>).entries === 'function';
+	const isAsyncIterable =
+		typeof (enumerable as AsyncIterable<unknown>)[Symbol.asyncIterator] === 'function';
+	const isIterable = typeof (enumerable as Iterable<unknown>)[Symbol.iterator] === 'function';
 	const isObject = enumerable instanceof Object;
 
 	let idx = 0;
 	if (hasEntries) {
 		// [K, V] enumerates first
-		const arr = ((enumerable as unknown) as any).entries() as [TKey, TValue][];
+		const arr = ((enumerable as unknown) as Map<TKey, TValue>).entries();
 		for (const e of arr) {
 			yield e;
 		}
 	} else if (isAsyncIterable || isIterable) {
 		// [V] enumerates
-		for await (const e of (enumerable as unknown) as AsyncIterable<[TKey, TValue]>) {
+		for await (const e of (enumerable as unknown) as AsyncIterable<TValue>) {
 			yield ([idx++, e] as unknown) as [TKey, TValue];
 		}
 	} else if (isObject) {
@@ -210,20 +211,20 @@ export function* enumerateSync<
 	TKey = EnumerableKeyOfT<T>,
 	TValue = EnumerableValueOfT<T>
 >(enumerable: T): Generator<[TKey, TValue], void, unknown> {
-	const hasEntries = typeof (enumerable as any).entries === 'function';
-	const isIterable = typeof (enumerable as any)[Symbol.iterator] === 'function';
+	const hasEntries = typeof (enumerable as Map<unknown, unknown>).entries === 'function';
+	const isIterable = typeof (enumerable as Iterable<unknown>)[Symbol.iterator] === 'function';
 	const isObject = enumerable instanceof Object;
 
 	let idx = 0;
 	if (hasEntries) {
 		// [K, V] enumerates first
-		const arr = ((enumerable as unknown) as any).entries() as [TKey, TValue][];
+		const arr = ((enumerable as unknown) as Map<TKey, TValue>).entries();
 		for (const e of arr) {
 			yield e;
 		}
 	} else if (isIterable) {
 		// [V] enumerates after [K,V]
-		for (const e of (enumerable as unknown) as Iterable<[TKey, TValue]>) {
+		for (const e of (enumerable as unknown) as Iterable<TValue>) {
 			yield ([idx++, e] as unknown) as [TKey, TValue];
 		}
 	} else if (isObject) {
@@ -290,7 +291,7 @@ export function collectSync<
 	return arr;
 }
 
-export async function collectValues<
+export function collectValues<
 	T extends Enumerable<T>,
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
@@ -385,7 +386,7 @@ export function collectToMapSync<Key, Value>(list: Iterable<[Key, Value]>): Map<
 export async function collectToObject<TKey extends ObjectKey, TValue>(
 	list: AsyncIterable<[TKey, TValue]>
 ): Promise<MapLikeObject<TKey, TValue>> {
-	let obj: MapLikeObject<TKey, TValue> = {} as MapLikeObject<TKey, TValue>;
+	const obj: MapLikeObject<TKey, TValue> = {} as MapLikeObject<TKey, TValue>;
 	for await (const e of list) {
 		obj[e[0]] = e[1];
 	}
@@ -394,7 +395,7 @@ export async function collectToObject<TKey extends ObjectKey, TValue>(
 export function collectToObjectSync<TKey extends ObjectKey, TValue>(
 	list: Iterable<[TKey, TValue]>
 ): MapLikeObject<TKey, TValue> {
-	let obj: MapLikeObject<TKey, TValue> = {} as MapLikeObject<TKey, TValue>;
+	const obj: MapLikeObject<TKey, TValue> = {} as MapLikeObject<TKey, TValue>;
 	for (const e of list) {
 		obj[e[0]] = e[1];
 	}
@@ -416,7 +417,7 @@ export function collectToStringSync<T extends string>(list: Iterable<T>): string
 	return str;
 }
 
-export async function collectToArray<
+export function collectToArray<
 	T extends Enumerable<T>,
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
@@ -430,7 +431,7 @@ export function collectToArraySync<
 >(list: T): TValue[] {
 	return collectSync(list);
 }
-export async function collectToList<
+export function collectToList<
 	T extends EnumerableSync<T>,
 	TKey = unknown,
 	TValue = EnumerableValueOfT<T>
@@ -518,22 +519,18 @@ export function* unnestSync<T>(
 export async function* range(
 	start: number,
 	end: number,
-	step: number = 1
+	step = 1
 ): AsyncGenerator<number, void, unknown> {
 	let idx = start;
-	let positiveIncrement = step > 0;
+	const positiveIncrement = step > 0;
 	while (positiveIncrement ? idx < end : idx > end) {
 		yield idx;
 		idx = idx + step;
 	}
 }
-export function* rangeSync(
-	start: number,
-	end: number,
-	step: number = 1
-): Generator<number, void, unknown> {
+export function* rangeSync(start: number, end: number, step = 1): Generator<number, void, unknown> {
 	let idx = start;
-	let positiveIncrement = step > 0;
+	const positiveIncrement = step > 0;
 	while (positiveIncrement ? idx < end : idx > end) {
 		yield idx;
 		idx = idx + step;
@@ -1011,15 +1008,15 @@ export async function* zip<
 	T2 extends Enumerable<T2>,
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
->(iterable_0: T1, iterable_1: T2): AsyncGenerator<[T1Value, T2Value]> {
-	const it_0 = iterate(iterable_0);
-	const it_1 = iterate(iterable_1);
-	let next_0 = await it_0.next();
-	let next_1 = await it_1.next();
-	while (!(next_0.done || next_1.done)) {
-		yield [next_0.value, next_1.value] as [T1Value, T2Value];
-		next_0 = await it_0.next();
-		next_1 = await it_1.next();
+>(iterableT1: T1, iterableT2: T2): AsyncGenerator<[T1Value, T2Value]> {
+	const itT1 = iterate(iterableT1);
+	const itT2 = iterate(iterableT2);
+	let nextT1 = await itT1.next();
+	let nextT2 = await itT2.next();
+	while (!(nextT1.done || nextT2.done)) {
+		yield [nextT1.value, nextT2.value] as [T1Value, T2Value];
+		nextT1 = await itT1.next();
+		nextT2 = await itT2.next();
 	}
 }
 export function* zipSync<
@@ -1027,15 +1024,15 @@ export function* zipSync<
 	T2 extends EnumerableSync<T2>,
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
->(iterable_0: T1, iterable_1: T2): Generator<[T1Value, T2Value]> {
-	const it_0 = iterateSync(iterable_0);
-	const it_1 = iterateSync(iterable_1);
-	let next_0 = it_0.next();
-	let next_1 = it_1.next();
-	while (!(next_0.done || next_1.done)) {
-		yield [next_0.value, next_1.value] as [T1Value, T2Value];
-		next_0 = it_0.next();
-		next_1 = it_1.next();
+>(iterableT1: T1, iterableT2: T2): Generator<[T1Value, T2Value]> {
+	const itT1 = iterateSync(iterableT1);
+	const itT2 = iterateSync(iterableT2);
+	let nextT1 = itT1.next();
+	let nextT2 = itT2.next();
+	while (!(nextT1.done || nextT2.done)) {
+		yield [nextT1.value, nextT2.value] as [T1Value, T2Value];
+		nextT1 = itT1.next();
+		nextT2 = itT2.next();
 	}
 }
 
@@ -1047,17 +1044,17 @@ export async function* zipKV<
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
 >(
-	iterable_0: T1,
-	iterable_1: T2
+	iterableT1: T1,
+	iterableT2: T2
 ): AsyncGenerator<[[T1Key, T1Value], [T2Key, T2Value]], void, unknown> {
-	const it_0 = enumerate<T1, T1Key, T1Value>(iterable_0);
-	const it_1 = enumerate<T2, T2Key, T2Value>(iterable_1);
-	let next_0 = await it_0.next();
-	let next_1 = await it_1.next();
-	while (!(next_0.done || next_1.done)) {
-		yield [next_0.value, next_1.value] as [[T1Key, T1Value], [T2Key, T2Value]];
-		next_0 = await it_0.next();
-		next_1 = await it_1.next();
+	const itT1 = enumerate<T1, T1Key, T1Value>(iterableT1);
+	const itT2 = enumerate<T2, T2Key, T2Value>(iterableT2);
+	let nextT1 = await itT1.next();
+	let nextT2 = await itT2.next();
+	while (!(nextT1.done || nextT2.done)) {
+		yield [nextT1.value, nextT2.value] as [[T1Key, T1Value], [T2Key, T2Value]];
+		nextT1 = await itT1.next();
+		nextT2 = await itT2.next();
 	}
 }
 export function* zipKVSync<
@@ -1067,15 +1064,15 @@ export function* zipKVSync<
 	T2Key = EnumerableKeyOfT<T2>,
 	T1Value = EnumerableValueOfT<T1>,
 	T2Value = EnumerableValueOfT<T2>
->(iterable_0: T1, iterable_1: T2): Generator<[[T1Key, T1Value], [T2Key, T2Value]], void, unknown> {
-	const it_0 = enumerateSync<T1, T1Key, T1Value>(iterable_0);
-	const it_1 = enumerateSync<T2, T2Key, T2Value>(iterable_1);
-	let next_0 = it_0.next();
-	let next_1 = it_1.next();
-	while (!(next_0.done || next_1.done)) {
-		yield [next_0.value, next_1.value] as [[T1Key, T1Value], [T2Key, T2Value]];
-		next_0 = it_0.next();
-		next_1 = it_1.next();
+>(iterableT1: T1, iterableT2: T2): Generator<[[T1Key, T1Value], [T2Key, T2Value]], void, unknown> {
+	const itT1 = enumerateSync<T1, T1Key, T1Value>(iterableT1);
+	const itT2 = enumerateSync<T2, T2Key, T2Value>(iterableT2);
+	let nextT1 = itT1.next();
+	let nextT2 = itT2.next();
+	while (!(nextT1.done || nextT2.done)) {
+		yield [nextT1.value, nextT2.value] as [[T1Key, T1Value], [T2Key, T2Value]];
+		nextT1 = itT1.next();
+		nextT2 = itT2.next();
 	}
 }
 
@@ -1129,14 +1126,14 @@ export function* tailKVSync<T extends EnumerableSync<T>>(en: T) {
 	yield* dropKVSync(1, en);
 }
 
-export async function first<T extends Enumerable<T>>(en: T) {
+export function first<T extends Enumerable<T>>(en: T) {
 	return head(en);
 }
 export function firstSync<T extends EnumerableSync<T>>(en: T) {
 	return headSync(en);
 }
 
-export async function firstKV<T extends Enumerable<T>>(en: T) {
+export function firstKV<T extends Enumerable<T>>(en: T) {
 	return headKV(en);
 }
 export function firstKVSync<T extends EnumerableSync<T>>(en: T) {
