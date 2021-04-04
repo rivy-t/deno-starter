@@ -33,6 +33,16 @@
 // };
 
 // note: Iterable<T>, by ECMA2020 default, includes Array<T>, ArrayLike<T>, Map<K,T>, Set<T>, and String
+// Array<T> ; ref: <https://github.com/microsoft/TypeScript/blob/11097c622c/src/lib/es5.d.ts#L1200>
+// ArrayLike<T> ; ref: <https://github.com/microsoft/TypeScript/blob/11097c622c/src/lib/es5.d.ts#L1443>
+// Iterable<T> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2015.iterable.d.ts#L30>
+// Iterator<T> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2015.iterable.d.ts#L23>
+// IterableIterator<T> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2015.iterable.d.ts#L34>
+// Generator<T> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2015.generator.d.ts#L3
+// AsyncIterator<T> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2018.asynciterable.d.ts#L12>
+// AsyncGenerator<T> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2018.asyncgenerator.d.ts#L3>
+// Map<K,V> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2015.collection.d.ts#L1>
+// Set<T> ; ref: <https://github.com/microsoft/TypeScript/blob/237b6f61f6/src/lib/es2015.collection.d.ts#L38>
 
 export type ObjectKey = number | string | symbol;
 export type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
