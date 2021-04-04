@@ -82,7 +82,7 @@ const cmdShimTemplate = cmdShimBase.replace(
 
 const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
-const pathListSeparator = isWinOS ? /;/ : /:/;
+// const pathListSeparator = isWinOS ? /;/ : /:/;
 // const paths = Deno.env.get('PATH')?.split(pathListSeparator) || [];
 // const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 const pathCaseSensitive = !isWinOS;
@@ -114,7 +114,6 @@ eol.LF = function (s: string) {
 const denoInstallRoot = joinDefinedPaths(
 	Deno.env.get('DENO_INSTALL_ROOT') ?? joinDefinedPaths(OsPaths.home(), '.deno'),
 	'bin'
-	// '#commune'
 );
 
 if (denoInstallRoot && fs.existsSync(denoInstallRoot)) {
