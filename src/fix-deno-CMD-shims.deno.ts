@@ -40,14 +40,45 @@ import * as _ from 'https://cdn.skypack.dev/pin/lodash@v4.17.20-4NISnx5Etf8JOo22
 const decoder = new TextDecoder(); // default == 'utf-8'
 const encoder = new TextEncoder(); // default == 'utf-8'
 
-const cmdShimTemplate = `% \`<%=shimBinName%>\` (*revised* Deno CMD shim; by \`dxi\`) %
+const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\`) %
 @rem:: spell-checker:ignore (shell/CMD) COMSPEC ERRORLEVEL ; (deno) hrtime ; (bin) <%=shimBinName%> <%=denoRunTarget%>
 @set "ERRORLEVEL="
 @setLocal
+@set "_DENO_SHIM_PIPE_="
+@:...prepPipe...
+@:launch
+@(
+@goto _undef_ 2>NUL
+@for %%G in ("%COMSPEC%") do @title %%~nG
 @set _DENO_SHIM_0_=%0
-@set _DENO_SHIM_*_=%*
-@goto _undef_ 2>NUL || @for %%G in ("%COMSPEC%") do @title %%~nG & @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %*
+@set _DENO_SHIM_ARGS_=%*
+@set "_DENO_SHIM_ERRORLEVEL_="
+@set "_DENO_SHIM_PIPE_=%_DENO_SHIM_PIPE_%"
+@deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %*
+@call set _DENO_SHIM_ERRORLEVEL_=%%ERRORLEVEL%%
+@if EXIST "%_DENO_SHIM_PIPE_%" call "%_DENO_SHIM_PIPE_%" >NUL 2>NUL
+@if EXIST "%_DENO_SHIM_PIPE_%" echo del /q "%_DENO_SHIM_PIPE_%" 2>NUL
+@set "_DENO_SHIM_0_="
+@set "_DENO_SHIM_ARGS_="
+@set "_DENO_SHIM_PIPE_="
+@call %COMSPEC% /d/c "exit %%_DENO_SHIM_ERRORLEVEL_%%"
+)
 `;
+const cmdShimPrepPipe = `@:prepPipe
+@set "RANDOM=" &:: remove any cloak from dynamic variable RANDOM
+@if NOT DEFINED TEMP @set TEMP=%TMP%
+@if NOT EXIST "%TEMP%" @set TEMP=%TMP%
+@if NOT EXIST "%TEMP%" @goto :launch
+@set _DENO_SHIM_PIPE_=%TEMP%\\<%=shimBinName%>.shim.pipe.%RANDOM%.%RANDOM%.%RANDOM%.cmd
+@if EXIST "%_DENO_SHIM_PIPE_%" @goto :prepPipe
+@if DEFINED _DENO_SHIM_PIPE_ echo @rem \`<%=shimBinName%>\` shell pipe > "%_DENO_SHIM_PIPE_%"
+`;
+
+const enablePipe = false;
+const cmdShimTemplate = cmdShimBase.replace(
+	'@:...prepPipe...',
+	enablePipe ? cmdShimPrepPipe : '@:pipeDisabled'
+);
 
 const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
@@ -147,14 +178,14 @@ const updates = await collect(
 		const reMatchArray =
 			contentsOriginal.match(
 				// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
-				/^@deno[.]exe\s+\x22run\x22\s+(\x22.*\x22\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m
+				/^(.*?)@\x22?deno(?:[.]exe)?\x22?\s+\x22?run\x22?\s+(.*\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m
 			) || [];
-		const [match, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
+		const [match, denoCommandPrefix, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
 		// remove trailing "--" (quoted or not) , if it exists (avoid collision with "--" added by template)
 		const denoRunOptions = (denoRunOptionsRaw || '')
-			.replace(/^\s+/, '')
-			.replace(/\s+$/, '')
-			.replace(/\s+\x22?--\x22?\s*\$/, '');
+			.replace(/((^|\s+)\x22?--\x22?)+(\s|$)/g, ' ')
+			.replace(/^\s+/m, '')
+			.replace(/\s+$/m, '');
 		const shimBinName = Path.parse(shimPath).name;
 		const contentsUpdated = eol.CRLF(
 			_.template(cmdShimTemplate)({
@@ -165,9 +196,11 @@ const updates = await collect(
 		);
 		return {
 			shimPath,
-			needsUpdate: !isEmpty(match),
-			contentsOriginal,
+			// needsUpdate: !isEmpty(match),
+			needsUpdate: true,
 			contentsUpdated,
+			denoRunOptions,
+			contentsOriginal,
 		};
 	}, fileEntries)
 );
