@@ -87,7 +87,7 @@ const isWinOS = Deno.build.os === 'windows';
 // const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 const pathCaseSensitive = !isWinOS;
 
-function joinDefinedPaths(...paths: (string | undefined)[]): string | undefined {
+function joinFullyDefinedPaths(...paths: (string | undefined)[]): string | undefined {
 	if (paths.find((v) => typeof v === 'undefined')) {
 		return void 0;
 	}
@@ -111,8 +111,8 @@ eol.LF = function (s: string) {
 };
 // ---
 
-const denoInstallRoot = joinDefinedPaths(
-	Deno.env.get('DENO_INSTALL_ROOT') ?? joinDefinedPaths(OsPaths.home(), '.deno'),
+const denoInstallRoot = joinFullyDefinedPaths(
+	Deno.env.get('DENO_INSTALL_ROOT') ?? joinFullyDefinedPaths(OsPaths.home(), '.deno'),
 	'bin'
 );
 
