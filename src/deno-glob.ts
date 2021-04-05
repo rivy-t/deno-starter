@@ -1,6 +1,10 @@
 // Copyright 2018-2021 the Deno authors. All rights reserved. MIT license.
 
+// spell-checker:ignore (vars) dotglob globstar nullglob
+
 // - [x] modify to use `caseSensitive`
+// - [ ] add dotglob capability (ignoring non-literal leading '.' for glob matches)
+// - [ ] return relative paths for relative globs
 
 import {
 	GlobOptions,
@@ -26,6 +30,7 @@ export interface ExpandGlobOptions extends Omit<GlobOptions, 'os'> {
 	exclude?: string[];
 	includeDirs?: boolean;
 	caseSensitive?: boolean;
+	dotglob?: boolean;
 }
 
 interface SplitPath {
@@ -80,6 +85,7 @@ export async function* expandGlob(
 		includeDirs = true,
 		extended = false,
 		globstar = false,
+		dotglob = true,
 		caseSensitive = isWindows ? false : true,
 	}: ExpandGlobOptions = {}
 ): AsyncIterableIterator<WalkEntry> {
@@ -180,6 +186,7 @@ export function* expandGlobSync(
 		includeDirs = true,
 		extended = false,
 		globstar = false,
+		dotglob = true,
 		caseSensitive = isWindows ? false : true,
 	}: ExpandGlobOptions = {}
 ): IterableIterator<WalkEntry> {
