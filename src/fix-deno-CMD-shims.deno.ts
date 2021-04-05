@@ -176,17 +176,24 @@ const updates = await collect(
 	map(async function (fileEntry) {
 		const shimPath = fileEntry.path;
 		const contentsOriginal = eol.LF(decoder.decode(await Deno.readFile(shimPath)));
+
+		// heuristic match for enhanced shim
+		// spell-checker:ignore () ined
+		const isEnhanced =
+			contentsOriginal.match(/goto\s+[\W_]*undef(?:ined)?[\W_]*\s+2\s*>\s*NUL/i) ||
+			contentsOriginal.match(/shim\s*;\s*by\s*`?dxi`?/i);
+
 		const reMatchArray =
 			contentsOriginal.match(
 				// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
 				/^(.*?)@\x22?deno(?:[.]exe)?\x22?\s+\x22?run\x22?\s+(.*\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m
 			) || [];
 		const [match, denoCommandPrefix, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
-		// remove trailing "--" (quoted or not) , if it exists (avoid collision with "--" added by template)
+
 		const denoRunOptions = (denoRunOptionsRaw || '')
-			.replace(/((^|\s+)\x22?--\x22?)+(\s|$)/g, ' ')
-			.replace(/^\s+/m, '')
-			.replace(/\s+$/m, '');
+			.replace(/((^|\s+)\x22?--\x22?)+(\s|$)/g, ' ') // remove any "--" (quoted or not); avoids collision with "--" added by template
+			.replace(/^\s+/m, '') // remove leading whitespace
+			.replace(/\s+$/m, ''); // remove trailing whitespace
 		const shimBinName = Path.parse(shimPath).name;
 		const contentsUpdated = eol.CRLF(
 			_.template(cmdShimTemplate)({
@@ -197,8 +204,7 @@ const updates = await collect(
 		);
 		return {
 			shimPath,
-			// needsUpdate: !isEmpty(match),
-			needsUpdate: true,
+			isEnhanced,
 			contentsUpdated,
 			denoRunOptions,
 			contentsOriginal,
@@ -208,10 +214,10 @@ const updates = await collect(
 
 for await (const update of updates) {
 	// if (options.debug) {
-	// console.log({ update });
+	console.log({ update });
 	// console.log(update.contentsUpdated);
 	// }
-	if (update.needsUpdate) {
+	if (!update.isEnhanced || forceUpdate) {
 		Deno.stdout.writeSync(encoder.encode(Path.basename(update.shimPath) + '...'));
 		Deno.writeFileSync(update.shimPath, encoder.encode(update.contentsUpdated));
 		Deno.stdout.writeSync(encoder.encode('updated' + '\n'));
