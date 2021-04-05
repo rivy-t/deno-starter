@@ -2,6 +2,10 @@
 // spell-checker:ignore (people) Federico Kereki
 // spell-checker:ignore (vars) en enumer it iter
 
+// ToDO: add fluency?
+// List<T> = Gen<T> with all functions (map, reduce, take, ...) attached producing more List<T>'s ; "lazy"
+// ... and collectX() producing fully materialized built-in data types (string, Array, Map, Set, MapLikeObject/Record)
+
 // ToDO: look at `rambda` for automatic handling of async (see <https://www.skypack.dev/view/rambda>)
 // inspirations/refs
 // * <https://exploringjs.com/es6/ch_iteration.html#sec_take_closing> , <https://2ality.com/2016/10/asynchronous-iteration.html>
@@ -20,6 +24,13 @@
 // * ref: <https://github.com/a-synchronous/rubico/blob/master/_internal/iteratorFind.js>
 // * ref: <https://github.com/a-synchronous/rubico/blob/master/_internal/asyncIteratorFind.js>
 // * ref: <https://github.com/a-synchronous/rubico/blob/master/x/find.js>
+// * `forEach()` ; implements iteration over synchronous or asynchronous values ... see <https://github.com/a-synchronous/rubico/blob/master/x/forEach.js>
+//   ... how to type return value for TS? use `Either<L, R>`?
+// * `asyncIteratorFind()` ; https://github.com/a-synchronous/rubico/blob/master/_internal/asyncIteratorFind.js
+// * `iteratorFind()` ; <https://github.com/a-synchronous/rubico/blob/master/_internal/iteratorFind.js>
+// * `SemiGroup = Array|String|Set|TypedArray|{ concat: function }|{ write: function }|Object` ; <https://github.com/a-synchronous/rubico/issues/179>
+// * `Foldable = Iterable|AsyncIterable|{ reduce: function }|Object` ; <https://github.com/a-synchronous/rubico/issues/179>
+// * `isObject(x)` at <https://github.com/a-synchronous/rubico/blob/master/_internal/isObject.js>
 
 // const symbolAsyncIterator = Symbol.asyncIterator;
 // const symbolIterator = Symbol.iterator;
