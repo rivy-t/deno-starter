@@ -145,7 +145,7 @@ const re = new RegExp(
 	pathCaseSensitive ? void 0 : 'i'
 );
 
-const identity = <T>(x: T) => x;
+// const identity = <T>(x: T) => x;
 
 const res = [re];
 const fileEntries = await collect(
