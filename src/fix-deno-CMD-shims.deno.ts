@@ -50,18 +50,18 @@ const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\
 @(
 @goto _undef_ 2>NUL
 @for %%G in ("%COMSPEC%") do @title %%~nG
-@set _DENO_SHIM_0_=%0
-@set _DENO_SHIM_ARGS_=%*
-@set "_DENO_SHIM_ERRORLEVEL_="
-@set "_DENO_SHIM_PIPE_=%_DENO_SHIM_PIPE_%"
+@set DENO_SHIM_0=%0
+@set DENO_SHIM_ARGS=%*
+@set "DENO_SHIM_ERRORLEVEL="
+@set "DENO_SHIM_PIPE=%DENO_SHIM_PIPE%"
 @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %*
-@call set _DENO_SHIM_ERRORLEVEL_=%%ERRORLEVEL%%
-@if EXIST "%_DENO_SHIM_PIPE_%" call "%_DENO_SHIM_PIPE_%" >NUL 2>NUL
-@if EXIST "%_DENO_SHIM_PIPE_%" echo del /q "%_DENO_SHIM_PIPE_%" 2>NUL
-@set "_DENO_SHIM_0_="
-@set "_DENO_SHIM_ARGS_="
-@set "_DENO_SHIM_PIPE_="
-@call %COMSPEC% /d/c "exit %%_DENO_SHIM_ERRORLEVEL_%%"
+@call set DENO_SHIM_ERRORLEVEL=%%ERRORLEVEL%%
+@if EXIST "%DENO_SHIM_PIPE%" call "%DENO_SHIM_PIPE%" >NUL 2>NUL
+@if EXIST "%DENO_SHIM_PIPE%" echo del /q "%DENO_SHIM_PIPE%" 2>NUL
+@set "DENO_SHIM_0="
+@set "DENO_SHIM_ARGS="
+@set "DENO_SHIM_PIPE="
+@call %COMSPEC% /d/c "exit %%DENO_SHIM_ERRORLEVEL%%"
 )
 `;
 const cmdShimPrepPipe = `@:prepPipe
@@ -69,12 +69,13 @@ const cmdShimPrepPipe = `@:prepPipe
 @if NOT DEFINED TEMP @set TEMP=%TMP%
 @if NOT EXIST "%TEMP%" @set TEMP=%TMP%
 @if NOT EXIST "%TEMP%" @goto :launch
-@set _DENO_SHIM_PIPE_=%TEMP%\\<%=shimBinName%>.shim.pipe.%RANDOM%.%RANDOM%.%RANDOM%.cmd
-@if EXIST "%_DENO_SHIM_PIPE_%" @goto :prepPipe
-@if DEFINED _DENO_SHIM_PIPE_ echo @rem \`<%=shimBinName%>\` shell pipe > "%_DENO_SHIM_PIPE_%"
-`;
+@set DENO_SHIM_PIPE=%TEMP%\\<%=shimBinName%>.shim.pipe.%RANDOM%.%RANDOM%.%RANDOM%.cmd
+@if EXIST "%DENO_SHIM_PIPE%" @goto :prepPipe
+@if DEFINED DENO_SHIM_PIPE echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_PIPE%"`;
 
-const enablePipe = false;
+const enablePipe = true;
+const forceUpdate = true;
+
 const cmdShimTemplate = cmdShimBase.replace(
 	'@:...prepPipe...',
 	enablePipe ? cmdShimPrepPipe : '@:pipeDisabled'
