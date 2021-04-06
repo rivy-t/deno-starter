@@ -5,6 +5,7 @@
 // - [x] modify to use `caseSensitive`
 // - [ ] add dotglob capability (ignoring non-literal leading '.' for glob matches)
 // - [ ] return relative paths for relative globs
+// - [ ] investigate globstar syntax and results
 
 import {
 	GlobOptions,
