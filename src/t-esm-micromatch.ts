@@ -1,7 +1,7 @@
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
 import Micromatch from 'https://esm.sh/micromatch@4.0.2';
-import braces from 'https://esm.sh/braces';
+import braces from 'https://esm.sh/braces@3.0.2';
 
 import * as Me from './lib/me.ts';
 import { splitByBareWS } from './lib/parse.ts';
@@ -15,61 +15,25 @@ if (Deno.build.os === 'windows' && !me[0]) {
 	);
 }
 const args = me.ARGS || '';
+const argvSplit0 = splitByBareWS(args);
+const argvReslash1 = argvSplit0; //.flatMap((v) => v.replace(/\\/gmsu, '/'));
+const argvBraceExp2 = argvReslash1.flatMap((v) => braces.expand(v));
+const argv = argvBraceExp2;
+console.warn(me.name, { args, argvSplit0, argvReslash1, argvBraceExp2, argv });
+
+const DQStringReS = '"[^"]*(?:"|$)'; // double-quoted string (unbalanced at end-of-line is allowed)
+const SQStringReS = "'[^']*(?:'|$)"; // single-quoted string (unbalanced at end-of-line is allowed)
+const DQStringStrictReS = '"[^"]*"'; // double-quoted string (quote balance is required)
+const SQStringStrictReS = "'[^']*'"; // single-quoted string (quote balance is required)
 
 const pathSepRe = /[\\/]/;
 const globChars = ['?', '*', '[', ']'];
-// const globCharsReS = '(?:' + globChars.map((c) => '\\' + c).join('|') + ')';
 const globCharsReS = globChars.map((c) => '\\' + c).join('|');
-function tokenizeString(s: string) {
-	// parse string into tokens separated by unquoted-whitespace
-	// * supports both single and double quotes; escapes are not supported
-	const arr: Array<string> = [];
-	console.warn({ s });
-	s.replace(/^\s+/, ''); // trim leading whitespace
-	while (s !== '') {
-		const m = s.match(/^((?:"[^"]*(?:"|$)|'[^']*(?:'|$)|\S+)+)(.*$)/msu);
-		if (m) {
-			arr.push(m[1]);
-			s = m[2] ? m[2].replace(/^\s+/, '') : ''; // trim leading whitespace
-		} else {
-			s = '';
-		}
-		console.warn({ s, m, arr });
-	}
-	// console.warn('tokenizeString()', { arr });
-	return arr;
-}
 
 // ToDO: handle long paths, "\\?\...", and UNC paths
-
-const RESERVED_NAMES = [
-	'AUX',
-	'NUL',
-	'PRN',
-	'CON',
-	'COM1',
-	'COM2',
-	'COM3',
-	'COM4',
-	'COM5',
-	'COM6',
-	'COM7',
-	'COM8',
-	'COM9',
-	'LPT1',
-	'LPT2',
-	'LPT3',
-	'LPT4',
-	'LPT5',
-	'LPT6',
-	'LPT7',
-	'LPT8',
-	'LPT9',
-];
-
 // ref: [1][MSDN - Windows: Naming Files, Paths, and Namespaces] http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx @@ https://archive.today/DgH7i
 
-function parseNonGlobPrefix(s: string): { prefix: string; glob: string } {
+function parseNonGlobPathPrefix(s: string): { prefix: string; glob: string } {
 	// options.os => undefined (aka portable), 'windows', 'posix'/'linux'
 	const options: { os?: string } = {};
 	let prefix = '';
@@ -79,9 +43,9 @@ function parseNonGlobPrefix(s: string): { prefix: string; glob: string } {
 	// const sepReS = Path.SEP_PATTERN;
 	const sepReS = `[\\\\\\/]`;
 
-	// console.warn({ globCharsReS, SEP: Path.SEP, SEP_PATTERN: Path.SEP_PATTERN });
+	// console.warn({ _: 'parseNonGlobPathPrefix', globCharsReS, SEP: Path.SEP, SEP_PATTERN: Path.SEP_PATTERN });
 
-	// // for 'windows' or portable, strip any leading "\\?\" as a prefix
+	// for 'windows' or portable, strip any leading "\\?\" as a prefix
 	if (!options.os || options.os === 'windows') {
 		const m = s.match(/^\\\\?\\(.*)/);
 		if (m) {
@@ -90,8 +54,6 @@ function parseNonGlobPrefix(s: string): { prefix: string; glob: string } {
 		}
 	}
 
-	const DQStringReS = '"[^"]*(?:"|$)'; // double-quoted string (unbalanced is allowed)
-	const SQStringReS = "'[^']*(?:'|$)"; // single-quoted string (unbalanced is allowed)
 	const QReS = `["']`; // double or single quote character
 	const nonGlobReS = `(?:(?!${globCharsReS}).)`;
 	const nonGlobQReS = `(?:(?!${globCharsReS}|${QReS}).)`;
@@ -100,10 +62,10 @@ function parseNonGlobPrefix(s: string): { prefix: string; glob: string } {
 	const re = new RegExp(
 		`^((?:${DQStringReS}|${SQStringReS}|${nonGlobQSepReS}+)*(?:${sepReS}+|$))(.*$)`
 	);
-	console.log({ re });
-	while (s !== '') {
+	// console.warn({ _: 'parseNonGlobPathPrefix', re });
+	while (s) {
 		const m = s.match(re);
-		console.warn({ s, m });
+		// console.warn({ _: 'parseNonGlobPathPrefix', s, m });
 		if (m) {
 			prefix += m && m[1] ? m[1] : '';
 			glob = m && m[2];
@@ -112,7 +74,7 @@ function parseNonGlobPrefix(s: string): { prefix: string; glob: string } {
 			glob = s || '';
 			s = '';
 		}
-		console.warn({ prefix, glob });
+		// console.warn({ _: 'parseNonGlobPathPrefix', prefix, glob });
 	}
 
 	return { prefix, glob };
@@ -121,9 +83,10 @@ function parseNonGlobPrefix(s: string): { prefix: string; glob: string } {
 // console.log(Micromatch.isMatch('a.a\\b', '*.a\\b', { windows: true }));
 // console.log(braces('\\\\{"a,b",c}', { expand: true }));
 // console.log(Micromatch.scan('c/*.cmd'));
-// console.log({ parsed: parseNonGlobPrefix(`a/b/c"a"'aa'/b/"c\\d"\\e*.cmd`) });
-// console.log({ parsed: parseNonGlobPrefix(`a/b/c"a"'aa'/b/"c\\d"\\e.cmd`) });
-// console.log({ parsed: parseNonGlobPrefix(`"c\\d"\\e*.cmd`) });
-// console.log({ parsed: parseNonGlobPrefix(`"c\\d"*\\e*.cmd`) });
+// console.log({ parsed: parseNonGlobPathPrefix(`a/b/c"a"'aa'/b/"c\\d"\\e*.cmd`) });
+// console.log({ parsed: parseNonGlobPathPrefix(`a/b/c"a"'aa'/b/"c\\d"\\e.cmd`) });
+// console.log({ parsed: parseNonGlobPathPrefix(`"c\\d"\\e*.cmd`) });
+// console.log({ parsed: parseNonGlobPathPrefix(`"c\\d"*\\e*.cmd`) });
 
-console.log({ parsedArgs: parseNonGlobPrefix(args) });
+console.log({ parsedArgs: parseNonGlobPathPrefix(args) });
+console.log({ parsedArgV: argv.map((v) => parseNonGlobPathPrefix(v)) });
