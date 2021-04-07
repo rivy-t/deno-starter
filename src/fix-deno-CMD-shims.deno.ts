@@ -57,7 +57,7 @@ const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\
 @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %*
 @call set DENO_SHIM_ERRORLEVEL=%%ERRORLEVEL%%
 @if EXIST "%DENO_SHIM_PIPE%" call "%DENO_SHIM_PIPE%" >NUL 2>NUL
-@if EXIST "%DENO_SHIM_PIPE%" echo del /q "%DENO_SHIM_PIPE%" 2>NUL
+@if EXIST "%DENO_SHIM_PIPE%" if NOT DEFINED DENO_SHIM_DEBUG del /q "%DENO_SHIM_PIPE%" 2>NUL
 @set "DENO_SHIM_0="
 @set "DENO_SHIM_ARGS="
 @set "DENO_SHIM_PIPE="
