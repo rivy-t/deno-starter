@@ -8,7 +8,7 @@ import { walk, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync, walk, walkSync };
 
 import * as Me from './lib/me.ts';
-import { quotedTokens } from './lib/parse.ts';
+import { splitByBareWS } from './lib/parse.ts';
 
 // const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
@@ -19,7 +19,6 @@ import { quotedTokens } from './lib/parse.ts';
 
 const me = Me.info();
 // console.warn(me.name, { me });
-
 if (Deno.build.os === 'windows' && !me[0]) {
 	console.warn(
 		me.name +
@@ -28,7 +27,8 @@ if (Deno.build.os === 'windows' && !me[0]) {
 }
 
 const args = me.ARGS || Deno.args.join(' ');
-const argv = quotedTokens(args);
+const argv = splitByBareWS(args);
+// console.warn(me.name, { args, argv });
 const targetPath = argv.shift();
 const targetArgs = argv.join(' ');
 

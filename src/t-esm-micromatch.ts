@@ -4,6 +4,7 @@ import Micromatch from 'https://esm.sh/micromatch@4.0.2';
 import braces from 'https://esm.sh/braces';
 
 import * as Me from './lib/me.ts';
+import { splitByBareWS } from './lib/parse.ts';
 
 const me = Me.info();
 console.warn(me.name, { me });

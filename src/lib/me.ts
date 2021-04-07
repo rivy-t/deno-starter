@@ -1,6 +1,6 @@
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
-import { quotedTokens } from '../lib/parse.ts';
+import { splitByBareWS } from '../lib/parse.ts';
 
 export function info() {
 	const shimInfo = {
@@ -11,7 +11,7 @@ export function info() {
 	const denoExec = Deno.execPath();
 	const denoMain = Deno.mainModule;
 	// DENO_SHIM_0 => name | "runner" ... "name"
-	const shim0Tokens = quotedTokens(shimInfo[0] || '');
+	const shim0Tokens = splitByBareWS(shimInfo[0] || '');
 	const nameFromShim0 = shim0Tokens.pop() || '';
 	const path = nameFromShim0
 		? nameFromShim0
