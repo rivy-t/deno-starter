@@ -1,3 +1,5 @@
+// spell-checker:ignore (js) gmsu
+
 const DQStringReS = '"[^"]*(?:"|$)'; // double-quoted string (unbalanced at end-of-line is allowed)
 const SQStringReS = "'[^']*(?:'|$)"; // single-quoted string (unbalanced at end-of-line is allowed)
 const DQStringStrictReS = '"[^"]*"'; // double-quoted string (quote balance is required)
@@ -33,12 +35,9 @@ export function splitByBareWSBalanced(s: string): Array<string> {
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWS()', s });
-	const tokenRe = new RegExp(
-		`^((?:${DQStringReS}|${SQStringReS}|${notQWSReS}+))(\s+)?(.*$)`,
-		'msu'
-	);
+	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${notQWSReS}+))(.*$)`, 'msu');
 	let text = '';
-	let value = '';
+	// let value = '';
 	while (s) {
 		const m = s.match(tokenRe);
 		if (m) {
@@ -74,39 +73,43 @@ export function splitToTokenByBareWS(s: string): Array<string> {
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWSBalanced()', s });
-	const tokenRe = new RegExp(
-		`^((?:${DQStringReS}|${SQStringReS}|${notQWSReS}+))(\s+)?(.*$)`,
-		'msu'
-	);
+	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${notQWSReS}+))(.*?$)`, '');
 	let text = '';
 	while (s) {
 		const m = s.match(tokenRe);
+		console.warn({ _: 'splitToTokenByBareWS', m });
 		if (m) {
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
 				// ""?
-				console.warn('here:1');
+				// console.warn('here:1');
 				if (matchStr[0] === '"') {
-					console.warn('here:"', { matchStr });
+					// console.warn('here:"', { matchStr });
 					// * de-quote
 					const spl = matchStr.split('"');
 					matchStr = spl[1];
+					matchStr = matchStr.replace(/\\/gmsu, '\\\\');
 					matchStr = matchStr.replace(/(.)/gmsu, '\\$1');
 					// matchStr
 				} else if (matchStr[0] === "'") {
 					// console.warn("here:'", { matchStr });
 					const spl = matchStr.split("'");
 					matchStr = spl[1];
+					matchStr = matchStr.replace(/\\/gmsu, '\\\\');
 					matchStr = matchStr.replace(/(.)/gmsu, '\\$1');
+				} else {
+					// const slashAndGlobChars = ['\\', '?', '*', '[', ']'];
+					matchStr = matchStr.replace(/([\\?*\[\]])/gmsu, '\\\\\\$1');
 				}
 			}
 			text += matchStr;
-			// console.warn({ text });
-			s = m[3] ? m[3].replace(/^\s+/, '') : ''; // trim leading whitespace
-			if (m[2] || !s) {
-				arr.push(text);
-			}
+			s = m[2] ? m[2].replace(/^\s+/, '') : ''; // trim leading whitespace
+			console.warn({ _: 'splitToTokenByBareWS', text, s });
+			// if (m[2] || !s) {
+			arr.push(text);
+			// }
 		} else {
+			// arr.push(text);
 			s = '';
 		}
 	}

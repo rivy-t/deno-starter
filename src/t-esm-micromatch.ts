@@ -1,3 +1,5 @@
+// spell-checker:ignore (js) gmsu
+
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
 import Micromatch from 'https://esm.sh/micromatch@4.0.2';
@@ -16,10 +18,12 @@ if (Deno.build.os === 'windows' && !me[0]) {
 }
 const args = me.ARGS || '';
 const argvSplit0 = splitToTokenByBareWS(args);
-const argvReslash1 = argvSplit0; //.flatMap((v) => v.replace(/\\/gmsu, '/'));
-const argvBraceExp2 = argvReslash1.flatMap((v) => braces.expand(v));
+const argvReSlash1 = argvSplit0; //.flatMap((v) => v.replace(/\\/gmsu, '/'));
+const argvBraceExp2 = argvReSlash1
+	.flatMap((v) => braces.expand(v))
+	.map((v) => v.replace(/\\(.)/gmsu, '[$1]'));
 const argv = argvBraceExp2;
-console.warn(me.name, { args, argvSplit0, argvReslash1, argvBraceExp2, argv });
+console.warn(me.name, { args, argvSplit0, argvBraceExp2, argv });
 
 const DQStringReS = '"[^"]*(?:"|$)'; // double-quoted string (unbalanced at end-of-line is allowed)
 const SQStringReS = "'[^']*(?:'|$)"; // single-quoted string (unbalanced at end-of-line is allowed)
