@@ -4,7 +4,7 @@ import Micromatch from 'https://esm.sh/micromatch@4.0.2';
 import braces from 'https://esm.sh/braces@3.0.2';
 
 import * as Me from './lib/me.ts';
-import { splitByBareWS } from './lib/parse.ts';
+import { splitByBareWS, splitByBareWSBalanced, splitToTokenByBareWS } from './lib/parse.ts';
 
 const me = Me.info();
 console.warn(me.name, { me });
@@ -15,7 +15,7 @@ if (Deno.build.os === 'windows' && !me[0]) {
 	);
 }
 const args = me.ARGS || '';
-const argvSplit0 = splitByBareWS(args);
+const argvSplit0 = splitToTokenByBareWS(args);
 const argvReslash1 = argvSplit0; //.flatMap((v) => v.replace(/\\/gmsu, '/'));
 const argvBraceExp2 = argvReslash1.flatMap((v) => braces.expand(v));
 const argv = argvBraceExp2;
