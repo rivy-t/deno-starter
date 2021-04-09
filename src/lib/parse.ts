@@ -2,17 +2,22 @@
 
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
-// import Picomatch from 'https://esm.sh/picomatch@2.2.2';
-import Micromatch from 'https://esm.sh/micromatch@4.0.2';
-import braces from 'https://esm.sh/braces@3.0.2';
-// import Picomatch from 'https://cdn.esm.sh/picomatch@2.2.2';
-// import Micromatch from 'https://cdn.esm.sh/micromatch@4.0.2';
-// import braces from 'https://cdn.esm.sh/braces@3.0.2';
-// import Picomatch from 'https://cdn.skypack.dev/picomatch@2.2.2';
-// import Micromatch from 'https://cdn.skypack.dev/micromatch@4.0.2';
-// import braces from 'https://cdn.skypack.dev/braces@3.0.2';
+import Picomatch from 'https://cdn.esm.sh/picomatch@2.2.2';
+import Micromatch from 'https://cdn.esm.sh/micromatch@4.0.2';
+import braces from 'https://cdn.esm.sh/braces@3.0.2';
 
-import React from 'https://cdn.skypack.dev/react?dts';
+// import Picomatch from 'http://localhost/picomatch@2.2.2?bundle';
+// import Micromatch from 'http://localhost/micromatch@4.0.2?bundle';
+// import braces from 'http://localhost/braces@3.0.2?bundle';
+
+// import Picomatch from 'http://smtp-lan:8080/picomatch@2.2.2?bundle';
+// import Micromatch from 'http://smtp-lan:8080/micromatch@4.0.2?bundle';
+// import braces from 'http://smtp-lan:8080/braces@3.0.2?bundle';
+
+// * skypack imports fail due to missing polyfills
+// import Picomatch from 'https://cdn.skypack.dev/picomatch@2.2.2?dts';
+// import Micromatch from 'https://cdn.skypack.dev/micromatch@4.0.2?dts';
+// import braces from 'https://cdn.skypack.dev/braces@3.0.2?dts';
 
 const DQStringReS = '"[^"]*(?:"|$)'; // double-quoted string (unbalanced at end-of-line is allowed)
 const SQStringReS = "'[^']*(?:'|$)"; // single-quoted string (unbalanced at end-of-line is allowed)
@@ -243,18 +248,19 @@ export function parseNonGlobPathPrefix(s: string) {
 		// console.warn({ _: 'parseNonGlobPathPrefix', prefix, glob });
 	}
 
-	const globAsRe = globToRe(glob);
+	console.log({ glob });
+	const globAsRe = glob && globToRe(glob);
 	const globScan = Micromatch.scan(glob, { tokens: true });
-	// const globScanTokens = globScan.tokens[0];
-	// const globSegs = Picomatch.scan(glob, {});
+	const globScanTokens = globScan.tokens[0];
+	const globSegs = Picomatch.scan(glob, {});
 
 	return {
 		prefix,
 		glob,
 		globAsRe,
 		globScan,
-		// globScanTokens,
-		// globSegs,
+		globScanTokens,
+		globSegs,
 	};
 }
 
