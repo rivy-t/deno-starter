@@ -1,0 +1,3 @@
+/* esm.sh - micromatch@4.0.2 */
+export * from "https://cdn.esm.sh/v38/micromatch@4.0.2/deno/micromatch.js";
+export { default } from "https://cdn.esm.sh/v38/micromatch@4.0.2/deno/micromatch.js";

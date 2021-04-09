@@ -1,0 +1,21 @@
+import * as Me from './lib/me.ts';
+import { braceExpand, splitByBareWS, splitByBareWSBalanced, } from './lib/parse.ts';
+const me = Me.info();
+console.warn(me.name, { me });
+if (Deno.build.os === 'windows' && !me[0]) {
+    console.warn(me.name +
+        ': warn: diminished capacity; full functionality requires an enhanced runner (use `dxr` or install with `dxi`)');
+}
+const args = me.ARGS || '';
+const argvSplit = splitByBareWS(args);
+const argvSplitBalanced = splitByBareWSBalanced(args);
+const argvSplitBraceExpanded = splitByBareWS(args).flatMap((v) => braceExpand(v));
+const argv = argvSplitBraceExpanded;
+console.warn(me.name, {
+    args,
+    argvSplit,
+    argvSplitBalanced,
+    argvSplitBraceExpanded,
+    argv,
+});
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidC1lc20tbWljcm9tYXRjaC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbInQtZXNtLW1pY3JvbWF0Y2gudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBT0EsT0FBTyxLQUFLLEVBQUUsTUFBTSxhQUFhLENBQUM7QUFDbEMsT0FBTyxFQUNOLFdBQVcsRUFDWCxhQUFhLEVBQ2IscUJBQXFCLEdBR3JCLE1BQU0sZ0JBQWdCLENBQUM7QUFFeEIsTUFBTSxFQUFFLEdBQUcsRUFBRSxDQUFDLElBQUksRUFBRSxDQUFDO0FBQ3JCLE9BQU8sQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLElBQUksRUFBRSxFQUFFLEVBQUUsRUFBRSxDQUFDLENBQUM7QUFDOUIsSUFBSSxJQUFJLENBQUMsS0FBSyxDQUFDLEVBQUUsS0FBSyxTQUFTLElBQUksQ0FBQyxFQUFFLENBQUMsQ0FBQyxDQUFDLEVBQUU7SUFDMUMsT0FBTyxDQUFDLElBQUksQ0FDWCxFQUFFLENBQUMsSUFBSTtRQUNOLCtHQUErRyxDQUNoSCxDQUFDO0NBQ0Y7QUFFRCxNQUFNLElBQUksR0FBRyxFQUFFLENBQUMsSUFBSSxJQUFJLEVBQUUsQ0FBQztBQUMzQixNQUFNLFNBQVMsR0FBRyxhQUFhLENBQUMsSUFBSSxDQUFDLENBQUM7QUFDdEMsTUFBTSxpQkFBaUIsR0FBRyxxQkFBcUIsQ0FBQyxJQUFJLENBQUMsQ0FBQztBQUN0RCxNQUFNLHNCQUFzQixHQUFHLGFBQWEsQ0FBQyxJQUFJLENBQUMsQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFDLEVBQUUsRUFBRSxDQUFDLFdBQVcsQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDO0FBQ2xGLE1BQU0sSUFBSSxHQUFHLHNCQUFzQixDQUFDO0FBQ3BDLE9BQU8sQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDLElBQUksRUFBRTtJQUNyQixJQUFJO0lBQ0osU0FBUztJQUNULGlCQUFpQjtJQUNqQixzQkFBc0I7SUFDdEIsSUFBSTtDQUNKLENBQUMsQ0FBQyJ9

@@ -1,0 +1,3 @@
+/* esm.sh - picomatch@2.2.2 */
+export * from "https://cdn.esm.sh/v38/picomatch@2.2.2/deno/picomatch.js";
+export { default } from "https://cdn.esm.sh/v38/picomatch@2.2.2/deno/picomatch.js";

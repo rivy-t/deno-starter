@@ -1,0 +1,3 @@
+/* esm.sh - braces@3.0.2 */
+export * from "https://cdn.esm.sh/v38/braces@3.0.2/deno/braces.js";
+export { default } from "https://cdn.esm.sh/v38/braces@3.0.2/deno/braces.js";

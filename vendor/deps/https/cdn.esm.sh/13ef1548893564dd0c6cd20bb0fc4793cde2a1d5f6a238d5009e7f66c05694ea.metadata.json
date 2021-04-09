@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "cf-ray": "63d0a395ccddd33e-LAX",
+    "content-type": "application/javascript; charset=utf-8",
+    "vary": "Origin",
+    "x-typescript-types": "https://cdn.esm.sh/v38/@types/braces@3.0.0/index.d.ts",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "cf-request-id": "09564491a10000d33e0227a000000001",
+    "server": "cloudflare",
+    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
+    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=LHW6LiSg7AP9WqVt40utAI1yc0LFmL0QzLjlYEy2OhXErxRUIgK4Zv5G5zvCrdb8mEXpYFTVcwsgoaFpUlQ6acSYD7v8aIlTDDGx\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
+    "cache-control": "private, max-age=600",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "cf-cache-status": "DYNAMIC"
+  },
+  "url": "https://cdn.esm.sh/braces@3.0.2"
+}

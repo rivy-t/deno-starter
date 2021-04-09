@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "cache-control": "private, max-age=600",
+    "x-typescript-types": "https://cdn.esm.sh/v38/@types/picomatch@2.2.1/index.d.ts",
+    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
+    "vary": "Origin",
+    "cf-ray": "63d0a395ccdfd33e-LAX",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=b%2FCL2Cpuj7wyICccMpMxLSKLUSbqA0iwbd68Q9Ot8mmsYkSwjfhEbrycJ6uSKpPYkMTam%2BhLmXD0bxW08Hp%2BoGIwfNrcVsen7f%2Fq\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
+    "content-type": "application/javascript; charset=utf-8",
+    "server": "cloudflare",
+    "cf-request-id": "09564491a10000d33e05b01000000001",
+    "cf-cache-status": "DYNAMIC"
+  },
+  "url": "https://cdn.esm.sh/picomatch@2.2.2"
+}
