@@ -1,21 +1,22 @@
 {
   "headers": {
-    "cf-ray": "63d0a39b5839d33e-LAX",
-    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
-    "server": "cloudflare",
-    "cache-control": "public, max-age=31536000, immutable",
-    "cf-request-id": "09564495130000d33eeda04000000001",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
-    "vary": "Origin, Accept-Encoding",
-    "content-type": "application/javascript",
-    "cf-polished": "origSize=908",
-    "cf-bgj": "minify",
-    "age": "110842",
     "last-modified": "Wed, 07 Apr 2021 16:55:27 GMT",
-    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
     "cf-cache-status": "HIT",
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=5QljjYDEueMsAheGA7tR15JSjAJXwjSw%2B7oNLIXy5pnk7eNPmgGJik0kQaRz%2FwTV6XQT5eDzyPFvAm%2FA1PanBOQKzOIcf5pc63Il\"}],\"max_age\":604800,\"group\":\"cf-nel\"}"
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "cf-polished": "origSize=908",
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "cf-ray": "63d79b194a5442d2-LAX",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "cache-control": "public, max-age=31536000, immutable",
+    "server": "cloudflare",
+    "cf-bgj": "minify",
+    "vary": "Origin, Accept-Encoding",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=som7IgDycdFa%2BqMjSKvNsPZmHi0B8rwxmCTjctsq2DtXyVfodsl0hRrfKVeGuz4qvhXSH3PgfoDN20%2BIVUBnQkg9rcs0Zhv8Ydgm\"}]}",
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT",
+    "cf-request-id": "095a9f43d3000042d2890b3000000001",
+    "age": "183894",
+    "content-type": "application/javascript",
+    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}"
   },
   "url": "https://cdn.esm.sh/v38/has@1.0.3/deno/has.js"
 }

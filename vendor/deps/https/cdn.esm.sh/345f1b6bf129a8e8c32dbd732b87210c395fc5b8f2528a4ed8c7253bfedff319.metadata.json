@@ -1,21 +1,22 @@
 {
   "headers": {
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=BJmEN%2F2nG6i9S4B7BkRB5gFPIVG5UdoTZCXfOJVjQxBSESjWVmoDh85T3Cf5iJt4Dz31lhQ0bE0A6JiWk9lijbnUAbiNHY0v8X4y\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
-    "last-modified": "Wed, 07 Apr 2021 16:55:17 GMT",
-    "cf-ray": "63d0a3996c9bd33e-LAX",
     "cache-control": "public, max-age=31536000, immutable",
-    "age": "110843",
-    "server": "cloudflare",
-    "cf-request-id": "09564493dc0000d33edeb52000000001",
-    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
-    "vary": "Origin, Accept-Encoding",
-    "cf-cache-status": "HIT",
-    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "cf-ray": "63d79b176dbb42d2-LAX",
     "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
-    "content-type": "application/javascript",
+    "cf-cache-status": "HIT",
+    "server": "cloudflare",
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "last-modified": "Wed, 07 Apr 2021 16:55:17 GMT",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT",
+    "cf-bgj": "minify",
     "cf-polished": "origSize=14194",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "cf-bgj": "minify"
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=E9g%2FeUX5FysZlPowr%2B%2BlSvzlBNaZk6XVFZQ8fE1VKe6S71F4RQGPWlS3fR517z5BVV2bFyyzBZY9%2B3BXarSo8C%2BT9hgJPJCYguAk\"}]}",
+    "content-type": "application/javascript",
+    "age": "183895",
+    "cf-request-id": "095a9f42a3000042d2662ac000000001",
+    "vary": "Origin, Accept-Encoding"
   },
   "url": "https://cdn.esm.sh/v38/util@0.12.3/deno/util.js"
 }

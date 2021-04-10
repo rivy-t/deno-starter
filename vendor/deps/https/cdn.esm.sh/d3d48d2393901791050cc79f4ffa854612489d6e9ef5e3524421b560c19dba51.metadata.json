@@ -1,21 +1,22 @@
 {
   "headers": {
-    "cache-control": "public, max-age=31536000, immutable",
-    "cf-request-id": "09564494a50000d33e05b41000000001",
-    "cf-polished": "origSize=1773",
-    "last-modified": "Wed, 07 Apr 2021 16:55:27 GMT",
-    "vary": "Origin, Accept-Encoding",
+    "cf-cache-status": "HIT",
+    "age": "183894",
+    "cf-request-id": "095a9f4372000042d253873000000001",
     "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
-    "cf-ray": "63d0a39aaf01d33e-LAX",
-    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
-    "content-type": "application/javascript",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=QtnDYxrLWlSeegl7CfnESferOIax9NhBmRjx0yqYmQHczjU2w1v%2Fe5e7cBYS%2FKn9BIDfvwqav4jDMWydDMxDVnpodVl8RvakCJGP\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
-    "age": "110842",
-    "cf-bgj": "minify",
-    "server": "cloudflare",
     "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
-    "cf-cache-status": "HIT"
+    "cf-ray": "63d79b18b90142d2-LAX",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "last-modified": "Wed, 07 Apr 2021 16:55:27 GMT",
+    "content-type": "application/javascript",
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT",
+    "vary": "Origin, Accept-Encoding",
+    "server": "cloudflare",
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=GpAnjEEbd8b50BOhlRsDsma8ffTkZ%2B%2BF%2FMAi%2B1sVj6B97C360%2BveEIrTeRuaGRgHAOlEBKGqm8ZS4qMpmnIor8qtr379UZGQ49q5\"}]}",
+    "cf-polished": "origSize=1773",
+    "cf-bgj": "minify",
+    "cache-control": "public, max-age=31536000, immutable"
   },
   "url": "https://cdn.esm.sh/v38/has-symbols@1.0.2/deno/has-symbols.js"
 }

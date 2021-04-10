@@ -1,21 +1,22 @@
 {
   "headers": {
+    "cf-bgj": "minify",
+    "cache-control": "public, max-age=31536000, immutable",
+    "cf-ray": "63d79b18b8fa42d2-LAX",
+    "content-type": "application/javascript",
     "last-modified": "Wed, 07 Apr 2021 16:55:27 GMT",
     "vary": "Origin, Accept-Encoding",
-    "cf-cache-status": "HIT",
-    "server": "cloudflare",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
-    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
-    "age": "110842",
-    "cf-bgj": "minify",
-    "cf-request-id": "09564494a50000d33e14950000000001",
+    "age": "183894",
     "cf-polished": "origSize=1520",
-    "cf-ray": "63d0a39aaf06d33e-LAX",
-    "content-type": "application/javascript",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=TbPBlIsNTgGTEIBQTByKHP7MUby35%2F9KBZfm3fUow14sL4SMuzLUz70nFJ2x29TrNrmVaMYkPo%2BxyDjeDSGNtYP%2B%2BTAStclSTdWh\"}]}",
     "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
-    "cache-control": "public, max-age=31536000, immutable",
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=%2FmVgNZBpPY%2BYjPHVO2%2FHFr9mUU5WbRlYUCTc3kN5I484TBA0krQrzNP3OqRZTeUEZl6oxVgo0TqGNvLK%2FQdlYmTwfBvkdFFP8g98\"}],\"max_age\":604800,\"group\":\"cf-nel\"}"
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "server": "cloudflare",
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT",
+    "cf-cache-status": "HIT",
+    "cf-request-id": "095a9f4370000042d2809ac000000001"
   },
   "url": "https://cdn.esm.sh/v38/function-bind@1.1.1/deno/function-bind.js"
 }

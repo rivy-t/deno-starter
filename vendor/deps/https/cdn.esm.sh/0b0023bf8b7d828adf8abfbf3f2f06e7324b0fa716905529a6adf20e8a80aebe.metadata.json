@@ -1,21 +1,22 @@
 {
   "headers": {
-    "content-type": "application/javascript",
-    "cf-bgj": "minify",
-    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
-    "last-modified": "Fri, 09 Apr 2021 03:09:59 GMT",
-    "cf-request-id": "09564493820000d33e2da97000000001",
-    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
-    "cf-cache-status": "HIT",
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=DRyYsY%2F9npzp694T3u52uDK9GsEOnA8zFo4KOYoXNP1s9jZ1d31Q0BpER1piRo2VvTuQdJERIXUX67QzdxkYhnPRCqNPgunpqaP6\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
-    "age": "1040",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
     "cache-control": "public, max-age=31536000, immutable",
+    "cf-polished": "origSize=7164",
+    "age": "74092",
     "server": "cloudflare",
+    "cf-ray": "63d79b16dc8242d2-LAX",
+    "cf-cache-status": "HIT",
+    "cf-request-id": "095a9f424c000042d297bc1000000001",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=wNb53%2FT5FEDavD1EJNoRKWTiyDoC9ivav5uSLDk6KkkMaCyvPvZP%2BfIX0xVk%2Bve5iaFreNz8gUYjEy3hMwq7Cpx%2BAYg6CUnYfHRN\"}]}",
+    "content-type": "application/javascript",
     "vary": "Origin, Accept-Encoding",
-    "cf-ray": "63d0a398cbb8d33e-LAX",
-    "cf-polished": "origSize=7164"
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "cf-bgj": "minify",
+    "last-modified": "Fri, 09 Apr 2021 03:09:59 GMT",
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT"
   },
   "url": "https://cdn.esm.sh/v38/micromatch@4.0.2/deno/micromatch.js"
 }

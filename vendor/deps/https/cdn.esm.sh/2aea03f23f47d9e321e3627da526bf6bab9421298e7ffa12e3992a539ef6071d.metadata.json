@@ -1,21 +1,22 @@
 {
   "headers": {
-    "cf-bgj": "minify",
-    "server": "cloudflare",
-    "cf-cache-status": "HIT",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
-    "cache-control": "public, max-age=31536000, immutable",
-    "cf-polished": "origSize=8695",
-    "cf-request-id": "09564493570000d33ee9269000000001",
-    "last-modified": "Fri, 09 Apr 2021 03:09:55 GMT",
-    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "age": "74096",
     "content-type": "application/javascript",
-    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=94EYJ9hv5n6v8zZ5dfLFxzrV2ysDrHweofjnx8UYhKf1SJbBqLa2o%2FSaJUeE4mlREngoKK8QwrtFyPdAiHjOu%2FWb4TwyKa9Md%2Bz5\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
-    "age": "1044",
     "vary": "Origin, Accept-Encoding",
-    "cf-ray": "63d0a3988b46d33e-LAX"
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT",
+    "last-modified": "Fri, 09 Apr 2021 03:09:55 GMT",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "server": "cloudflare",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "cf-request-id": "095a9f4220000042d256ba0000000001",
+    "cf-polished": "origSize=8695",
+    "cf-bgj": "minify",
+    "cache-control": "public, max-age=31536000, immutable",
+    "cf-cache-status": "HIT",
+    "cf-ray": "63d79b169bc842d2-LAX",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=TEQMZ2LeU3tnp9YORf0%2FIKfRZ8bLX15M1y3Bop3aNvLIOfB8XHxCWUsQ1HXeR9gQ1stcsdLn8YV6KYZsS%2B0ecf80cmfKdWj6CRQ1\"}]}"
   },
   "url": "https://cdn.esm.sh/v38/braces@3.0.2/deno/braces.js"
 }

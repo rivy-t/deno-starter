@@ -1,21 +1,22 @@
 {
   "headers": {
-    "age": "110842",
-    "cache-control": "public, max-age=31536000, immutable",
-    "cf-cache-status": "HIT",
-    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
     "cf-bgj": "minify",
-    "vary": "Origin, Accept-Encoding",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "last-modified": "Wed, 07 Apr 2021 16:55:28 GMT",
-    "cf-request-id": "09564494f60000d33ec9060000000001",
-    "server": "cloudflare",
-    "cf-polished": "origSize=1009",
     "content-type": "application/javascript",
-    "cf-ray": "63d0a39b2fded33e-LAX",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "cf-request-id": "095a9f43d3000042d294aec000000001",
     "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=SF25vmQIN%2Bn7Lcf1Z5aCpTAY4ICZvSapWWywhZ%2BTXf4YPGNfAMq5jCUVgktArK%2BKwIH8LNtaQlPZk2zQKs2qVe0reG6LeDjlQ6rl\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
-    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}"
+    "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
+    "last-modified": "Wed, 07 Apr 2021 16:55:28 GMT",
+    "cf-cache-status": "HIT",
+    "server": "cloudflare",
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT",
+    "cf-polished": "origSize=1009",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=wvRv9Llc3GyJHZJHcIuP68ixcw8rwXemcjhIrYhMx02BBdDRGb5CiaN9qbF3G%2BXy9fVF4VVP%2FMuSRuKAMYq1%2FR9zJ17Uv6lTB5bK\"}]}",
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "age": "183894",
+    "cache-control": "public, max-age=31536000, immutable",
+    "cf-ray": "63d79b194a5542d2-LAX",
+    "vary": "Origin, Accept-Encoding"
   },
   "url": "https://cdn.esm.sh/v38/array-filter@1.0.0/deno/array-filter.js"
 }

@@ -1,21 +1,22 @@
 {
   "headers": {
-    "content-type": "application/javascript",
-    "cf-bgj": "minify",
-    "age": "1044",
-    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
-    "last-modified": "Thu, 08 Apr 2021 13:19:17 GMT",
-    "cf-request-id": "09564493af0000d33e30325000000001",
-    "cf-polished": "origSize=3743",
     "vary": "Origin, Accept-Encoding",
-    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
-    "report-to": "{\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=PvxDBEcfO95jeVca6el3%2BtfUGu11E4IFMVNTHvq8qmsP6ZPoFnQqvmniRmG0M4e6htb6xql42DzavdiFlSyFOIYB4vb331eXxAFk\"}],\"max_age\":604800,\"group\":\"cf-nel\"}",
-    "cf-cache-status": "HIT",
-    "date": "Fri, 09 Apr 2021 03:27:20 GMT",
-    "cache-control": "public, max-age=31536000, immutable",
-    "server": "cloudflare",
     "nel": "{\"report_to\":\"cf-nel\",\"max_age\":604800}",
-    "cf-ray": "63d0a3991c2cd33e-LAX"
+    "cf-cache-status": "HIT",
+    "cf-polished": "origSize=3743",
+    "cache-control": "public, max-age=31536000, immutable",
+    "content-type": "application/javascript",
+    "expect-ct": "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+    "cf-request-id": "095a9f427a000042d24c36b000000001",
+    "server": "cloudflare",
+    "alt-svc": "h3-27=\":443\"; ma=86400, h3-28=\":443\"; ma=86400, h3-29=\":443\"; ma=86400",
+    "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https:\\/\\/a.nel.cloudflare.com\\/report?s=ZOXHPtdEol2r3rs%2FoYg%2BPm%2Bhj494GUCXm5OMPng8xSbNS8bZEMTDUlpq4VWDSBO4WzIM1ysPWwbCPi4tL3xA6bCVt7z7aibXVmVd\"}]}",
+    "cf-bgj": "minify",
+    "age": "74096",
+    "set-cookie": "__cfduid=da221ee65e9598a7508825539b50485401618011892; expires=Sun, 09-May-21 23:44:52 GMT; path=/; domain=.esm.sh; HttpOnly; SameSite=Lax",
+    "date": "Fri, 09 Apr 2021 23:44:52 GMT",
+    "last-modified": "Thu, 08 Apr 2021 13:19:17 GMT",
+    "cf-ray": "63d79b172d1c42d2-LAX"
   },
   "url": "https://cdn.esm.sh/v38/fill-range@7.0.1/deno/fill-range.js"
 }
