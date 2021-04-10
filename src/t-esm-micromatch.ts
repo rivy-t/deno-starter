@@ -12,6 +12,7 @@ import {
 	splitByBareWSBalanced,
 	splitByBareWSToPreBrace,
 	parseNonGlobPathPrefix,
+	globToRe,
 } from './lib/parse.ts';
 
 const me = Me.info();
@@ -26,14 +27,17 @@ if (Deno.build.os === 'windows' && !me[0]) {
 const args = me.ARGS || '';
 const argvSplit = splitByBareWS(args);
 const argvSplitBalanced = splitByBareWSBalanced(args);
-const argvSplitBraceExpanded = splitByBareWS(args).flatMap((v) => braceExpand(v));
+const argvSplitBraceExpanded = splitByBareWS(args).flatMap(braceExpand);
 const argv = argvSplitBraceExpanded;
+const argvToGlobRe = argv.map(globToRe);
+
 console.warn(me.name, {
 	args,
 	argvSplit,
 	argvSplitBalanced,
 	argvSplitBraceExpanded,
 	argv,
+	argvToGlobRe,
 });
 
 // console.log(Micromatch.isMatch('a.a\\b', '*.a\\b', { windows: true }));
@@ -45,4 +49,4 @@ console.warn(me.name, {
 // console.log({ parsed: parseNonGlobPathPrefix(`"c\\d"*\\e*.cmd`) });
 
 // console.log({ parsedArgs: parseNonGlobPathPrefix(args) });
-console.log({ parsedArgV: argv.map((v) => parseNonGlobPathPrefix(v)) });
+// console.log({ parsedArgV: argv.map((v) => parseNonGlobPathPrefix(v)) });
