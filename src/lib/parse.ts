@@ -44,18 +44,18 @@ const Braces = BracesM as typeof BracesT;
 const Micromatch = MicromatchM as typeof MicromatchT;
 const Picomatch = PicomatchM as typeof PicomatchT;
 
-// import Picomatch from 'http://localhost/picomatch@2.2.2?bundle';
+// import Braces from 'http://localhost/braces@3.0.2?bundle';
 // import Micromatch from 'http://localhost/micromatch@4.0.2?bundle';
-// import braces from 'http://localhost/braces@3.0.2?bundle';
+// import Picomatch from 'http://localhost/picomatch@2.2.2?bundle';
 
-// import Picomatch from 'http://smtp-lan:8080/picomatch@2.2.2?bundle';
+// import Braces from 'http://smtp-lan:8080/braces@3.0.2?bundle';
 // import Micromatch from 'http://smtp-lan:8080/micromatch@4.0.2?bundle';
-// import braces from 'http://smtp-lan:8080/braces@3.0.2?bundle';
+// import Picomatch from 'http://smtp-lan:8080/picomatch@2.2.2?bundle';
 
 // * skypack imports fail due to missing polyfills
-// import Picomatch from 'https://cdn.skypack.dev/picomatch@2.2.2?dts';
+// import Braces from 'https://cdn.skypack.dev/braces@3.0.2?dts';
 // import Micromatch from 'https://cdn.skypack.dev/micromatch@4.0.2?dts';
-// import braces from 'https://cdn.skypack.dev/braces@3.0.2?dts';
+// import Picomatch from 'https://cdn.skypack.dev/picomatch@2.2.2?dts';
 
 const isWinOS = Deno.build.os === 'windows';
 
@@ -205,7 +205,7 @@ export function braceExpand(s: string): Array<string> {
 	// * note: no character escape sequences are recognized; unbalanced quotes are allowed
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
-	// console.warn({ _: 'braceExpand()', s });
+	console.warn({ _: 'braceExpand()', s });
 	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, '');
 	let text = '';
 	while (s) {
@@ -245,7 +245,7 @@ export function braceExpand(s: string): Array<string> {
 		}
 	}
 	return arr
-		.flatMap((v) => braces.expand(v))
+		.flatMap((v) => Braces.expand(v))
 		.map((v) => v.replace(/\\(.)/gmsu, '"$1"'))
 		.map((v) => v.replace(/"\\"/gmsu, '\\'));
 }
