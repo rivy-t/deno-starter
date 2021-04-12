@@ -20,21 +20,29 @@
 
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
-// import Picomatch from 'https://cdn.esm.sh/picomatch@2.2.2';
+// esm.sh
+// import Braces from 'https://cdn.esm.sh/braces@3.0.2';
 // import Micromatch from 'https://cdn.esm.sh/micromatch@4.0.2';
-// import braces from 'https://cdn.esm.sh/braces@3.0.2';
-import Picomatch from 'https://cdn.esm.sh/picomatch@2.2.2?dev';
-import Micromatch from 'https://cdn.esm.sh/micromatch@4.0.2?dev';
-import braces from 'https://cdn.esm.sh/braces@3.0.2?dev';
+// import Picomatch from 'https://cdn.esm.sh/picomatch@2.2.2';
+// esm.sh (un-minimized, readable source)
+// import Braces from 'https://cdn.esm.sh/braces@3.0.2?dev';
+// import Micromatch from 'https://cdn.esm.sh/micromatch@4.0.2?dev';
+// import Picomatch from 'https://cdn.esm.sh/picomatch@2.2.2?dev';
 
 // // jspm.io
-// import Picomatch from 'https://ga.jspm.io/npm:picomatch@2.2.2/index.js';
-// import Micromatch from 'https://ga.jspm.io/npm:micromatch@4.0.2/index.js';
-// import braces from 'https://ga.jspm.io/npm:braces@3.0.2/index.js';
-// // jspm.dev
-// import Picomatch from 'https://jspm.dev/npm:picomatch@2.2.2';
-// import Micromatch from 'https://jspm.dev/npm:micromatch@4.0.2';
-// import braces from 'https://jspm.dev/npm:braces@3.0.2';
+// import BracesM from 'https://ga.jspm.io/npm:braces@3.0.2/index.js';
+// import MicromatchM from 'https://ga.jspm.io/npm:micromatch@4.0.2/index.js';
+// import PicomatchM from 'https://ga.jspm.io/npm:picomatch@2.2.2/index.js';
+// jspm.dev
+import BracesM from 'https://jspm.dev/npm:braces@3.0.2';
+import MicromatchM from 'https://jspm.dev/npm:micromatch@4.0.2';
+import PicomatchM from 'https://jspm.dev/npm:picomatch@2.2.2';
+import * as BracesT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/braces/index.d.ts';
+import * as MicromatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/micromatch/index.d.ts';
+import * as PicomatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/picomatch/index.d.ts';
+const Braces = BracesM as typeof BracesT;
+const Micromatch = MicromatchM as typeof MicromatchT;
+const Picomatch = PicomatchM as typeof PicomatchT;
 
 // import Picomatch from 'http://localhost/picomatch@2.2.2?bundle';
 // import Micromatch from 'http://localhost/micromatch@4.0.2?bundle';
