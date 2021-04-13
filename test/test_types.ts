@@ -14,16 +14,19 @@ import * as Parse from '../src/lib/parse.ts';
 const e = new TextEncoder();
 
 Deno.test('parse', () => {
-	//
+	Deno.writeAllSync(Deno.stdout, e.encode('['));
+
 	let result;
 
-	Deno.writeAllSync(Deno.stderr, e.encode('.'));
+	Deno.writeAllSync(Deno.stdout, e.encode('.'));
 	result = isOfType(unknown.array().of(string).max(0), Parse.splitByBareWS(''));
 	// console.warn({ result });
 	assert(result[1]);
 
-	Deno.writeAllSync(Deno.stderr, e.encode('.'));
+	Deno.writeAllSync(Deno.stdout, e.encode('.'));
 	result = isOfType(unknown.array().of(string), Parse.splitByBareWS('test this'));
 	// console.warn({ result });
 	assert(result[1]);
+
+	Deno.writeAllSync(Deno.stdout, e.encode('] '));
 });
