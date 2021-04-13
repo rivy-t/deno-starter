@@ -1,10 +1,29 @@
-import Schema, { Type, string, number, array, unknown } from 'http://esm.sh/computed-types@1.6.0';
+import { assert } from 'https://deno.land/std@0.92.0/testing/asserts.ts';
 
-// const isType = <T>(t: Type<T>, x: unknown) => { unknown.schema(t).destruct()(x);}
+import Schema, { string, number, array, unknown } from 'http://esm.sh/computed-types@1.6.0';
+// import type { SchemaValidatorFunction, SchemaReturnType } from 'http://esm.sh/computed-types@1.6.0';
 
-const s = '10';
+type ValidatorType = unknown;
+const isOfType = (s: ValidatorType, value: unknown) => {
+	// deno-lint-ignore no-explicit-any
+	return (s as any).destruct()(value);
+};
 
-// console.log(isType(s, s));
-console.log(unknown.schema(string).destruct()(s));
+import * as Parse from '../src/lib/parse.ts';
 
-function isS(x:unknown) { return unknown.schema(string).destruct()(x); }
+const e = new TextEncoder();
+
+Deno.test('parse', () => {
+	//
+	let result;
+
+	Deno.writeAllSync(Deno.stderr, e.encode('.'));
+	result = isOfType(unknown.array().of(string).max(0), Parse.splitByBareWS(''));
+	// console.warn({ result });
+	assert(result[1]);
+
+	Deno.writeAllSync(Deno.stderr, e.encode('.'));
+	result = isOfType(unknown.array().of(string), Parse.splitByBareWS('test this'));
+	// console.warn({ result });
+	assert(result[1]);
+});
