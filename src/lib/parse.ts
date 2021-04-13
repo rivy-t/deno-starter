@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu ; (names) micromatch picomatch
+// spell-checker:ignore (js) gmsu ; (names) micromatch picomatch SkyPack ; (options) nobrace noquantifiers nocase
 
 // ESM conversion refs
 // ref: <https://esbuild.github.io/plugins>
@@ -292,7 +292,7 @@ export function parseNonGlobPathPrefix(s: string) {
 	const globAsRe = glob && globToRe(glob);
 	const globScan = Micromatch.scan(glob, { tokens: true });
 	const globScanTokens = globScan.tokens[0];
-	const globSegs = Picomatch.scan(glob, {});
+	const globSegments = Picomatch.scan(glob, {});
 
 	return {
 		prefix,
@@ -300,7 +300,7 @@ export function parseNonGlobPathPrefix(s: string) {
 		globAsRe,
 		globScan,
 		globScanTokens,
-		globSegs,
+		globSegments,
 	};
 }
 
