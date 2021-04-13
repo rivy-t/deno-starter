@@ -7,5 +7,6 @@
 		"target": "esnext",
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true
-	}
+	},
+	"exclude": ["vendor"]
 }
