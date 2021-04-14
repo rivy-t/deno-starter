@@ -5,6 +5,7 @@
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"target": "esnext",
+		"isolatedModules": true,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true
 	},
