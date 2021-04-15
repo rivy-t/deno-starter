@@ -4,6 +4,10 @@ import { writeAllSync } from 'https://deno.land/std@@0.93.0/io/mod.ts';
 import Schema, { string, number, array, unknown } from 'http://esm.sh/computed-types@1.6.0';
 // import type { SchemaValidatorFunction, SchemaReturnType } from 'http://esm.sh/computed-types@1.6.0';
 
+import { nameGen } from './common.ts';
+
+const testName = nameGen(import.meta.url);
+
 type ValidatorType = unknown;
 const isOfType = (s: ValidatorType, value: unknown) => {
 	// deno-lint-ignore no-explicit-any
@@ -14,7 +18,7 @@ import * as Parse from '../src/lib/parse.ts';
 
 const e = new TextEncoder();
 
-Deno.test('parse', () => {
+Deno.test(testName('parse'), () => {
 	writeAllSync(Deno.stdout, e.encode('['));
 
 	let result;

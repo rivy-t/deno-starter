@@ -1,3 +1,12 @@
-// Add your test dependencies in here
-// export { test, runTests } from "https://deno.land/std@0.82.0/testing/mod.ts";
-export { assertEquals } from 'https://deno.land/std@0.93.0/testing/asserts.ts';
+// tests ~ dependencies
+
+export { existsSync } from 'https://deno.land/std@0.92.0/fs/exists.ts';
+export * as Path from 'https://deno.land/std@0.92.0/path/mod.ts';
+export {
+	assert,
+	assertEquals,
+	assertNotEquals,
+	assertStringIncludes,
+	assertThrows,
+	assertThrowsAsync,
+} from 'https://deno.land/std@0.92.0/testing/asserts.ts';
