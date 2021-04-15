@@ -19,3 +19,4 @@ dist
 
 # * third-party code
 node_modules
+vendor

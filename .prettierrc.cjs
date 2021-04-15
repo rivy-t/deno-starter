@@ -3,6 +3,7 @@ module.exports = {
 	singleQuote: true,
 	useTabs: true,
 	tabWidth: 2,
+	trailingComma: 'all',
 	overrides: [
 		{
 			files: ['*.md', '*.mkd', '*.markdown'],
