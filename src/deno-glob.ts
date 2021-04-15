@@ -7,6 +7,15 @@
 // - [ ] return relative paths for relative globs
 // - [ ] investigate globstar syntax and results
 
+import { assert } from 'https://deno.land/std@0.92.0/_util/assert.ts';
+import { isWindows } from 'https://deno.land/std@0.92.0/_util/os.ts';
+import {
+	_createWalkEntry,
+	_createWalkEntrySync,
+	walk,
+	WalkEntry,
+	walkSync,
+} from 'https://deno.land/std@0.92.0/fs/walk.ts';
 import {
 	GlobOptions,
 	globToRegExp,
@@ -16,15 +25,6 @@ import {
 	normalize,
 	SEP_PATTERN,
 } from 'https://deno.land/std@0.92.0/path/mod.ts';
-import {
-	_createWalkEntry,
-	_createWalkEntrySync,
-	walk,
-	WalkEntry,
-	walkSync,
-} from 'https://deno.land/std@0.92.0/fs/walk.ts';
-import { assert } from 'https://deno.land/std@0.92.0/_util/assert.ts';
-import { isWindows } from 'https://deno.land/std@0.92.0/_util/os.ts';
 
 export interface ExpandGlobOptions extends Omit<GlobOptions, 'os'> {
 	root?: string;
@@ -88,7 +88,7 @@ export async function* expandGlob(
 		globstar = false,
 		dotglob = true,
 		caseSensitive = isWindows ? false : true,
-	}: ExpandGlobOptions = {}
+	}: ExpandGlobOptions = {},
 ): AsyncIterableIterator<WalkEntry> {
 	const globOptions: GlobOptions = { extended, globstar };
 	const absRoot = isAbsolute(root) ? normalize(root) : joinGlobs([Deno.cwd(), root], globOptions);
@@ -118,7 +118,7 @@ export async function* expandGlob(
 	async function* advanceMatch(
 		walkInfo: WalkEntry,
 		globSegment: string,
-		caseSensitive: boolean
+		caseSensitive: boolean,
 	): AsyncIterableIterator<WalkEntry> {
 		if (!walkInfo.isDirectory) {
 			return;
@@ -143,7 +143,7 @@ export async function* expandGlob(
 			match: [
 				new RegExp(
 					globToRegExp(joinGlobs([walkInfo.path, globSegment], globOptions), globOptions),
-					caseSensitive ? '' : 'i'
+					caseSensitive ? '' : 'i',
 				),
 			],
 			skip: excludePatterns,
@@ -189,7 +189,7 @@ export function* expandGlobSync(
 		globstar = false,
 		dotglob = true,
 		caseSensitive = isWindows ? false : true,
-	}: ExpandGlobOptions = {}
+	}: ExpandGlobOptions = {},
 ): IterableIterator<WalkEntry> {
 	const globOptions: GlobOptions = { extended, globstar };
 	const absRoot = isAbsolute(root) ? normalize(root) : joinGlobs([Deno.cwd(), root], globOptions);
@@ -219,7 +219,7 @@ export function* expandGlobSync(
 	function* advanceMatch(
 		walkInfo: WalkEntry,
 		globSegment: string,
-		caseSensitive: boolean
+		caseSensitive: boolean,
 	): IterableIterator<WalkEntry> {
 		if (!walkInfo.isDirectory) {
 			return;
@@ -244,7 +244,7 @@ export function* expandGlobSync(
 			match: [
 				new RegExp(
 					globToRegExp(joinGlobs([walkInfo.path, globSegment], globOptions), globOptions),
-					caseSensitive ? '' : 'i'
+					caseSensitive ? '' : 'i',
 				),
 			],
 			skip: excludePatterns,

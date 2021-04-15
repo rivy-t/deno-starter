@@ -22,7 +22,7 @@ const me = Me.info();
 if (Deno.build.os === 'windows' && !me[0]) {
 	console.warn(
 		me.name +
-			': warn: diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)'
+			': warn: diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
 	);
 }
 

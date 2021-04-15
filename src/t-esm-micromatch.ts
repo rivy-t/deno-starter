@@ -8,11 +8,11 @@ import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 import * as Me from './lib/me.ts';
 import {
 	braceExpand,
+	globToRe,
+	parseNonGlobPathPrefix,
 	splitByBareWS,
 	splitByBareWSBalanced,
 	splitByBareWSToPreBrace,
-	parseNonGlobPathPrefix,
-	globToRe,
 } from './lib/parse.ts';
 
 const me = Me.info();
@@ -20,7 +20,7 @@ console.warn(me.name, { me });
 if (Deno.build.os === 'windows' && !me[0]) {
 	console.warn(
 		me.name +
-			': warn: diminished capacity; full functionality requires an enhanced runner (use `dxr` or install with `dxi`)'
+			': warn: diminished capacity; full functionality requires an enhanced runner (use `dxr` or install with `dxi`)',
 	);
 }
 

@@ -13,7 +13,7 @@ console.warn(me.name, { meExec, meMain, me });
 if (Deno.build.os === 'windows' && !me[0]) {
 	console.warn(
 		me.name +
-			': warn: diminished capacity; full functionality requires an enhanced runner (use `dxr` or install with `dxi`)'
+			': warn: diminished capacity; full functionality requires an enhanced runner (use `dxr` or install with `dxi`)',
 	);
 }
 

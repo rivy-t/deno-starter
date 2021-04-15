@@ -34,12 +34,12 @@ import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 // import MicromatchM from 'https://ga.jspm.io/npm:micromatch@4.0.2/index.js';
 // import PicomatchM from 'https://ga.jspm.io/npm:picomatch@2.2.2/index.js';
 // jspm.dev
-import BracesM from 'https://jspm.dev/npm:braces@3.0.2';
-import MicromatchM from 'https://jspm.dev/npm:micromatch@4.0.2';
-import PicomatchM from 'https://jspm.dev/npm:picomatch@2.2.2';
 import * as BracesT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/braces/index.d.ts';
 import * as MicromatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/micromatch/index.d.ts';
 import * as PicomatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/picomatch/index.d.ts';
+import BracesM from 'https://jspm.dev/npm:braces@3.0.2';
+import MicromatchM from 'https://jspm.dev/npm:micromatch@4.0.2';
+import PicomatchM from 'https://jspm.dev/npm:picomatch@2.2.2';
 const Braces = BracesM as typeof BracesT;
 const Micromatch = MicromatchM as typeof MicromatchT;
 const Picomatch = PicomatchM as typeof PicomatchT;
@@ -110,7 +110,7 @@ export function splitByBareWSBalanced(s: string): Array<string> {
 	// console.warn({ _: 'splitByBareWS()', s });
 	const tokenRe = new RegExp(
 		`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+))(\\s+)?(.*$)`,
-		'msu'
+		'msu',
 	);
 	let text = '';
 	while (s) {
@@ -271,7 +271,7 @@ export function parseNonGlobPathPrefix(s: string) {
 	}
 
 	const re = new RegExp(
-		`^((?:${DQStringReS}|${SQStringReS}|${nonGlobQSepReS}+)*(?:${sepReS}+|$))(.*$)`
+		`^((?:${DQStringReS}|${SQStringReS}|${nonGlobQSepReS}+)*(?:${sepReS}+|$))(.*$)`,
 	);
 	// console.warn({ _: 'parseNonGlobPathPrefix', re });
 	while (s) {

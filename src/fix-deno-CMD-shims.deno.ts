@@ -78,7 +78,7 @@ const forceUpdate = true;
 
 const cmdShimTemplate = cmdShimBase.replace(
 	'@:...prepPipe...',
-	enablePipe ? cmdShimPrepPipe : '@:pipeDisabled'
+	enablePipe ? cmdShimPrepPipe : '@:pipeDisabled',
 );
 
 const isWinOS = Deno.build.os === 'windows';
@@ -114,12 +114,12 @@ eol.LF = function (s: string) {
 
 const denoInstallRoot = joinFullyDefinedPaths(
 	Deno.env.get('DENO_INSTALL_ROOT') ?? joinFullyDefinedPaths(OsPaths.home(), '.deno'),
-	'bin'
+	'bin',
 );
 
 if (denoInstallRoot && fs.existsSync(denoInstallRoot)) {
 	Deno.stdout.writeSync(
-		encoder.encode('`deno` binaries folder found at "' + denoInstallRoot + '"\n')
+		encoder.encode('`deno` binaries folder found at "' + denoInstallRoot + '"\n'),
 	);
 } else {
 	Deno.stderr.writeSync(encoder.encode('ERR!: `deno` binaries folder not found\n'));
@@ -139,10 +139,10 @@ const re = new RegExp(
 	Path.globToRegExp(cmdGlob, { extended: true, globstar: true, os: 'windows' }).source.replace(
 		// * remove leading "anchor"
 		/^[^]/,
-		''
+		'',
 	),
 	// * configure case sensitivity
-	pathCaseSensitive ? void 0 : 'i'
+	pathCaseSensitive ? void 0 : 'i',
 );
 
 // const identity = <T>(x: T) => x;
@@ -156,8 +156,8 @@ const fileEntries = await collect(
 			maxDepth: 1,
 			match: res,
 			// skip: [/[.]/],
-		})
-	)
+		}),
+	),
 );
 // console.log({
 // 	denoInstallRoot,
@@ -179,15 +179,13 @@ const updates = await collect(
 
 		// heuristic match for enhanced shim
 		// spell-checker:ignore () ined
-		const isEnhanced =
-			contentsOriginal.match(/goto\s+[\W_]*undef(?:ined)?[\W_]*\s+2\s*>\s*NUL/i) ||
+		const isEnhanced = contentsOriginal.match(/goto\s+[\W_]*undef(?:ined)?[\W_]*\s+2\s*>\s*NUL/i) ||
 			contentsOriginal.match(/shim\s*;\s*by\s*`?dxi`?/i);
 
-		const reMatchArray =
-			contentsOriginal.match(
-				// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
-				/^(.*?)@\x22?deno(?:[.]exe)?\x22?\s+\x22?run\x22?\s+(.*\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m
-			) || [];
+		const reMatchArray = contentsOriginal.match(
+			// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
+			/^(.*?)@\x22?deno(?:[.]exe)?\x22?\s+\x22?run\x22?\s+(.*\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m,
+		) || [];
 		const [match, denoCommandPrefix, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
 
 		const denoRunOptions = (denoRunOptionsRaw || '')
@@ -200,7 +198,7 @@ const updates = await collect(
 				denoRunOptions,
 				denoRunTarget,
 				shimBinName,
-			})
+			}),
 		);
 		return {
 			shimPath,
@@ -209,7 +207,7 @@ const updates = await collect(
 			denoRunOptions,
 			contentsOriginal,
 		};
-	}, fileEntries)
+	}, fileEntries),
 );
 
 for await (const update of updates) {

@@ -7,11 +7,11 @@ import OsPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 
 import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 // import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
-import { walk, walkSync, WalkEntry } from 'https://deno.land/std@0.83.0/fs/walk.ts';
+import { walk, WalkEntry, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, walk, walkSync };
 
 import { expandGlobSync } from './deno-glob.ts';
-import { collectSync, collect } from './funk.ts';
+import { collect, collectSync } from './funk.ts';
 
 const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
@@ -81,7 +81,7 @@ function wildArgs() {
 		console.log({ globToken });
 		if (globToken.isGlob) {
 			const expandedGlobs = collectSync(
-				expandGlobSync(globToken.glob) as IterableIterator<WalkEntry>
+				expandGlobSync(globToken.glob) as IterableIterator<WalkEntry>,
 			);
 			if (expandedGlobs.length > 0) {
 				const globs = Array.from(expandedGlobs, (v) => v.path);
@@ -114,7 +114,7 @@ function localExpandGlob(glob: string) {
 		// 	''
 		// ),
 		// * configure case sensitivity
-		pathCaseSensitive ? void 0 : 'i'
+		pathCaseSensitive ? void 0 : 'i',
 	);
 	const res = [re];
 	const fileEntries = collectSync(
@@ -122,7 +122,7 @@ function localExpandGlob(glob: string) {
 			// maxDepth: 1,
 			match: res,
 			// skip: [/[.]/],
-		})
+		}),
 	);
 	// console.warn({ glob, re, res, fileEntries });
 	return fileEntries;

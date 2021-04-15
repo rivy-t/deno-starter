@@ -19,7 +19,7 @@ import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync };
 
-import { first, collect, map } from './funk.ts';
+import { collect, first, map } from './funk.ts';
 
 // templating engines ~ <https://colorlib.com/wp/top-templating-engines-for-javascript> @@ <https://archive.is/BKYMw>
 
@@ -100,7 +100,7 @@ type findFileOptions = {
 
 async function* findExecutable(
 	name: string,
-	options: findFileOptions = {}
+	options: findFileOptions = {},
 ): AsyncIterableIterator<string> {
 	const paths = options.paths
 		? options.paths
@@ -120,7 +120,7 @@ async function* findExecutable(
 
 function* findExecutableSync(
 	name: string,
-	options: findFileOptions = {}
+	options: findFileOptions = {},
 ): IterableIterator<string> {
 	const paths = options.paths
 		? options.paths
@@ -143,7 +143,7 @@ const npmBinPath = npmPath ? path.dirname(npmPath) : void 0;
 
 if (npmBinPath) {
 	Deno.stdout.writeSync(
-		encoder.encode('`npm` binaries folder found at "' + npmBinPath + '"' + '\n')
+		encoder.encode('`npm` binaries folder found at "' + npmBinPath + '"' + '\n'),
 	);
 } else {
 	Deno.stderr.writeSync(encoder.encode('`npm` binaries folder not found\n'));
@@ -170,7 +170,7 @@ const updates = await collect(
 			contentsOriginal,
 			contentsUpdated,
 		};
-	}, files)
+	}, files),
 );
 
 for await (const update of updates) {

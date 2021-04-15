@@ -1,7 +1,7 @@
 import { assert } from 'https://deno.land/std@0.93.0/testing/asserts.ts';
 import { writeAllSync } from 'https://deno.land/std@@0.93.0/io/mod.ts';
 
-import Schema, { string, number, array, unknown } from 'http://esm.sh/computed-types@1.6.0';
+import Schema, { array, number, string, unknown } from 'http://esm.sh/computed-types@1.6.0';
 // import type { SchemaValidatorFunction, SchemaReturnType } from 'http://esm.sh/computed-types@1.6.0';
 
 import { testTemplate } from './common.ts';

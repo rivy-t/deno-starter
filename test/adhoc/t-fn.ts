@@ -8,9 +8,9 @@
 
 // console.log({ x });
 
+import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 import * as F from '../../src/funk.ts'; // spell-checker:ignore unnest
 import type { ValueOrArray } from '../../src/funk.ts'; // spell-checker:ignore unnest
-import * as R from 'https://deno.land/x/ramda@v0.27.2/mod.ts';
 
 const double = (x: number) => x + x;
 const sum = (acc: number, x: number) => acc + x;

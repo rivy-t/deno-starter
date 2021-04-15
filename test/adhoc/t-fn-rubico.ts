@@ -55,7 +55,7 @@ map(
 		({ original, squared }: { original: number; squared: number }) => {
 			console.log('squared:', original, '->', squared);
 		},
-	])
+	]),
 )(iterables);
 
 // from: <https://www.youtube.com/watch?v=jmPZztKIFf4&t=2860s>
