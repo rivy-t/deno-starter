@@ -1,0 +1,23 @@
+{
+	"$schema": "https://dprint.dev/schemas/v0.json",
+	"projectType": "openSource",
+	"incremental": true,
+	"indentWidth": 2,
+	"useTabs": true,
+	"typescript": {
+		// ref: <https://dprint.dev/plugins/typescript/config>
+		"functionExpression.spaceAfterFunctionKeyword": true, // default to Prettier practice
+		"quoteStyle": "preferSingle"
+	},
+	"json": {},
+	"markdown": {},
+	"rustfmt": {},
+	"includes": ["**/*.{ts,tsx,js,jsx,json,md,rs}"],
+	"excludes": [".history", "**/node_modules", "**/*-lock.json", "**/target", "**/vendor"],
+	"plugins": [
+		"https://plugins.dprint.dev/typescript-0.40.3.wasm",
+		"https://plugins.dprint.dev/json-0.8.0.wasm",
+		"https://plugins.dprint.dev/markdown-0.5.1.wasm",
+		"https://plugins.dprint.dev/rustfmt-0.3.0.wasm"
+	]
+}
