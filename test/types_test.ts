@@ -13,6 +13,13 @@ const isOfType = (s: ValidatorType, value: unknown) => {
 	// deno-lint-ignore no-explicit-any
 	return (s as any).destruct()(value);
 };
+const assertType = (s: ValidatorType, value: unknown) => {
+	// deno-lint-ignore no-explicit-any
+	const result = isOfType(s, value);
+	if (result[0]) {
+		throw result[0];
+	}
+};
 
 import * as Parse from '../src/lib/parse.ts';
 
@@ -24,14 +31,14 @@ test('parse', () => {
 	let result;
 
 	writeAllSync(Deno.stdout, e.encode('.'));
-	result = isOfType(unknown.array().of(string).max(0), Parse.splitByBareWS(''));
+	// result = isOfType(unknown.array().of(string).max(0), Parse.splitByBareWS(''));
 	// console.warn({ result });
-	assert(result[1]);
+	assertType(unknown.array().of(string).max(0), Parse.splitByBareWS(''));
 
 	writeAllSync(Deno.stdout, e.encode('.'));
-	result = isOfType(unknown.array().of(string), Parse.splitByBareWS('test this'));
+	// result = isOfType(unknown.array().of(string), Parse.splitByBareWS('test this'));
 	// console.warn({ result });
-	assert(result[1]);
+	assertType(unknown.array().of(string), Parse.splitByBareWS('test this'));
 
 	writeAllSync(Deno.stdout, e.encode('] '));
 });
