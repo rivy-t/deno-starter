@@ -1,6 +1,6 @@
 // spell-checker:ignore (js) gmsu
 
-import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
+// import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
 // import Micromatch from 'https://esm.sh/micromatch@4.0.2';
 // import braces from 'https://esm.sh/braces@3.0.2';
@@ -9,10 +9,10 @@ import * as Me from './lib/me.ts';
 import {
 	braceExpand,
 	globToRe,
-	parseNonGlobPathPrefix,
+	// parseNonGlobPathPrefix,
 	splitByBareWS,
 	splitByBareWSBalanced,
-	splitByBareWSToPreBrace,
+	// splitByBareWSToPreBrace,
 } from './lib/parse.ts';
 
 const me = Me.info();
@@ -23,6 +23,9 @@ if (Deno.build.os === 'windows' && !me[0]) {
 			': warn: diminished capacity; full functionality requires an enhanced runner (use `dxr` or install with `dxi`)',
 	);
 }
+
+// bash-type command line expansion
+// ref: [bash ~ Shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
 
 const args = me.ARGS || '';
 const argvSplit = splitByBareWS(args);
