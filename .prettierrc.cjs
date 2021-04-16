@@ -1,3 +1,5 @@
+// deno-lint-ignore ban-ts-comment
+// @ts-ignore
 module.exports = {
 	printWidth: 100,
 	singleQuote: true,

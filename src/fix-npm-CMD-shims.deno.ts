@@ -71,7 +71,7 @@ const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
 const pathListSeparator = isWinOS ? /;/ : /:/;
 // const paths = Deno.env.get('PATH')?.split(pathListSeparator) || [];
-const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
+// const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 
 // EOL handler
 const eol = () => {};
@@ -118,25 +118,25 @@ async function* findExecutable(
 	}
 }
 
-function* findExecutableSync(
-	name: string,
-	options: findFileOptions = {},
-): IterableIterator<string> {
-	const paths = options.paths
-		? options.paths
-		: (isWinOS ? ['.'] : []).concat(Deno.env.get('PATH')?.split(pathListSeparator) || []);
-	const extensions = options.extensions
-		? options.extensions
-		: (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [''];
-	for (const path_ of paths) {
-		for (const extension of extensions) {
-			const p = path.join(path_, name) + extension;
-			if (fs.existsSync(p) && (isWinOS || (Deno.lstatSync(p).mode || 0) & 0o111)) {
-				yield p;
-			}
-		}
-	}
-}
+// function* findExecutableSync(
+// 	name: string,
+// 	options: findFileOptions = {},
+// ): IterableIterator<string> {
+// 	const paths = options.paths
+// 		? options.paths
+// 		: (isWinOS ? ['.'] : []).concat(Deno.env.get('PATH')?.split(pathListSeparator) || []);
+// 	const extensions = options.extensions
+// 		? options.extensions
+// 		: (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [''];
+// 	for (const path_ of paths) {
+// 		for (const extension of extensions) {
+// 			const p = path.join(path_, name) + extension;
+// 			if (fs.existsSync(p) && (isWinOS || (Deno.lstatSync(p).mode || 0) & 0o111)) {
+// 				yield p;
+// 			}
+// 		}
+// 	}
+// }
 
 const npmPath = await first(findExecutable('npm'));
 const npmBinPath = npmPath ? path.dirname(npmPath) : void 0;

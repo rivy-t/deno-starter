@@ -1,6 +1,6 @@
 // spell-checker:ignore (vars) arr globstar gmsu nullglob PATHEXT
 
-import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
+// import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
 import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
