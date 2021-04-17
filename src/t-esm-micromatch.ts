@@ -30,8 +30,8 @@ if (Deno.build.os === 'windows' && !me[0]) {
 // ref: [bash ~ Shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
 
 const args = me.ARGS || '';
-const argvSplit = splitByBareWS(args);
-const argvSplitBraceExpanded = splitByBareWS(args).flatMap(braceExpand);
+// const argvSplit = splitByBareWS(args);
+// const argvSplitBraceExpanded = splitByBareWS(args).flatMap(braceExpand);
 const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args)
 	.flatMap(braceExpand)
 	.flatMap(tildeExpand);
@@ -40,8 +40,8 @@ const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
 	.flatMap(tildeExpand)
 	.flatMap(filenameExpandSync);
 const argv = argvSplitBraceExpandedTildeExpandedGlobExpanded;
-const argsBraceExpanded = braceExpand(args);
-const argvToGlobRe = argv.map(parseGlob);
+// const argsBraceExpanded = braceExpand(args);
+const parsedGlobs = argvSplitBraceExpandedTildeExpanded.map(parseGlob);
 
 console.warn(me.name, {
 	args,
@@ -51,7 +51,7 @@ console.warn(me.name, {
 	// argvSplitBraceExpandedTildeExpanded,
 	// argvSplitBraceExpandedTildeExpandedGlobExpanded,
 	argv,
-	// argvToGlobRe,
+	parsedGlobs,
 });
 
 // for (const a of argvToGlobRe) {
@@ -69,3 +69,5 @@ console.warn(me.name, {
 
 // console.log({ parsedArgs: parseGlob(args) });
 // console.log({ parsedArgV: argv.map((v) => parseGlob(v)) });
+
+// Deno.exit(100);
