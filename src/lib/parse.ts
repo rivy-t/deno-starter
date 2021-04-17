@@ -114,6 +114,70 @@ export function splitByBareWSo(s: string): Array<string> {
 	return arr;
 }
 
+const TokenReS = {
+	bareWS: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+))(\\s+)?(.*$)`, 'msu'),
+	brace: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, ''),
+};
+
+export function shiftByBareWS(
+	s: string,
+	options: { autoQuote: boolean } = { autoQuote: true },
+): [string, string] {
+	// parse string into a token + restOfString separated by unquoted-whitespace
+	// * supports both single and double quotes
+	// * no character escape sequences are recognized
+	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
+	const { autoQuote } = options;
+	const arr: Array<string> = [];
+	s.replace(/^\s+/, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
+	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
+	let foundFullToken = false;
+	let token = '';
+	while (s && !foundFullToken) {
+		const m = s.match(tokenRe);
+		if (m) {
+			let matchStr = m[1];
+			if (matchStr.length > 0) {
+				const firstChar = matchStr[0];
+				// "..." or '...'?
+				if (firstChar === DQ || firstChar === SQ) {
+					if (autoQuote && matchStr[matchStr.length - 1] !== firstChar) {
+						matchStr += firstChar;
+					}
+				}
+			}
+			token += matchStr;
+			s = m[3] ? m[3].replace(/^\s+/, '') : ''; // trim leading whitespace
+			if (m[2] || !s) {
+				foundFullToken = true;
+			}
+		} else {
+			// should not be possible
+			foundFullToken = true;
+		}
+		// console.warn({ _: 'shiftByBareWS()', s, m, token });
+	}
+	return [token, s];
+}
+
+export function splitByShiftBareWS(
+	s: string,
+	options: { autoQuote: boolean } = { autoQuote: true },
+): Array<string> {
+	// parse string into tokens separated by unquoted-whitespace
+	// * supports both single and double quotes
+	// * no character escape sequences are recognized
+	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
+	const arr: Array<string> = [];
+	s.replace(/^\s+/, ''); // trim leading whitespace
+	while (s) {
+		const [token, restOfString] = shiftByBareWS(s, options);
+		arr.push(token);
+		s = restOfString;
+	}
+	return arr;
+}
+
 export function splitByBareWS(
 	s: string,
 	options: { autoQuote: boolean } = { autoQuote: true },
@@ -126,10 +190,7 @@ export function splitByBareWS(
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWS()', s });
-	const tokenRe = new RegExp(
-		`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+))(\\s+)?(.*$)`,
-		'msu',
-	);
+	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let text = '';
 	while (s) {
 		const m = s.match(tokenRe);
@@ -166,7 +227,7 @@ export function braceExpand(s: string): Array<string> {
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
 	// console.warn({ _: 'braceExpand()', s });
-	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, '');
+	const tokenRe = TokenReS.brace; // == (tokenFragment)(restOfString)
 	let text = '';
 	while (s) {
 		const m = s.match(tokenRe);
