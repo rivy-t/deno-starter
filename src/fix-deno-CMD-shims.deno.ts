@@ -43,42 +43,66 @@ const encoder = new TextEncoder(); // default == 'utf-8'
 const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\`) %
 @rem:: spell-checker:ignore (shell/CMD) COMSPEC ERRORLEVEL ; (deno) hrtime ; (bin) <%=shimBinName%> <%=denoRunTarget%>
 @set "ERRORLEVEL="
+@set "DENO_SHIM_ERRORLEVEL="
 @setLocal
-@set "_DENO_SHIM_PIPE_="
-@:...prepPipe...
+@set "DENO_SHIM_ARGS="
+@set "DENO_SHIM_PIPE="
+@:...prep...
 @:launch
+@:rem DENO_SHIM_EXEC convolution is to avoid \`%*\` within the final parse group [o/w paren args cause parsing misbehavior]
+@:rem ... this revision does now require balanced double-quotes (when double-quotes are used); this can be avoided if/when Deno handles packaging the command line argument string
+@>>"%DENO_SHIM_EXEC%" echo @set DENO_SHIM_ARGS=%*
+@>>"%DENO_SHIM_EXEC%" echo @goto _undef_ 2^>NUL ^|^| @for %%%%G in ("%COMSPEC%") do @title %%%%~nG ^& @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %%DENO_SHIM_ARGS%%
 @(
 @goto _undef_ 2>NUL
 @for %%G in ("%COMSPEC%") do @title %%~nG
-@set DENO_SHIM_0=%0
-@set DENO_SHIM_ARGS=%*
-@set "DENO_SHIM_ERRORLEVEL="
+@set "DENO_SHIM_0=%~0"
+@set "DENO_SHIM_EXEC=%DENO_SHIM_EXEC%"
 @set "DENO_SHIM_PIPE=%DENO_SHIM_PIPE%"
-@deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %*
+@call "%DENO_SHIM_EXEC%"
 @call set DENO_SHIM_ERRORLEVEL=%%ERRORLEVEL%%
 @if EXIST "%DENO_SHIM_PIPE%" call "%DENO_SHIM_PIPE%" >NUL 2>NUL
+@if EXIST "%DENO_SHIM_EXEC%" if NOT DEFINED DENO_SHIM_DEBUG del /q "%DENO_SHIM_EXEC%" 2>NUL
 @if EXIST "%DENO_SHIM_PIPE%" if NOT DEFINED DENO_SHIM_DEBUG del /q "%DENO_SHIM_PIPE%" 2>NUL
 @set "DENO_SHIM_0="
 @set "DENO_SHIM_ARGS="
+@set "DENO_SHIM_EXEC="
 @set "DENO_SHIM_PIPE="
 @call %COMSPEC% /d/c "exit %%DENO_SHIM_ERRORLEVEL%%"
 )
 `;
-const cmdShimPrepPipe = `@:prepPipe
+const cmdShimPrepPipe = `@:pipeEnabled
+@:prep
 @set "RANDOM=" &:: remove any cloak from dynamic variable RANDOM
 @if NOT DEFINED TEMP @set TEMP=%TMP%
 @if NOT EXIST "%TEMP%" @set TEMP=%TMP%
 @if NOT EXIST "%TEMP%" @goto :launch
-@set DENO_SHIM_PIPE=%TEMP%\\<%=shimBinName%>.shim.pipe.%RANDOM%.%RANDOM%.%RANDOM%.cmd
-@if EXIST "%DENO_SHIM_PIPE%" @goto :prepPipe
-@if DEFINED DENO_SHIM_PIPE echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_PIPE%"`;
+@set DENO_SHIM_TID=%RANDOM%.%RANDOM%.%RANDOM%
+@set DENO_SHIM_EXEC=%TEMP%\\<%=shimBinName%>.shim.exec.%DENO_SHIM_TID%.cmd
+@set DENO_SHIM_PIPE=%TEMP%\\<%=shimBinName%>.shim.pipe.%DENO_SHIM_TID%.cmd
+@if EXIST "%DENO_SHIM_EXEC%" @goto :prep
+@if EXIST "%DENO_SHIM_PIPE%" @goto :prep
+@if DEFINED DENO_SHIM_EXEC echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_EXEC%"
+@if DEFINED DENO_SHIM_PIPE echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_PIPE%"
+`;
+const cmdShimPrepNoPipe = `@:pipeDisabled
+@:prep
+@set "RANDOM=" &:: remove any cloak from dynamic variable RANDOM
+@if NOT DEFINED TEMP @set TEMP=%TMP%
+@if NOT EXIST "%TEMP%" @set TEMP=%TMP%
+@if NOT EXIST "%TEMP%" @goto :launch
+@set DENO_SHIM_TID=%RANDOM%.%RANDOM%.%RANDOM%
+@set DENO_SHIM_EXEC=%TEMP%\\<%=shimBinName%>.shim.exec.%DENO_SHIM_TID%.cmd
+@if EXIST "%DENO_SHIM_EXEC%" @goto :prep
+@if DEFINED DENO_SHIM_EXEC echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_EXEC%"
+`;
 
 const enablePipe = true;
 const forceUpdate = true;
 
 const cmdShimTemplate = cmdShimBase.replace(
-	'@:...prepPipe...',
-	enablePipe ? cmdShimPrepPipe : '@:pipeDisabled',
+	'@:...prep...',
+	enablePipe ? cmdShimPrepPipe : cmdShimPrepNoPipe,
 );
 
 const isWinOS = Deno.build.os === 'windows';
