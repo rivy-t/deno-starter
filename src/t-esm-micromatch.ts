@@ -9,9 +9,9 @@ import * as Me from './lib/me.ts';
 import {
 	braceExpand,
 	filenameExpand,
-	filenameExpandSync,
+	// filenameExpandSync,
 	// globToReS,
-	parseGlob,
+	// parseGlob,
 	splitByBareWS,
 	// splitByBareWSToPreBrace,
 	tildeExpand,

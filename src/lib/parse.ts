@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu ; (names) micromatch picomatch SkyPack ; (options) nobrace noquantifiers nocase
+// spell-checker:ignore (js) gmsu ; (names) SkyPack micromatch picomatch xwalk ; (options) nobrace noquantifiers nocase
 
 // ref: [bash shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
 // ref: [GNU ~ bash shell expansions](https://www.gnu.org/software/bash/manual/html_node/Shell-Expansions.html) @@ <https://archive.is/lHgK6>
@@ -331,9 +331,9 @@ export function filenameExpandToCollection(s: string): Array<string> {
 function pathToPosix(p: string) {
 	return p.replace(/\\/g, '/');
 }
-function pathToWindows(p: string) {
-	return p.replace(/\//g, '\\');
-}
+// function pathToWindows(p: string) {
+// 	return p.replace(/\//g, '\\');
+// }
 
 // ToDO: handle long paths, "\\?\...", and UNC paths
 // ref: [1][MSDN - Windows: Naming Files, Paths, and Namespaces] http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx @@ https://archive.today/DgH7i
@@ -386,9 +386,9 @@ export function parseGlob(s: string) {
 	// });
 	const globAsReS = glob && globToReS(glob);
 	// console.warn({ _: 'parseGlob', globAsReS });
-	// deno-lint-ignore no-explicit-any ## 'picomatch' has incomplete typing
 	// const globScan: any = Picomatch.scan(Path.join(prefix, glob), {
 	// console.warn({ _: 'parseGlob', prefix, glob, pathJoin: Path.posix.join(prefix, glob) });
+	// deno-lint-ignore no-explicit-any ## 'picomatch' has incomplete typing
 	const globScan: any = Picomatch.scan(pJoinToPosix, {
 		windows: true,
 		dot: false,

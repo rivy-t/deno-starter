@@ -1,3 +1,5 @@
+// spell-checker:ignore (*) xwalk
+
 // ToDO: create new xwalk module
 // * improve interface; guarantee no-throw
 
