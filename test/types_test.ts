@@ -11,11 +11,10 @@ const test = testTemplate(import.meta.url);
 type ValidatorType = unknown;
 const isOfType = (s: ValidatorType, value: unknown) => {
 	// deno-lint-ignore no-explicit-any
-	return (s as any).destruct()(value);
+	return ((s as unknown) as any).destruct()(value);
 };
 const assertType = (s: ValidatorType, value: unknown) => {
-	// deno-lint-ignore no-explicit-any
-	const result = isOfType(s, value);
+	const result = isOfType(s, value) as [Error, unknown];
 	if (result[0]) {
 		throw result[0];
 	}
@@ -28,7 +27,7 @@ const e = new TextEncoder();
 test('parse', () => {
 	writeAllSync(Deno.stdout, e.encode('['));
 
-	let result;
+	// let result;
 
 	writeAllSync(Deno.stdout, e.encode('.'));
 	// result = isOfType(unknown.array().of(string).max(0), Parse.splitByBareWS(''));
