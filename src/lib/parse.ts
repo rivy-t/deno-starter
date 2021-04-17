@@ -234,7 +234,6 @@ export function shellExpand(_s: string): Array<string> {
 
 export async function* filenameExpand(s: string) {
 	// filename (glob) expansion
-	const arr: string[] = [];
 	const parsed = parseGlob(s);
 
 	// console.warn({ _: 'filenameExpand()', parsed });
@@ -310,10 +309,10 @@ export function parseGlob(s: string) {
 	const re = new RegExp(
 		`^((?:${DQStringReS}|${SQStringReS}|${nonGlobQSepReS}+)*(?:${sepReS}+|$))(.*$)`,
 	);
-	// console.warn({ _: 'parseNonGlobPathPrefix', re });
+	// console.warn({ _: 'parseGlob', re });
 	while (s) {
 		const m = s.match(re);
-		// console.warn({ _: 'parseNonGlobPathPrefix', s, m });
+		// console.warn({ _: 'parseGlob', s, m });
 		if (m) {
 			prefix += m && m[1] ? m[1] : '';
 			glob = m && m[2];
@@ -322,11 +321,12 @@ export function parseGlob(s: string) {
 			glob = s || '';
 			s = '';
 		}
-		// console.warn({ _: 'parseNonGlobPathPrefix', prefix, glob });
+		// console.warn({ _: 'parseGlob', prefix, glob });
 	}
 
-	// console.warn({ _: 'parseNonGlobPathPrefix', prefix, glob });
+	// console.warn({ _: 'parseGlob', prefix, glob });
 	const globAsReS = glob && globToReS(glob);
+	// console.warn({ _: 'parseGlob', globAsReS });
 	const globScan = Picomatch.scan(Path.join(prefix, glob), {
 		windows: true,
 		dot: false,
@@ -392,16 +392,15 @@ export function globToReS(s: string) {
 	// console.warn({ _: 'globToReS', text });
 
 	// windows = true => match backslash and slash as path separators
-	const parsed = Picomatch.scan(text, {
+	const parsed = Picomatch.parse(text, {
 		windows: true,
 		dot: false,
 		nobrace: true,
 		noquantifiers: true,
 		posix: true,
 		nocase: isWinOS,
-		tokens: true,
-		parts: true,
 	});
+	// console.warn({ _: 'globToReS', parsed });
 	// deno-lint-ignore no-explicit-any
 	return ((parsed as unknown) as any).output;
 }
