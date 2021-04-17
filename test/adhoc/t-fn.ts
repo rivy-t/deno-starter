@@ -21,11 +21,11 @@ const isPrime = (n: number) => {
 	return n > 1;
 };
 
-function sumGeneric<T extends number | string>(acc: T, e: T): T;
-// deno-lint-ignore no-explicit-any
-function sumGeneric(acc: any, e: any) {
-	return acc + e;
-}
+// function sumGeneric<T extends number | string>(acc: T, e: T): T;
+// // deno-lint-ignore no-explicit-any
+// function sumGeneric(acc: any, e: any) {
+// 	return acc + e;
+// }
 
 const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd']));
 // const z = await F.collect(F.enumerate(new Map()));

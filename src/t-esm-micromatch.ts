@@ -10,7 +10,7 @@ import {
 	braceExpand,
 	// filenameExpand,
 	filenameExpandSync,
-	globToReS,
+	// globToReS,
 	parseGlob,
 	splitByBareWS,
 	// splitByBareWSToPreBrace,

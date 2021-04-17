@@ -41,13 +41,13 @@ import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 // import PicomatchM from 'https://ga.jspm.io/npm:picomatch@2.2.2/index.js';
 // jspm.dev
 import * as BracesT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/braces/index.d.ts';
-import * as MicromatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/micromatch/index.d.ts';
+// import * as MicromatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/micromatch/index.d.ts';
 import * as PicomatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/picomatch/index.d.ts';
 import BracesM from 'https://jspm.dev/npm:braces@3.0.2';
-import MicromatchM from 'https://jspm.dev/npm:micromatch@4.0.2';
+// import MicromatchM from 'https://jspm.dev/npm:micromatch@4.0.2';
 import PicomatchM from 'https://jspm.dev/npm:picomatch@2.2.2';
 const Braces = BracesM as typeof BracesT;
-const Micromatch = MicromatchM as typeof MicromatchT;
+// const Micromatch = MicromatchM as typeof MicromatchT;
 const Picomatch = PicomatchM as typeof PicomatchT;
 
 // import Braces from 'http://localhost/braces@3.0.2?bundle';
@@ -83,8 +83,8 @@ const globCharsReS = globChars.map((c) => '\\' + c).join('|');
 const sepReS = `[\\\\\\/]`;
 
 const QReS = `[${DQ}${SQ}]`; // double or single quote character
-const nonGlobReS = `(?:(?!${globCharsReS}).)`;
-const nonGlobQReS = `(?:(?!${globCharsReS}|${QReS}).)`;
+// const nonGlobReS = `(?:(?!${globCharsReS}).)`;
+// const nonGlobQReS = `(?:(?!${globCharsReS}|${QReS}).)`;
 const nonGlobQSepReS = `(?:(?!${globCharsReS}|${QReS}|${sepReS}).)`;
 
 const nonQReS = `(?:(?!${QReS}).)`; // non-quote, non-whitespace character
@@ -327,7 +327,8 @@ export function parseGlob(s: string) {
 	// console.warn({ _: 'parseGlob', prefix, glob });
 	const globAsReS = glob && globToReS(glob);
 	// console.warn({ _: 'parseGlob', globAsReS });
-	const globScan = Picomatch.scan(Path.join(prefix, glob), {
+	// deno-lint-ignore no-explicit-any ## 'picomatch' has incomplete typing
+	const globScan: any = Picomatch.scan(Path.join(prefix, glob), {
 		windows: true,
 		dot: false,
 		nobrace: true,
@@ -336,9 +337,9 @@ export function parseGlob(s: string) {
 		nocase: isWinOS,
 		tokens: true,
 	});
-	const globScanTokens = ((globScan as unknown) as any).tokens;
-	const globScanSlashes = ((globScan as unknown) as any).slashes;
-	const globScanParts = ((globScan as unknown) as any).parts;
+	const globScanTokens = globScan.tokens;
+	const globScanSlashes = globScan.slashes;
+	const globScanParts = globScan.parts;
 	// const globParsed = Picomatch.scan(glob, {
 	// 	windows: true,
 	// 	dot: false,
