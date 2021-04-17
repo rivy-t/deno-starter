@@ -24,7 +24,7 @@
 import { exists, existsSync } from 'https://deno.land/std@0.93.0/fs/exists.ts';
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 import { walk, walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
-import OSPaths from 'https://deno.land/x/os_paths/src/mod.deno.ts';
+import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 
 // esm.sh
 // import Braces from 'https://cdn.esm.sh/braces@3.0.2';
