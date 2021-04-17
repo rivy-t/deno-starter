@@ -206,7 +206,7 @@ export function braceExpand(s: string): Array<string> {
 			text = s = '';
 		}
 	}
-	console.warn({ _: 'braceExpand', arr });
+	// console.warn({ _: 'braceExpand', arr });
 	// return arr.flatMap((v) => Braces.expand(v));
 	return arr.flatMap((v) => Braces.expand(v)).map((v) => v.replace(/\\(\\)/gmsu, '$1'));
 }
@@ -237,7 +237,7 @@ export async function* filenameExpand(s: string) {
 	const arr: string[] = [];
 	const parsed = parseGlob(s);
 
-	console.warn({ _: 'filenameExpand()', parsed });
+	// console.warn({ _: 'filenameExpand()', parsed });
 
 	let found = false;
 	if (parsed.glob) {
@@ -265,7 +265,7 @@ export function filenameExpandSync(s: string): Array<string> {
 	const arr: string[] = [];
 	const parsed = parseGlob(s);
 
-	console.warn({ _: 'filenameExpandSync()', parsed });
+	// console.warn({ _: 'filenameExpandSync()', parsed });
 
 	if (parsed.glob) {
 		const currentWorkingDirectory = Deno.cwd();
@@ -327,17 +327,41 @@ export function parseGlob(s: string) {
 
 	// console.warn({ _: 'parseNonGlobPathPrefix', prefix, glob });
 	const globAsReS = glob && globToReS(glob);
-	const globScan = Micromatch.scan(glob, { tokens: true });
-	const globScanTokens = globScan.tokens[0];
-	const globSegments = Picomatch.scan(glob, {});
+	const globScan = Picomatch.scan(Path.join(prefix, glob), {
+		windows: true,
+		dot: false,
+		nobrace: true,
+		noquantifiers: true,
+		posix: true,
+		nocase: isWinOS,
+		tokens: true,
+	});
+	const globScanTokens = ((globScan as unknown) as any).tokens;
+	const globScanSlashes = ((globScan as unknown) as any).slashes;
+	const globScanParts = ((globScan as unknown) as any).parts;
+	// const globParsed = Picomatch.scan(glob, {
+	// 	windows: true,
+	// 	dot: false,
+	// 	nobrace: true,
+	// 	noquantifiers: true,
+	// 	posix: true,
+	// 	nocase: isWinOS,
+	// 	tokens: true,
+	// });
+	// const globParsedTokens = ((globParsed as unknown) as any).tokens;
+	// const globParsedParts = ((globParsed as unknown) as any).parts;
 
 	return {
 		prefix,
 		glob,
 		globAsReS,
-		// globScan,
-		// globScanTokens,
-		// globSegments,
+		globScan,
+		globScanTokens,
+		globScanSlashes,
+		globScanParts,
+		// globParsed,
+		// globParsedTokens,
+		// globParsedParts,
 	};
 }
 
@@ -365,16 +389,18 @@ export function globToReS(s: string) {
 	// convert PATTERN to POSIX-path-style by replacing all backslashes with slashes (backslash is *not* used as an escape)
 	text = text.replace(/\\/g, '/');
 
-	console.warn({ _: 'globToReS', text });
+	// console.warn({ _: 'globToReS', text });
 
 	// windows = true => match backslash and slash as path separators
-	const parsed = Picomatch.parse(text, {
+	const parsed = Picomatch.scan(text, {
 		windows: true,
 		dot: false,
 		nobrace: true,
 		noquantifiers: true,
 		posix: true,
 		nocase: isWinOS,
+		tokens: true,
+		parts: true,
 	});
 	// deno-lint-ignore no-explicit-any
 	return ((parsed as unknown) as any).output;
