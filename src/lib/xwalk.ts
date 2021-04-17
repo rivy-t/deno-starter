@@ -1,3 +1,6 @@
+// ToDO: create new xwalk module
+// * improve interface; guarantee no-throw
+
 // Documentation and interface for walk were adapted from Go
 // https://golang.org/pkg/path/filepath/#Walk
 // Copyright 2009 The Go Authors. All rights reserved. BSD license.

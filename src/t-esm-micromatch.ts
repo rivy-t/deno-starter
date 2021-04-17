@@ -38,25 +38,36 @@ const args = me.ARGS || '';
 const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args)
 	.flatMap(braceExpand)
 	.flatMap(tildeExpand);
-const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
-	.flatMap(braceExpand)
-	.flatMap(tildeExpand)
-	.flatMap(filenameExpandSync);
+// const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
+// 	.flatMap(braceExpand)
+// 	.flatMap(tildeExpand)
+// 	.flatMap(filenameExpand);
+// const argv = [];
+// for (const values of argvSplitBraceExpandedTildeExpandedGlobExpanded) {
+// 	for await (const vs of values) {
+// 		// console.log({ vs });
+// 		argv.push(vs);
+// 	}
+// }
+// const argv = await argvSplitBraceExpandedTildeExpandedGlobExpandedGen.flat();
+// const argsBraceExpanded = braceExpand(args);
+// const parsedGlobs = argvSplitBraceExpandedTildeExpanded.map(parseGlob);
+
 const argv = [];
-for (const values of argvSplitBraceExpandedTildeExpandedGlobExpanded) {
-	for await (const v of values) {
-		// console.log({ v });
+const vGen = argvSplitBraceExpandedTildeExpanded.flatMap(filenameExpand);
+for (const vs of vGen) {
+	for await (const v of vs) {
+		console.log({ v });
 		argv.push(v);
 	}
 }
-// const argv = await argvSplitBraceExpandedTildeExpandedGlobExpandedGen.flat();
-// const argsBraceExpanded = braceExpand(args);
-const parsedGlobs = argvSplitBraceExpandedTildeExpanded.map(parseGlob);
 
 console.warn(
 	me.name,
 	{
 		args,
+		argvSplitBraceExpandedTildeExpanded,
+		// vGen,
 		// // argsBraceExpanded,
 		// argvSplit,
 		// argvSplitBraceExpanded,
@@ -82,6 +93,6 @@ console.warn(
 // console.log({ parsed: parseGlob(`"c\\d"*\\e*.cmd`) });
 
 // console.log({ parsedArgs: parseGlob(args) });
-// console.log({ parsedArgV: argv.map((v) => parseGlob(v)) });
+// console.log({ parsedArgV: argv.map((vs) => parseGlob(vs)) });
 
 // Deno.exit(100);

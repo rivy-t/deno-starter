@@ -248,6 +248,7 @@ export async function* filenameExpand(s: string) {
 			Deno.chdir(resolvedPrefix);
 			for await (const e of walk('.', {
 				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+				maxDepth: parsed.globScan.maxDepth,
 			})) {
 				found = true;
 				yield Path.join(parsed.prefix, e.path);
