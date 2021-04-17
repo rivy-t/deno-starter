@@ -8,11 +8,12 @@
 import * as Me from './lib/me.ts';
 import {
 	braceExpand,
+	filenameExpand,
 	globToRe,
-	// parseNonGlobPathPrefix,
+	parseGlob,
 	splitByBareWS,
-	splitByBareWSBalanced,
 	// splitByBareWSToPreBrace,
+	tildeExpand,
 } from './lib/parse.ts';
 
 const me = Me.info();
@@ -29,27 +30,41 @@ if (Deno.build.os === 'windows' && !me[0]) {
 
 const args = me.ARGS || '';
 const argvSplit = splitByBareWS(args);
-const argvSplitBalanced = splitByBareWSBalanced(args);
 const argvSplitBraceExpanded = splitByBareWS(args).flatMap(braceExpand);
-const argv = argvSplitBraceExpanded;
-const argvToGlobRe = argv.map(globToRe);
+const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args)
+	.flatMap(braceExpand)
+	.flatMap(tildeExpand);
+const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
+	.flatMap(braceExpand)
+	.flatMap(tildeExpand)
+	.flatMap(filenameExpand);
+const argv = argvSplitBraceExpandedTildeExpandedGlobExpanded;
+const argsBraceExpanded = braceExpand(args);
+const argvToGlobRe = argv.map(parseGlob);
 
 console.warn(me.name, {
 	args,
-	argvSplit,
-	argvSplitBalanced,
-	argvSplitBraceExpanded,
+	// // argsBraceExpanded,
+	// argvSplit,
+	// argvSplitBraceExpanded,
+	// argvSplitBraceExpandedTildeExpanded,
+	// argvSplitBraceExpandedTildeExpandedGlobExpanded,
 	argv,
-	argvToGlobRe,
+	// argvToGlobRe,
 });
+
+// for (const a of argvToGlobRe) {
+// 	const o = ((a as unknown) as any).output;
+// 	console.warn({ a, o }, o);
+// }
 
 // console.log(Micromatch.isMatch('a.a\\b', '*.a\\b', { windows: true }));
 // console.log(braces('\\\\{"a,b",c}', { expand: true }));
 // console.log(Micromatch.scan('c/*.cmd'));
-// console.log({ parsed: parseNonGlobPathPrefix(`a/b/c"a"'aa'/b/"c\\d"\\e*.cmd`) });
-// console.log({ parsed: parseNonGlobPathPrefix(`a/b/c"a"'aa'/b/"c\\d"\\e.cmd`) });
-// console.log({ parsed: parseNonGlobPathPrefix(`"c\\d"\\e*.cmd`) });
-// console.log({ parsed: parseNonGlobPathPrefix(`"c\\d"*\\e*.cmd`) });
+// console.log({ parsed: parseGlob(`a/b/c"a"'aa'/b/"c\\d"\\e*.cmd`) });
+// console.log({ parsed: parseGlob(`a/b/c"a"'aa'/b/"c\\d"\\e.cmd`) });
+// console.log({ parsed: parseGlob(`"c\\d"\\e*.cmd`) });
+// console.log({ parsed: parseGlob(`"c\\d"*\\e*.cmd`) });
 
-// console.log({ parsedArgs: parseNonGlobPathPrefix(args) });
-// console.log({ parsedArgV: argv.map((v) => parseNonGlobPathPrefix(v)) });
+// console.log({ parsedArgs: parseGlob(args) });
+// console.log({ parsedArgV: argv.map((v) => parseGlob(v)) });

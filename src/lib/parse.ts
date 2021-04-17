@@ -1,5 +1,8 @@
 // spell-checker:ignore (js) gmsu ; (names) micromatch picomatch SkyPack ; (options) nobrace noquantifiers nocase
 
+// ref: [bash shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
+// ref: [GNU ~ bash shell expansions](https://www.gnu.org/software/bash/manual/html_node/Shell-Expansions.html) @@ <https://archive.is/lHgK6>
+
 // ESM conversion refs
 // ref: <https://esbuild.github.io/plugins>
 // ref: <https://github.com/postui/esm.sh/blob/master/server/build.go>
@@ -19,6 +22,8 @@
 // ref: <https://jspm.org/docs/cdn>
 
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
+import { walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
+import OSPaths from 'https://deno.land/x/os_paths/src/mod.deno.ts';
 
 // esm.sh
 // import Braces from 'https://cdn.esm.sh/braces@3.0.2';
@@ -59,12 +64,16 @@ const Picomatch = PicomatchM as typeof PicomatchT;
 
 const isWinOS = Deno.build.os === 'windows';
 
-const DQStringReS = '"[^"]*(?:"|$)'; // double-quoted string (unbalanced at end-of-line is allowed)
-const SQStringReS = "'[^']*(?:'|$)"; // single-quoted string (unbalanced at end-of-line is allowed)
-const DQStringStrictReS = '"[^"]*"'; // double-quoted string (quote balance is required)
-const SQStringStrictReS = "'[^']*'"; // single-quoted string (quote balance is required)
+export const portablePathSepReS = '[\\/]';
 
-const pathSepRe = /[\\/]/;
+const DQ = '"';
+const SQ = "'";
+const DQStringReS = `${DQ}[^${DQ}]*(?:${DQ}|$)`; // double-quoted string (unbalanced at end-of-line is allowed)
+const SQStringReS = `${SQ}[^${SQ}]*(?:${SQ}|$)`; // single-quoted string (unbalanced at end-of-line is allowed)
+// const DQStringStrictReS = '"[^"]*"'; // double-quoted string (quote balance is required)
+// const SQStringStrictReS = "'[^']*'"; // single-quoted string (quote balance is required)
+
+// const pathSepRe = /[\\/]/;
 const globChars = ['?', '*', '[', ']'];
 const globCharsReS = globChars.map((c) => '\\' + c).join('|');
 
@@ -72,21 +81,22 @@ const globCharsReS = globChars.map((c) => '\\' + c).join('|');
 // const sepReS = Path.SEP_PATTERN;
 const sepReS = `[\\\\\\/]`;
 
-const QReS = `["']`; // double or single quote character
+const QReS = `[${DQ}${SQ}]`; // double or single quote character
 const nonGlobReS = `(?:(?!${globCharsReS}).)`;
 const nonGlobQReS = `(?:(?!${globCharsReS}|${QReS}).)`;
 const nonGlobQSepReS = `(?:(?!${globCharsReS}|${QReS}|${sepReS}).)`;
 
-const nonQReS = `(?:(?!["']).)`; // non-quote, non-whitespace character
-const nonQWSReS = `(?:(?!["']|\\s).)`; // non-quote, non-whitespace character
+const nonQReS = `(?:(?!${QReS}).)`; // non-quote, non-whitespace character
+const nonQWSReS = `(?:(?!${QReS}|\\s).)`; // non-quote, non-whitespace character
 
-export function splitByBareWS(s: string): Array<string> {
+export function splitByBareWSo(s: string): Array<string> {
 	// parse string into tokens separated by unquoted-whitespace
-	// * supports both single and double quotes; note: no character escape sequences are recognized
-	const addBalance = true;
+	// * supports both single and double quotes
+	// * no character escape sequences are recognized
+	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
-	// console.warn({ _: 'splitByBareWS()', s });
+	// console.warn({ _: 'splitByBareWSo()', s });
 	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+)*)(.*$)`, 'msu');
 	while (s) {
 		const m = s.match(tokenRe);
@@ -96,15 +106,20 @@ export function splitByBareWS(s: string): Array<string> {
 		} else {
 			s = '';
 		}
-		// console.warn({ _: 'splitByBareWS()', s, m, arr });
+		// console.warn({ _: 'splitByBareWSo()', s, m, arr });
 	}
 	return arr;
 }
 
-export function splitByBareWSBalanced(s: string): Array<string> {
+export function splitByBareWS(
+	s: string,
+	options: { autoQuote: boolean } = { autoQuote: true },
+): Array<string> {
 	// parse string into tokens separated by unquoted-whitespace
-	// * supports both single and double quotes; note: no character escape sequences are recognized
-	const addBalance = true;
+	// * supports both single and double quotes
+	// * no character escape sequences are recognized
+	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
+	const { autoQuote } = options;
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWS()', s });
@@ -118,20 +133,16 @@ export function splitByBareWSBalanced(s: string): Array<string> {
 		if (m) {
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
-				// ""?
-				if (matchStr[0] === '"') {
-					if (addBalance && matchStr[matchStr.length - 1] !== '"') {
-						matchStr += '"';
-					}
-				} else if (matchStr[0] === "'") {
-					if (addBalance && matchStr[matchStr.length - 1] !== "'") {
-						matchStr += "'";
+				const firstChar = matchStr[0];
+				// "..." or '...'?
+				if (firstChar === DQ || firstChar === SQ) {
+					if (autoQuote && matchStr[matchStr.length - 1] !== firstChar) {
+						matchStr += firstChar;
 					}
 				}
 			}
 			text += matchStr;
 			s = m[3] ? m[3].replace(/^\s+/, '') : ''; // trim leading whitespace
-			// console.warn({ _: 'splitByBareWSToPreBrace', text, s });
 			if (m[2] || !s) {
 				arr.push(text);
 				text = '';
@@ -145,67 +156,13 @@ export function splitByBareWSBalanced(s: string): Array<string> {
 	return arr;
 }
 
-export function splitByBareWSToPreBrace(s: string): Array<string> {
-	// parse string into tokens separated by unquoted-whitespace
-	// * supports both single and double quotes; note: no character escape sequences are recognized
-	const arr: Array<string> = [];
-	s.replace(/^\s+/, ''); // trim leading whitespace
-	// console.warn({ _: 'splitByBareWSBalanced()', s });
-	// const tokenRe = new RegExp(`^((?:(?!["']|\\s).)+)(\\s)?(.*)$`, '');
-	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+))(\\s+)?(.*?$)`, '');
-	let text = '';
-	while (s) {
-		const m = s.match(tokenRe);
-		// console.warn({ _: 'splitByBareWSToPreBrace', s, m });
-		if (m) {
-			let matchStr = m[1];
-			if (matchStr.length > 0) {
-				// ""?
-				// console.warn('here:1');
-				if (matchStr[0] === '"') {
-					// console.warn('here:"', { matchStr });
-					// * de-quote
-					const spl = matchStr.split('"');
-					matchStr = spl[1];
-					// matchStr = matchStr.replace(/\\/gmsu, '\\\\');
-					matchStr = matchStr.replace(/([\\?*\[\]])/gmsu, '\\$1');
-					matchStr = matchStr.replace(/(.)/gmsu, '\\$1');
-					// matchStr
-				} else if (matchStr[0] === "'") {
-					// console.warn("here:'", { matchStr });
-					const spl = matchStr.split("'");
-					matchStr = spl[1];
-					// matchStr = matchStr.replace(/\\/gmsu, '\\\\');
-					matchStr = matchStr.replace(/([?*\[\]])/gmsu, '\\$1');
-					matchStr = matchStr.replace(/(.)/gmsu, '\\$1');
-				} else {
-					// const slashAndGlobChars = ['\\', '?', '*', '[', ']'];
-					matchStr = matchStr.replace(/\\/gmsu, '\\\\');
-					matchStr = matchStr.replace(/([\\?*\[\]])/gmsu, '\\$1');
-				}
-			}
-			text += matchStr;
-			s = m[3] ? m[3].replace(/^\s+/, '') : ''; // trim leading whitespace
-			// console.warn({ _: 'splitByBareWSToPreBrace', text, s });
-			if (m[2] || !s) {
-				arr.push(text);
-				text = '';
-			}
-		} else {
-			arr.push(text);
-			text = s = '';
-		}
-	}
-	// console.warn({ arr });
-	return arr;
-}
-
 export function braceExpand(s: string): Array<string> {
 	// brace expand a string
-	// * note: no character escape sequences are recognized; unbalanced quotes are allowed
+	// * no character escape sequences are recognized
+	// * unbalanced quotes are allowed (parsed as if completed by EOL)
 	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace
-	console.warn({ _: 'braceExpand()', s });
+	// console.warn({ _: 'braceExpand()', s });
 	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, '');
 	let text = '';
 	while (s) {
@@ -213,24 +170,28 @@ export function braceExpand(s: string): Array<string> {
 		if (m) {
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
-				if (matchStr[0] === '"') {
-					// * "..." => de-quote and backslash escape contents
-					const spl = matchStr.split('"');
+				const bracesEscChar = '\\'; // `braces` escape character == backslash
+				if (matchStr[0] === DQ || matchStr[0] === SQ) {
+					// "..." or '...' => escape contents
+					const qChar = matchStr[0];
+					const spl = matchStr.split(qChar);
 					matchStr = spl[1];
-					// * backslash escape (double-escape backslash or glob characters)
-					matchStr = matchStr.replace(/([\\?*\[\]])/gmsu, '\\$1');
-					matchStr = matchStr.replace(/(.)/gmsu, '\\$1');
-				} else if (matchStr[0] === "'") {
-					// * '...' => de-quote and backslash escape contents
-					const spl = matchStr.split("'");
-					matchStr = spl[1];
-					// * backslash escape (double-escape backslash or glob characters)
-					matchStr = matchStr.replace(/([?*\[\]])/gmsu, '\\$1');
-					matchStr = matchStr.replace(/(.)/gmsu, '\\$1');
+					// escape contents
+					// * 1st, escape the braces escape character
+					matchStr = matchStr.replace(bracesEscChar, `${bracesEscChar}${bracesEscChar}`);
+					// * escape string contents
+					matchStr = matchStr.replace(/(.)/gmsu, `${bracesEscChar}$1`);
+					// add surrounding escaped quotes
+					matchStr = `${bracesEscChar}${qChar}` + matchStr + `${bracesEscChar}${qChar}`;
 				} else {
-					// unquoted text => backslash escape special characters (double-escape backslash)
-					matchStr = matchStr.replace(/\\/gmsu, '\\\\');
-					matchStr = matchStr.replace(/([\\?*\[\]])/gmsu, '\\$1');
+					// unquoted text => escape special characters
+					// * 1st, escape the braces escape character
+					matchStr = matchStr.replace(bracesEscChar, `${bracesEscChar}${bracesEscChar}`);
+					// * escape any 'special' (braces escape or glob) characters
+					matchStr = matchStr.replace(
+						new RegExp(`([\\${bracesEscChar}?*\\[\\]])`, 'gmsu'),
+						`${bracesEscChar}$1`,
+					);
 				}
 			}
 			text += matchStr;
@@ -244,16 +205,57 @@ export function braceExpand(s: string): Array<string> {
 			text = s = '';
 		}
 	}
-	return arr
-		.flatMap((v) => Braces.expand(v))
-		.map((v) => v.replace(/\\(.)/gmsu, '"$1"'))
-		.map((v) => v.replace(/"\\"/gmsu, '\\'));
+	console.warn({ _: 'braceExpand', arr });
+	// return arr.flatMap((v) => Braces.expand(v));
+	return arr.flatMap((v) => Braces.expand(v)).map((v) => v.replace(/\\(\\)/gmsu, '$1'));
+}
+
+export function tildeExpand(s: string): string {
+	// tilde expand a string
+	// * any leading whitespace is removed
+	// ToDO?: handle `~USERNAME` for other users
+	s.replace(/^\s+/, ''); // trim leading whitespace
+	// console.warn({ _: 'tildeExpand()', s });
+	const sepReS = portablePathSepReS;
+	const username = Deno.env.get('USER') || Deno.env.get('USERNAME') || '';
+	const usernameReS = username.replace(/(.)/gmsu, '\\$1');
+	const re = new RegExp(`^\s*(~(?:${usernameReS})?)(?:${sepReS}|$)(.*)`, 'i');
+	const m = s.match(re);
+	if (m) {
+		s = OSPaths.home() + (m[2] ? m[2] : '');
+	}
+	return s;
+}
+
+export function shellExpand(_s: string): Array<string> {
+	throw 'unimplemented';
+}
+
+export function filenameExpand(s: string): Array<string> {
+	// filename (glob) expansion
+	const arr: string[] = [];
+	const parsed = parseGlob(s);
+
+	console.warn({ _: 'filenameExpand()', parsed });
+
+	if (parsed.glob) {
+		for (const e of walkSync(parsed.prefix, {
+			match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+		})) {
+			arr.push(Path.join(e.path));
+		}
+	}
+
+	if (arr.length < 1) {
+		arr.push(s);
+	}
+	return arr;
 }
 
 // ToDO: handle long paths, "\\?\...", and UNC paths
 // ref: [1][MSDN - Windows: Naming Files, Paths, and Namespaces] http://msdn.microsoft.com/en-us/library/windows/desktop/aa365247(v=vs.85).aspx @@ https://archive.today/DgH7i
 
-export function parseNonGlobPathPrefix(s: string) {
+export function parseGlob(s: string) {
 	// options.os => undefined (aka portable), 'windows', 'posix'/'linux'
 	const options: { os?: string } = {};
 	let prefix = '';
@@ -288,8 +290,8 @@ export function parseNonGlobPathPrefix(s: string) {
 		// console.warn({ _: 'parseNonGlobPathPrefix', prefix, glob });
 	}
 
-	console.log({ glob });
-	const globAsRe = glob && globToRe(glob);
+	// console.warn({ _: 'parseNonGlobPathPrefix', prefix, glob });
+	const globAsReS = glob && globToReS(glob);
 	const globScan = Micromatch.scan(glob, { tokens: true });
 	const globScanTokens = globScan.tokens[0];
 	const globSegments = Picomatch.scan(glob, {});
@@ -297,14 +299,14 @@ export function parseNonGlobPathPrefix(s: string) {
 	return {
 		prefix,
 		glob,
-		globAsRe,
-		globScan,
-		globScanTokens,
-		globSegments,
+		globAsReS,
+		// globScan,
+		// globScanTokens,
+		// globSegments,
 	};
 }
 
-export function globToRe(s: string) {
+export function globToReS(s: string) {
 	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, '');
 	let text = '';
 	while (s) {
@@ -312,17 +314,12 @@ export function globToRe(s: string) {
 		if (m) {
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
-				if (matchStr[0] === '"') {
-					// * "..." => de-quote and [.] escape any special characters
-					const spl = matchStr.split('"');
+				const firstChar = matchStr[0];
+				if (firstChar === DQ || firstChar === SQ) {
+					// "..." or '...' => de-quote and `[.]` escape any special characters
+					const spl = matchStr.split(firstChar);
 					matchStr = spl[1];
-					// * [.] escape glob characters
-					matchStr = matchStr.replace(/([?*\[\]])/gmsu, '[$1]');
-				} else if (matchStr[0] === "'") {
-					// * '...' => de-quote and [.] escape any special characters
-					const spl = matchStr.split("'");
-					matchStr = spl[1];
-					// * [.] escape glob characters
+					// * `[.]` escape glob characters
 					matchStr = matchStr.replace(/([?*\[\]])/gmsu, '[$1]');
 				}
 			}
@@ -330,14 +327,20 @@ export function globToRe(s: string) {
 			s = m[2];
 		}
 	}
+	// convert PATTERN to POSIX-path-style by replacing all backslashes with slashes (backslash is *not* used as an escape)
+	text = text.replace(/\\/g, '/');
+
+	console.warn({ _: 'globToReS', text });
 
 	// windows = true => match backslash and slash as path separators
-	return Picomatch.parse(text, {
+	const parsed = Picomatch.parse(text, {
 		windows: true,
-		dot: true,
+		dot: false,
 		nobrace: true,
 		noquantifiers: true,
 		posix: true,
 		nocase: isWinOS,
 	});
+	// deno-lint-ignore no-explicit-any
+	return ((parsed as unknown) as any).output;
 }
