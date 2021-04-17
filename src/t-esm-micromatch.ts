@@ -8,7 +8,7 @@
 import * as Me from './lib/me.ts';
 import {
 	braceExpand,
-	// filenameExpand,
+	filenameExpand,
 	filenameExpandSync,
 	// globToReS,
 	parseGlob,
@@ -16,6 +16,9 @@ import {
 	// splitByBareWSToPreBrace,
 	tildeExpand,
 } from './lib/parse.ts';
+
+// import * as Fmt from 'https://deno.land/std@0.93.0/fmt/printf.ts';
+// import * as Util from 'https://deno.land/std@0.93.0/node/util.ts';
 
 const me = Me.info();
 console.warn(me.name, { me });
@@ -39,20 +42,31 @@ const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
 	.flatMap(braceExpand)
 	.flatMap(tildeExpand)
 	.flatMap(filenameExpandSync);
-const argv = argvSplitBraceExpandedTildeExpandedGlobExpanded;
+const argv = [];
+for (const values of argvSplitBraceExpandedTildeExpandedGlobExpanded) {
+	for await (const v of values) {
+		// console.log({ v });
+		argv.push(v);
+	}
+}
+// const argv = await argvSplitBraceExpandedTildeExpandedGlobExpandedGen.flat();
 // const argsBraceExpanded = braceExpand(args);
 const parsedGlobs = argvSplitBraceExpandedTildeExpanded.map(parseGlob);
 
-console.warn(me.name, {
-	args,
-	// // argsBraceExpanded,
-	// argvSplit,
-	// argvSplitBraceExpanded,
-	// argvSplitBraceExpandedTildeExpanded,
-	// argvSplitBraceExpandedTildeExpandedGlobExpanded,
-	argv,
-	parsedGlobs,
-});
+console.warn(
+	me.name,
+	{
+		args,
+		// // argsBraceExpanded,
+		// argvSplit,
+		// argvSplitBraceExpanded,
+		// argvSplitBraceExpandedTildeExpanded,
+		// argvSplitBraceExpandedTildeExpandedGlobExpanded,
+		argv,
+		// parsedGlobs: Util.inspect(parsedGlobs),
+	},
+	// 'parsedGlobs ' + Deno.inspect(parsedGlobs, { depth: 10 }),
+);
 
 // for (const a of argvToGlobRe) {
 // 	const o = ((a as unknown) as any).output;

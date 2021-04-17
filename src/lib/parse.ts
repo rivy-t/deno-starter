@@ -23,8 +23,10 @@
 
 import { exists, existsSync } from 'https://deno.land/std@0.93.0/fs/exists.ts';
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
-import { walk, walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
+// import { walk, walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
+import { walk, walkSync } from './xwalk.ts';
 import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
+// import * as Fmt from 'https://deno.land/std@0.93.0/fmt/printf.ts';
 
 // esm.sh
 // import Braces from 'https://cdn.esm.sh/braces@3.0.2';
@@ -259,13 +261,13 @@ export async function* filenameExpand(s: string) {
 	}
 }
 
-export function filenameExpandSync(s: string): Array<string> {
+export function* filenameExpandSync(s: string) {
 	// filename (glob) expansion
-	const arr: string[] = [];
 	const parsed = parseGlob(s);
 
-	// console.warn({ _: 'filenameExpandSync()', parsed });
+	console.warn({ _: 'filenameExpandSync()', parsed });
 
+	let found = false;
 	if (parsed.glob) {
 		const currentWorkingDirectory = Deno.cwd();
 		const resolvedPrefix = Path.resolve(parsed.prefix);
@@ -273,9 +275,48 @@ export function filenameExpandSync(s: string): Array<string> {
 			Deno.chdir(resolvedPrefix);
 			for (const e of walkSync('.', {
 				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+				maxDepth: parsed.globScan.maxDepth,
+			})) {
+				found = true;
+				yield Path.join(parsed.prefix, e.path);
+			}
+			Deno.chdir(currentWorkingDirectory);
+		}
+	}
+
+	if (!found) {
+		yield s;
+	}
+}
+
+export function filenameExpandToCollection(s: string): Array<string> {
+	// filename (glob) expansion
+	const arr: string[] = [];
+	const parsed = parseGlob(s);
+
+	// console.warn({ _: 'filenameExpandToCollection()', parsed });
+
+	if (parsed.glob) {
+		const currentWorkingDirectory = Deno.cwd();
+		const resolvedPrefix = Path.resolve(parsed.prefix);
+		if (existsSync(resolvedPrefix)) {
+			// console.warn({
+			// 	_: 'filenameExpandSync()',
+			// 	resolvedPrefix,
+			// 	maxDepth: parsed.globScan.maxDepth,
+			// });
+			Deno.chdir(resolvedPrefix);
+			// try {
+			for (const e of walkSync('.', {
+				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+				// maxDepth: 4,
+				maxDepth: parsed.globScan.maxDepth,
 			})) {
 				arr.push(Path.join(parsed.prefix, e.path));
 			}
+			// } catch (e) {
+			// 	console.warn('ERROR!:', e);
+			// }
 			Deno.chdir(currentWorkingDirectory);
 		}
 	}
@@ -284,6 +325,13 @@ export function filenameExpandSync(s: string): Array<string> {
 		arr.push(s);
 	}
 	return arr;
+}
+
+function pathToPosix(p: string) {
+	return p.replace(/\\/g, '/');
+}
+function pathToWindows(p: string) {
+	return p.replace(/\//g, '\\');
 }
 
 // ToDO: handle long paths, "\\?\...", and UNC paths
@@ -324,11 +372,23 @@ export function parseGlob(s: string) {
 		// console.warn({ _: 'parseGlob', prefix, glob });
 	}
 
-	// console.warn({ _: 'parseGlob', prefix, glob });
+	const pJoin = Path.join(prefix, glob);
+	const pJoinToPosix = pathToPosix(pJoin);
+	// console.warn({
+	// 	_: 'parseGlob',
+	// 	prefix,
+	// 	glob,
+	// 	pJoin,
+	// 	pJoinToPosix,
+	// 	pJoinParsed: Path.parse(pJoin),
+	// 	pJoinToPosixParsed: Path.parse(pJoinToPosix),
+	// });
 	const globAsReS = glob && globToReS(glob);
 	// console.warn({ _: 'parseGlob', globAsReS });
 	// deno-lint-ignore no-explicit-any ## 'picomatch' has incomplete typing
-	const globScan: any = Picomatch.scan(Path.join(prefix, glob), {
+	// const globScan: any = Picomatch.scan(Path.join(prefix, glob), {
+	// console.warn({ _: 'parseGlob', prefix, glob, pathJoin: Path.posix.join(prefix, glob) });
+	const globScan: any = Picomatch.scan(pJoinToPosix, {
 		windows: true,
 		dot: false,
 		nobrace: true,
@@ -336,6 +396,7 @@ export function parseGlob(s: string) {
 		posix: true,
 		nocase: isWinOS,
 		tokens: true,
+		parts: true,
 	});
 	const globScanTokens = globScan.tokens;
 	const globScanSlashes = globScan.slashes;
