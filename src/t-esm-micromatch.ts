@@ -8,8 +8,9 @@
 import * as Me from './lib/me.ts';
 import {
 	braceExpand,
-	filenameExpand,
-	globToRe,
+	// filenameExpand,
+	filenameExpandSync,
+	globToReS,
 	parseGlob,
 	splitByBareWS,
 	// splitByBareWSToPreBrace,
@@ -37,7 +38,7 @@ const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args)
 const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
 	.flatMap(braceExpand)
 	.flatMap(tildeExpand)
-	.flatMap(filenameExpand);
+	.flatMap(filenameExpandSync);
 const argv = argvSplitBraceExpandedTildeExpandedGlobExpanded;
 const argsBraceExpanded = braceExpand(args);
 const argvToGlobRe = argv.map(parseGlob);

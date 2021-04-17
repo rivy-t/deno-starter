@@ -21,8 +21,9 @@
 // ref: <https://stackoverflow.com/questions/61821038/how-to-use-npm-module-in-deno>
 // ref: <https://jspm.org/docs/cdn>
 
+import { exists, existsSync } from 'https://deno.land/std@0.93.0/fs/exists.ts';
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
-import { walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
+import { walk, walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
 import OSPaths from 'https://deno.land/x/os_paths/src/mod.deno.ts';
 
 // esm.sh
@@ -216,13 +217,13 @@ export function tildeExpand(s: string): string {
 	// ToDO?: handle `~USERNAME` for other users
 	s.replace(/^\s+/, ''); // trim leading whitespace
 	// console.warn({ _: 'tildeExpand()', s });
-	const sepReS = portablePathSepReS;
+	// const sepReS = portablePathSepReS;
 	const username = Deno.env.get('USER') || Deno.env.get('USERNAME') || '';
 	const usernameReS = username.replace(/(.)/gmsu, '\\$1');
-	const re = new RegExp(`^\s*(~(?:${usernameReS})?)(?:${sepReS}|$)(.*)`, 'i');
+	const re = new RegExp(`^\s*(~(?:${usernameReS})?)(${sepReS}|$)(.*)`, 'i');
 	const m = s.match(re);
 	if (m) {
-		s = OSPaths.home() + (m[2] ? m[2] : '');
+		s = OSPaths.home() + (m[2] ? m[2] : '') + (m[3] ? m[3] : '');
 	}
 	return s;
 }
@@ -231,18 +232,52 @@ export function shellExpand(_s: string): Array<string> {
 	throw 'unimplemented';
 }
 
-export function filenameExpand(s: string): Array<string> {
+export async function* filenameExpand(s: string) {
 	// filename (glob) expansion
 	const arr: string[] = [];
 	const parsed = parseGlob(s);
 
 	console.warn({ _: 'filenameExpand()', parsed });
 
+	let found = false;
 	if (parsed.glob) {
-		for (const e of walkSync(parsed.prefix, {
-			match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
-		})) {
-			arr.push(Path.join(e.path));
+		const currentWorkingDirectory = Deno.cwd();
+		const resolvedPrefix = Path.resolve(parsed.prefix);
+		if (await exists(resolvedPrefix)) {
+			Deno.chdir(resolvedPrefix);
+			for await (const e of walk('.', {
+				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+			})) {
+				found = true;
+				yield Path.join(parsed.prefix, e.path);
+			}
+			Deno.chdir(currentWorkingDirectory);
+		}
+	}
+
+	if (!found) {
+		yield s;
+	}
+}
+
+export function filenameExpandSync(s: string): Array<string> {
+	// filename (glob) expansion
+	const arr: string[] = [];
+	const parsed = parseGlob(s);
+
+	console.warn({ _: 'filenameExpandSync()', parsed });
+
+	if (parsed.glob) {
+		const currentWorkingDirectory = Deno.cwd();
+		const resolvedPrefix = Path.resolve(parsed.prefix);
+		if (existsSync(resolvedPrefix)) {
+			Deno.chdir(resolvedPrefix);
+			for (const e of walkSync('.', {
+				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+			})) {
+				arr.push(Path.join(parsed.prefix, e.path));
+			}
+			Deno.chdir(currentWorkingDirectory);
 		}
 	}
 
