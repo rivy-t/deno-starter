@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu ; (names) SkyPack micromatch picomatch xwalk ; (options) nobrace noquantifiers nocase
+// spell-checker:ignore (js) gmsu msu ; (names) SkyPack micromatch picomatch xwalk ; (options) nobrace noquantifiers nocase
 
 // ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
 
@@ -101,14 +101,14 @@ export function splitByBareWSo(s: string): Array<string> {
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const arr: Array<string> = [];
-	s.replace(/^\s+/, ''); // trim leading whitespace
+	s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWSo()', s });
 	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+)*)(.*$)`, 'msu');
 	while (s) {
 		const m = s.match(tokenRe);
 		if (m) {
 			arr.push(m[1]);
-			s = m[2] ? m[2].replace(/^\s+/, '') : ''; // trim leading whitespace
+			s = m[2] ? m[2].replace(/^\s+/msu, '') : ''; // trim leading whitespace
 		} else {
 			s = '';
 		}
@@ -132,7 +132,8 @@ export function shiftByBareWS(
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
 	const initialS = s;
-	s.replace(/^\s+/, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
+	// console.warn({ _: 'shiftByBareWS()', s, options, initialS });
+	s.replace(/^\s+/msu, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let foundFullToken = false;
 	let token = '';
@@ -150,7 +151,7 @@ export function shiftByBareWS(
 				}
 			}
 			token += matchStr;
-			s = m[3] ? m[3].replace(/^\s+/, '') : ''; // trim leading whitespace
+			s = m[3] ? m[3].replace(/^\s+/msu, '') : ''; // trim leading whitespace
 			if (m[2] || !s) {
 				foundFullToken = true;
 			}
@@ -161,7 +162,7 @@ export function shiftByBareWS(
 			s = '';
 		}
 	}
-	assert(s !== initialS); // assert progress has been made o/w panic
+	assert(!initialS || (s !== initialS), 'non-progression of `shiftByBareWS()`'); // assert progress has been made o/w panic
 	return [token, s];
 }
 
@@ -174,11 +175,11 @@ export function splitByShiftBareWS(
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const arr: Array<string> = [];
-	s.replace(/^\s+/, ''); // trim leading whitespace
+	s.replace(/^\s+/msu, ''); // trim leading whitespace
 	while (s) {
 		const [token, restOfString] = shiftByBareWS(s, options);
 		arr.push(token);
-		assert(s !== restOfString); // assert progress has been made o/w panic
+		assert(s !== restOfString, 'non-progression of `splitByShiftBareWS()`'); // assert progress has been made o/w panic
 		s = restOfString;
 	}
 	return arr;
@@ -194,7 +195,7 @@ export function splitByBareWS(
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
 	const arr: Array<string> = [];
-	s.replace(/^\s+/, ''); // trim leading whitespace
+	s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWS()', s });
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let text = '';
@@ -212,7 +213,7 @@ export function splitByBareWS(
 				}
 			}
 			text += matchStr;
-			s = m[3] ? m[3].replace(/^\s+/, '') : ''; // trim leading whitespace
+			s = m[3] ? m[3].replace(/^\s+/msu, '') : ''; // trim leading whitespace
 			if (m[2] || !s) {
 				arr.push(text);
 				text = '';
@@ -231,7 +232,7 @@ export function braceExpand(s: string): Array<string> {
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if completed by EOL)
 	const arr: Array<string> = [];
-	s.replace(/^\s+/, ''); // trim leading whitespace
+	s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'braceExpand()', s });
 	const tokenRe = TokenReS.brace; // == (tokenFragment)(restOfString)
 	let text = '';
@@ -284,7 +285,7 @@ export function tildeExpand(s: string): string {
 	// tilde expand a string
 	// * any leading whitespace is removed
 	// ToDO?: handle `~USERNAME` for other users
-	s.replace(/^\s+/, ''); // trim leading whitespace
+	s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'tildeExpand()', s });
 	// const sepReS = portablePathSepReS;
 	const username = Deno.env.get('USER') || Deno.env.get('USERNAME') || '';
@@ -312,12 +313,13 @@ export async function* filenameExpand(s: string) {
 		const currentWorkingDirectory = Deno.cwd();
 		const resolvedPrefix = Path.resolve(parsed.prefix);
 		if (await exists(resolvedPrefix)) {
+			// console.warn('here', { resolvedPrefix });
 			Deno.chdir(resolvedPrefix);
 			// prettier-ignore
 			for await (
 				const e of walk('.', {
-					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
-					maxDepth: parsed.globScan.maxDepth,
+					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'imsu' : 'msu')],
+					maxDepth: parsed.globScan.maxDepth ? parsed.globScan.maxDepth : 1,
 				})
 			) {
 				found = true;
@@ -335,8 +337,6 @@ export async function* filenameExpand(s: string) {
 export function* filenameExpandSync(s: string) {
 	// filename (glob) expansion
 	const parsed = parseGlob(s);
-
-	console.warn({ _: 'filenameExpandSync()', parsed });
 
 	let found = false;
 	if (parsed.glob) {
