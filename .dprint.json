@@ -13,7 +13,8 @@
 		"functionExpression.spaceAfterFunctionKeyword": true,
 		"importDeclaration.preferHanging": false,
 		"operatorPosition": "sameLine",
-		"preferHanging": true,
+		"preferHanging": false,
+		"preferSingleLine": true,
 		"quoteStyle": "preferSingle",
 		"typeParameters.trailingCommas": "never"
 	},
