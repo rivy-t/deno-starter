@@ -8,7 +8,7 @@ import { walk, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync, walk, walkSync };
 
 import * as Me from './lib/me.ts';
-import { splitByBareWS } from './lib/parse.ts';
+import { shiftByBareWS } from './lib/parse.ts';
 
 // const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
@@ -27,10 +27,11 @@ if (Deno.build.os === 'windows' && !me[0]) {
 }
 
 const args = me.ARGS || Deno.args.join(' ');
-const argv = splitByBareWS(args);
+// const argv = splitByBareWS(args);
 // console.warn(me.name, { args, argv });
-const targetPath = argv.shift();
-const targetArgs = argv.join(' ');
+// const targetPath = argv.shift();
+// const targetArgs = argv.join(' ');
+const [targetPath, targetArgs] = shiftByBareWS(args);
 
 if (!targetPath) {
 	console.error(`${me.name}: err!: no target name supplied (use \`${me.name} TARGET\`)`);
@@ -40,12 +41,16 @@ if (!targetPath) {
 		console.error(`${me.name}: err!: target ('${targetPath}') does not exist`);
 		Deno.exit(1);
 	}
+	const denoOptions = ['run', '-A'];
 	const runOptions: Deno.RunOptions = {
-		cmd: ['deno', ...['run', '-A', targetPath, targetArgs]],
+		cmd: ['deno', ...denoOptions, ...[targetPath, targetArgs]],
 		stderr: 'inherit',
 		stdin: 'inherit',
 		stdout: 'inherit',
-		env: { DENO_SHIM_0: targetPath, DENO_SHIM_ARGS: targetArgs },
+		env: {
+			DENO_SHIM_0: `${me[0] ? me[0] : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
+			DENO_SHIM_ARGS: targetArgs,
+		},
 	};
 	// console.warn(me.name, { runOptions });
 	const process = Deno.run(runOptions);
