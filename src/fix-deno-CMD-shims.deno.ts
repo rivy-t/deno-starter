@@ -49,8 +49,8 @@ const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\
 @set "DENO_SHIM_PIPE="
 @:...prep...
 @:launch
-@:rem DENO_SHIM_EXEC convolution is to avoid \`%*\` within the final parse group [o/w paren args cause parsing misbehavior]
-@:rem ... this revision does now require balanced double-quotes (when double-quotes are used); this can be avoided if/when Deno handles packaging the command line argument string
+@rem:: DENO_SHIM_EXEC convolution is to avoid \`%*\` within the final parse group [o/w paren args cause parsing misbehavior]
+@rem:: ... this revision does now require balanced double-quotes (when double-quotes are used); this can be avoided if/when Deno handles packaging the command line argument string
 @>>"%DENO_SHIM_EXEC%" echo @set DENO_SHIM_ARGS=%*
 @>>"%DENO_SHIM_EXEC%" echo @goto _undef_ 2^>NUL ^|^| @for %%%%G in ("%COMSPEC%") do @title %%%%~nG ^& @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %%DENO_SHIM_ARGS%%
 @(
@@ -82,9 +82,8 @@ const cmdShimPrepPipe = `@:pipeEnabled
 @set DENO_SHIM_PIPE=%TEMP%\\<%=shimBinName%>.shim.pipe.%DENO_SHIM_TID%.cmd
 @if EXIST "%DENO_SHIM_EXEC%" @goto :prep
 @if EXIST "%DENO_SHIM_PIPE%" @goto :prep
-@if DEFINED DENO_SHIM_EXEC echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_EXEC%"
-@if DEFINED DENO_SHIM_PIPE echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_PIPE%"
-`;
+@if DEFINED DENO_SHIM_EXEC echo @rem \`<%=shimBinName%>\` shell exec > "%DENO_SHIM_EXEC%"
+@if DEFINED DENO_SHIM_PIPE echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_PIPE%"`;
 const cmdShimPrepNoPipe = `@:pipeDisabled
 @:prep
 @set "RANDOM=" &:: remove any cloak from dynamic variable RANDOM
@@ -94,8 +93,7 @@ const cmdShimPrepNoPipe = `@:pipeDisabled
 @set DENO_SHIM_TID=%RANDOM%.%RANDOM%.%RANDOM%
 @set DENO_SHIM_EXEC=%TEMP%\\<%=shimBinName%>.shim.exec.%DENO_SHIM_TID%.cmd
 @if EXIST "%DENO_SHIM_EXEC%" @goto :prep
-@if DEFINED DENO_SHIM_EXEC echo @rem \`<%=shimBinName%>\` shell pipe > "%DENO_SHIM_EXEC%"
-`;
+@if DEFINED DENO_SHIM_EXEC echo @rem \`<%=shimBinName%>\` shell exec > "%DENO_SHIM_EXEC%"`;
 
 const enablePipe = true;
 const forceUpdate = true;

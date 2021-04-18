@@ -39,7 +39,7 @@ import * as _ from 'https://cdn.skypack.dev/pin/lodash@v4.17.20-4NISnx5Etf8JOo22
 const decoder = new TextDecoder(); // default == 'utf-8'
 const encoder = new TextEncoder(); // default == 'utf-8'
 
-const cmdShimTemplate = `@rem:: \`<%=targetBinName%>\` (*updated* \`npm\` CMD shim)
+const cmdShimTemplate = `@rem:: \`<%=targetBinName%>\` (*enhanced* \`npm\` CMD shim)
 @setLocal
 @echo off
 goto :_START_
