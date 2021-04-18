@@ -2,23 +2,23 @@
 
 import { wait } from 'https://deno.land/x/wait/mod.ts';
 
-import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
-import OsPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
+// import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
+// import OsPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 
-import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
+// import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 // import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
-import { walk, WalkEntry, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
-const fs = { exists, existsSync, walk, walkSync };
+// import { WalkEntry } from 'https://deno.land/std@0.83.0/fs/walk.ts';
+// const fs = { exists, existsSync, walk, walkSync };
 
 import { expandGlobSync } from './deno-glob.ts';
-import { collect, collectSync } from './funk.ts';
+import { collectSync } from './funk.ts';
 
 const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
 // const pathListSeparator = isWinOS ? /;/ : /:/;
 // const paths = Deno.env.get('PATH')?.split(pathListSeparator) || [];
 // const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
-const pathCaseSensitive = !isWinOS;
+// const pathCaseSensitive = !isWinOS;
 
 console.log(Deno.env.get('DENO_SHIM_0'));
 console.log(Deno.env.get('DENO_SHIM_ARGS'));
@@ -98,33 +98,35 @@ function wildArgs() {
 	console.warn({ globTokens, arr });
 	return arr.length > 0 ? arr : Deno.args;
 }
-function localExpandGlob(glob: string) {
-	// * disable '`' escape character (by escaping all occurrences)
-	const winGlobEscape = '`';
-	glob.replace(winGlobEscape, winGlobEscape + winGlobEscape);
+// function localExpandGlob(glob: string) {
+// 	// * disable '`' escape character (by escaping all occurrences)
+// 	const winGlobEscape = '`';
+// 	glob.replace(winGlobEscape, winGlobEscape + winGlobEscape);
 
-	const isAbsolute = Path.isAbsolute(glob);
-	// configure regex (`[\\/]` as path separators, no escape characters (use character sets (`[..]`)instead) )
-	const re = new RegExp(
-		// Path.globToRegExp(cmdGlob, { extended: true, globstar: true, os: 'windows' }),
-		Path.globToRegExp(glob, { extended: true, globstar: true, os: 'windows' }).source,
-		// .replace(
-		// 	// * remove leading "anchor"
-		// 	/^[^]/,
-		// 	''
-		// ),
-		// * configure case sensitivity
-		pathCaseSensitive ? void 0 : 'i',
-	);
-	const res = [re];
-	const fileEntries = collectSync(fs.walkSync('.', {
-		// maxDepth: 1,
-		match: res,
-		// skip: [/[.]/],
-	}));
-	// console.warn({ glob, re, res, fileEntries });
-	return fileEntries;
-}
+// 	const isAbsolute = Path.isAbsolute(glob);
+// 	// configure regex (`[\\/]` as path separators, no escape characters (use character sets (`[..]`)instead) )
+// 	const re = new RegExp(
+// 		// Path.globToRegExp(cmdGlob, { extended: true, globstar: true, os: 'windows' }),
+// 		Path.globToRegExp(glob, { extended: true, globstar: true, os: 'windows' }).source,
+// 		// .replace(
+// 		// 	// * remove leading "anchor"
+// 		// 	/^[^]/,
+// 		// 	''
+// 		// ),
+// 		// * configure case sensitivity
+// 		pathCaseSensitive ? void 0 : 'i',
+// 	);
+// 	const res = [re];
+// 	const fileEntries = collectSync(
+// 		fs.walkSync('.', {
+// 			// maxDepth: 1,
+// 			match: res,
+// 			// skip: [/[.]/],
+// 		}),
+// 	);
+// 	// console.warn({ glob, re, res, fileEntries });
+// 	return fileEntries;
+// }
 
 const args = wildArgs();
 
