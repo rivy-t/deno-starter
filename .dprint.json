@@ -8,33 +8,13 @@
 	"typescript": {
 		// ref: <https://dprint.dev/plugins/typescript/config>
 		"deno": true,
-		// * customize preferences (changes from Deno choices)
+		// * customize preferences (overrides of some Deno formatting choices)
 		// ref: <https://github.com/dprint/dprint-plugin-typescript/blob/44b6cf562e511a308f4a7183dc98fb19cdf21d07/src/configuration/builder.rs#L51>
 		// ref: <https://github.com/denoland/deno/blob/f46e39c5c5/cli/tools/fmt.rs#L311>
-		"quoteStyle": "preferSingle"
-		// * changes to Deno formatting choices
-		// "conditionalType.preferSingleLine": false
-		// // "ignoreNodeCommentText": "deno-fmt-ignore",
-		// // "ignoreFileCommentText": "deno-fmt-ignore-file",
-		// // "module.sortImportDeclarations": "maintain",
-		// // "module.sortExportDeclarations": "maintain"
-		// // * mirror *much of* Deno configuration
-		// "nextControlFlowPosition": "sameLine",
-		// "binaryExpression.operatorPosition": "sameLine",
-		// "bracePosition": "sameLine",
-		// "commentLine.forceSpaceAfterSlashes": false,
-		// "constructSignature.spaceAfterNewKeyword": true,
-		// "constructorType.spaceAfterNewKeyword": true,
-		// "arrowFunction.useParentheses": "force",
-		// "newLineKind": "lf",
-		// "functionExpression.spaceAfterFunctionKeyword": true,
-		// "taggedTemplate.spaceBeforeLiteral": false
-		// // "conditionalExpression.preferSingleLine": true
-		// // "quoteStyle": "preferDouble",
-		// // "ignoreNodeCommentText": "deno-fmt-ignore",
-		// // "ignoreFileCommentText": "deno-fmt-ignore-file",
-		// // "module.sortImportDeclarations": "maintain",
-		// // "module.sortExportDeclarations": "maintain"
+		"lineWidth": 100,
+		"quoteStyle": "preferSingle",
+		"module.sortImportDeclarations": "caseInsensitive",
+		"module.sortExportDeclarations": "caseInsensitive"
 	},
 	"json": {},
 	"markdown": {},
