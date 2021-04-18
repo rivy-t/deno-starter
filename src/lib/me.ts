@@ -11,7 +11,7 @@ export function info() {
 	};
 	const denoExec = Deno.execPath();
 	const denoMain = Deno.mainModule;
-	// ToDO: DENO_SHIM_0 => name | "runner" ... "name"
+	// note: DENO_SHIM_0 == `[runner [runner_args]] name`
 	const shim0Tokens = splitByBareWS(shimInfo[0] || '');
 	const nameFromShim0 = shim0Tokens.pop() || '';
 	const path = nameFromShim0
