@@ -7,13 +7,13 @@ import { wait } from 'https://deno.land/x/wait/mod.ts';
 
 // import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 // import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
-// import { WalkEntry } from 'https://deno.land/std@0.83.0/fs/walk.ts';
+import { WalkEntry } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 // const fs = { exists, existsSync, walk, walkSync };
 
 import { expandGlobSync } from './deno-glob.ts';
 import { collectSync } from './funk.ts';
 
-const isWinOS = Deno.build.os === 'windows';
+// const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
 // const pathListSeparator = isWinOS ? /;/ : /:/;
 // const paths = Deno.env.get('PATH')?.split(pathListSeparator) || [];
