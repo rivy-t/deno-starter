@@ -1,3 +1,5 @@
+# spell-checker:ignore (utils) dprint
+
 on: [push, pull_request]
 
 jobs:
@@ -26,7 +28,8 @@ jobs:
         run: deno --version
 
       - name: Check format
-        run: deno fmt --check **/*.ts
+        uses: dprint/check@v1.3
+        # run: deno fmt --check **/*.ts
 
       - name: Run tests
         run: deno test.ts
