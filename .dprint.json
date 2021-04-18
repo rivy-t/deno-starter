@@ -14,7 +14,9 @@
 		"lineWidth": 100,
 		"quoteStyle": "preferSingle",
 		"module.sortImportDeclarations": "caseInsensitive",
-		"module.sortExportDeclarations": "caseInsensitive"
+		"module.sortExportDeclarations": "caseInsensitive",
+		"ignoreNodeCommentText": "dprint-ignore", // from Deno's "deno-fmt-ignore"
+		"ignoreFileCommentText": "dprint-ignore-file" // from Deno's "deno-fmt-ignore-file"
 	},
 	"json": {},
 	"markdown": {},
