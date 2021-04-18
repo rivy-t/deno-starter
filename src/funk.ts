@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-mixed-spaces-and-tabs
 // spell-checker:ignore (names) Packt Rambda Ramda Rubico ; (people) Federico Kereki ; (utils) dprint ; (vars) en enumer it iter
 
 // ToDO: add fluency?
@@ -56,13 +55,14 @@
 
 export type ObjectKey = number | string | symbol;
 export type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
+// prettier-ignore
 export type MapLike<K, V> =
 	| Map<K, V>
 	| MapLikeObject<ObjectKey, V>
 	| Record<ObjectKey, V>
 	| {
-			entries: () => [K, V][];
-	  };
+		entries: () => [K, V][];
+	};
 
 type AnyGenerator<T = unknown, TReturn = unknown, TNext = unknown> =
 	| AsyncGenerator<T, TReturn, TNext>
