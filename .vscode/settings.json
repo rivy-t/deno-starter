@@ -1,12 +1,15 @@
 {
+	"[typescript]": {
+		"editor.defaultFormatter": "dprint.dprint"
+	},
+	"deno.codeLens.implementations": true,
+	"deno.codeLens.referencesAllFunctions": true,
 	"deno.enable": true,
-	"editor.formatOnSave": true,
 	"deno.import_intellisense_origins": {
 		"https://deno.land": true
 	},
 	"deno.lint": true,
 	"deno.suggest.completeFunctionCalls": true,
 	"deno.unstable": true,
-	"deno.codeLens.referencesAllFunctions": true,
-	"deno.codeLens.implementations": true
+	"editor.formatOnSave": true
 }
