@@ -1,5 +1,7 @@
 // spell-checker:ignore (js) gmsu ; (names) SkyPack micromatch picomatch xwalk ; (options) nobrace noquantifiers nocase
 
+// ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
+
 // ref: [bash shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
 // ref: [GNU ~ bash shell expansions](https://www.gnu.org/software/bash/manual/html_node/Shell-Expansions.html) @@ <https://archive.is/lHgK6>
 
@@ -23,6 +25,7 @@
 
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 import { exists, existsSync } from 'https://deno.land/std@0.93.0/fs/exists.ts';
+import { assert } from 'https://deno.land/std@0.93.0/testing/asserts.ts';
 // import { walk, walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
 import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 import { walk, walkSync } from './xwalk.ts';
@@ -128,6 +131,7 @@ export function shiftByBareWS(
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
+	const initialS = s;
 	s.replace(/^\s+/, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let foundFullToken = false;
@@ -151,11 +155,13 @@ export function shiftByBareWS(
 				foundFullToken = true;
 			}
 		} else {
-			// should not be possible
+			// possible?
 			foundFullToken = true;
+			token += s;
+			s = '';
 		}
-		// console.warn({ _: 'shiftByBareWS()', s, m, token });
 	}
+	assert(s !== initialS); // assert progress has been made o/w panic
 	return [token, s];
 }
 
@@ -172,6 +178,7 @@ export function splitByShiftBareWS(
 	while (s) {
 		const [token, restOfString] = shiftByBareWS(s, options);
 		arr.push(token);
+		assert(s !== restOfString); // assert progress has been made o/w panic
 		s = restOfString;
 	}
 	return arr;
@@ -211,10 +218,10 @@ export function splitByBareWS(
 				text = '';
 			}
 		} else {
+			// possible?
 			arr.push(text);
 			text = s = '';
 		}
-		// console.warn({ _: 'splitByBareWS()', s, m, arr });
 	}
 	return arr;
 }
