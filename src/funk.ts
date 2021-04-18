@@ -74,11 +74,7 @@ type AnyIterableIterator<T> = AsyncIterableIterator<T> | IterableIterator<T>;
 
 type AnyIterator<T> = AsyncIterator<T> | Iterator<T>;
 
-export type EnumerableSync<
-	T,
-	K = EnumerableKeyOfT<T>,
-	V = EnumerableValueOfT<T>,
-> =
+export type EnumerableSync<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| MapLike<K, V>
 	| Generator<V>
 	| ArrayLike<V>
@@ -110,15 +106,15 @@ type EnumerableKeyOfT<T> = T extends [infer K, unknown][] ? K
 
 // dprint-ignore // ref: <https://github.com/dprint/dprint-plugin-typescript/issues/124>
 type EnumerableValueOfT<T> = T extends [unknown, infer V][] ? V
-  : T extends
-    | ArrayLike<infer V>
-    | MapLike<unknown, infer V>
-    | AnyIterable<infer V>
-    | AnyIterableIterator<infer V>
-    | AnyIterator<infer V> ? V
-  : T extends AnyGenerator<infer V, unknown, unknown> ? V
-  : T extends Enumerable<unknown, unknown, infer V> ? V
-  : unknown;
+	: T extends
+		| ArrayLike<infer V>
+		| MapLike<unknown, infer V>
+		| AnyIterable<infer V>
+		| AnyIterableIterator<infer V>
+		| AnyIterator<infer V> ? V
+	: T extends AnyGenerator<infer V, unknown, unknown> ? V
+	: T extends Enumerable<unknown, unknown, infer V> ? V
+	: unknown;
 // | AnySyncGenerator<[unknown, infer V], unknown, unknown> => V
 
 // ####
