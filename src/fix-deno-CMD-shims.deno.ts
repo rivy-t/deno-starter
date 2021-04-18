@@ -170,17 +170,15 @@ const re = new RegExp(
 // const identity = <T>(x: T) => x;
 
 const res = [re];
-const fileEntries = await collect(
-	filter(
-		// 	// (walkEntry) => walkEntry.path !== denoInstallRoot,
-		() => true,
-		fs.walkSync(denoInstallRoot + '/.', {
-			maxDepth: 1,
-			match: res,
-			// skip: [/[.]/],
-		}),
-	),
-);
+const fileEntries = await collect(filter(
+	// 	// (walkEntry) => walkEntry.path !== denoInstallRoot,
+	() => true,
+	fs.walkSync(denoInstallRoot + '/.', {
+		maxDepth: 1,
+		match: res,
+		// skip: [/[.]/],
+	}),
+));
 // console.log({
 // 	denoInstallRoot,
 // 	res,
@@ -194,35 +192,30 @@ const fileEntries = await collect(
 
 // const isEmpty = <T>(x: T) => typeof x === 'undefined' || x === null || (isString(x) && x === '');
 
-const updates = await collect(
-	map(async function (fileEntry) {
-		const shimPath = fileEntry.path;
-		const contentsOriginal = eol.LF(decoder.decode(await Deno.readFile(shimPath)));
+const updates = await collect(map(async function (fileEntry) {
+	const shimPath = fileEntry.path;
+	const contentsOriginal = eol.LF(decoder.decode(await Deno.readFile(shimPath)));
 
-		// heuristic match for enhanced shim
-		// spell-checker:ignore () ined
-		const isEnhanced =
-			contentsOriginal.match(/goto\s+[\W_]*undef(?:ined)?[\W_]*\s+2\s*>\s*NUL/i) ||
-			contentsOriginal.match(/shim\s*;\s*by\s*`?dxi`?/i);
+	// heuristic match for enhanced shim
+	// spell-checker:ignore () ined
+	const isEnhanced = contentsOriginal.match(/goto\s+[\W_]*undef(?:ined)?[\W_]*\s+2\s*>\s*NUL/i) ||
+		contentsOriginal.match(/shim\s*;\s*by\s*`?dxi`?/i);
 
-		const reMatchArray =
-			contentsOriginal.match(
-				// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
-				/^(.*?)@\x22?deno(?:[.]exe)?\x22?\s+\x22?run\x22?\s+(.*\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m,
-			) || [];
-		const [_match, _denoCommandPrefix, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
+	const reMatchArray = contentsOriginal.match(
+		// eg, `@deno run "--allow-..." ... "https://deno.land/x/denon/denon.ts" %*`
+		/^(.*?)@\x22?deno(?:[.]exe)?\x22?\s+\x22?run\x22?\s+(.*\s+)?(\x22[^\x22]*\x22)\s+%*.*$/m,
+	) || [];
+	const [_match, _denoCommandPrefix, denoRunOptionsRaw, denoRunTarget] = reMatchArray;
 
-		const denoRunOptions = (denoRunOptionsRaw || '')
-			.replace(/((^|\s+)\x22?--\x22?)+(\s|$)/g, ' ') // remove any "--" (quoted or not); avoids collision with "--" added by template
-			.replace(/^\s+/m, '') // remove leading whitespace
-			.replace(/\s+$/m, ''); // remove trailing whitespace
-		const shimBinName = Path.parse(shimPath).name;
-		const contentsUpdated = eol.CRLF(
-			_.template(cmdShimTemplate)({ denoRunOptions, denoRunTarget, shimBinName }),
-		);
-		return { shimPath, isEnhanced, contentsUpdated, denoRunOptions, contentsOriginal };
-	}, fileEntries),
-);
+	const denoRunOptions = (denoRunOptionsRaw || '').replace(/((^|\s+)\x22?--\x22?)+(\s|$)/g, ' ') // remove any "--" (quoted or not); avoids collision with "--" added by template
+		.replace(/^\s+/m, '') // remove leading whitespace
+		.replace(/\s+$/m, ''); // remove trailing whitespace
+	const shimBinName = Path.parse(shimPath).name;
+	const contentsUpdated = eol.CRLF(
+		_.template(cmdShimTemplate)({ denoRunOptions, denoRunTarget, shimBinName }),
+	);
+	return { shimPath, isEnhanced, contentsUpdated, denoRunOptions, contentsOriginal };
+}, fileEntries));
 
 for await (const update of updates) {
 	// if (options.debug) {

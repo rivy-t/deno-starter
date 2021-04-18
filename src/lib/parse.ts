@@ -306,10 +306,13 @@ export async function* filenameExpand(s: string) {
 		const resolvedPrefix = Path.resolve(parsed.prefix);
 		if (await exists(resolvedPrefix)) {
 			Deno.chdir(resolvedPrefix);
-			for await (const e of walk('.', {
-				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
-				maxDepth: parsed.globScan.maxDepth,
-			})) {
+			// prettier-ignore
+			for await (
+				const e of walk('.', {
+					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+					maxDepth: parsed.globScan.maxDepth,
+				})
+			) {
 				found = true;
 				yield Path.join(parsed.prefix, e.path);
 			}
@@ -334,10 +337,13 @@ export function* filenameExpandSync(s: string) {
 		const resolvedPrefix = Path.resolve(parsed.prefix);
 		if (existsSync(resolvedPrefix)) {
 			Deno.chdir(resolvedPrefix);
-			for (const e of walkSync('.', {
-				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
-				maxDepth: parsed.globScan.maxDepth,
-			})) {
+			// prettier-ignore
+			for (
+				const e of walkSync('.', {
+					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+					maxDepth: parsed.globScan.maxDepth,
+				})
+			) {
 				found = true;
 				yield Path.join(parsed.prefix, e.path);
 			}
@@ -368,11 +374,14 @@ export function filenameExpandToCollection(s: string): Array<string> {
 			// });
 			Deno.chdir(resolvedPrefix);
 			// try {
-			for (const e of walkSync('.', {
-				match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
-				// maxDepth: 4,
-				maxDepth: parsed.globScan.maxDepth,
-			})) {
+			// prettier-ignore
+			for (
+				const e of walkSync('.', {
+					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
+					// maxDepth: 4,
+					maxDepth: parsed.globScan.maxDepth,
+				})
+			) {
 				arr.push(Path.join(parsed.prefix, e.path));
 			}
 			// } catch (e) {

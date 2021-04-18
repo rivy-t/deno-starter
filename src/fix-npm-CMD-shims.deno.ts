@@ -152,18 +152,16 @@ if (npmBinPath) {
 // const files = await collect(fs.expandGlob(path.join(npmBinPath, '*.cmd')));
 const files = fs.expandGlob(path.join(npmBinPath, '*.cmd'));
 
-const updates = await collect(
-	map(async function (file) {
-		const name = file.path;
-		const contentsOriginal = eol.LF(decoder.decode(await Deno.readFile(name)));
-		const targetBinPath =
-			(contentsOriginal.match(/^[^\S\n]*\x22%_prog%\x22\s+\x22([^\x22]*)\x22.*$/m) || [])[1] ||
-			undefined;
-		const targetBinName = targetBinPath ? path.parse(targetBinPath).name : undefined;
-		const contentsUpdated = eol.CRLF(_.template(cmdShimTemplate)({ targetBinName, targetBinPath }));
-		return { name, targetBinPath, contentsOriginal, contentsUpdated };
-	}, files),
-);
+const updates = await collect(map(async function (file) {
+	const name = file.path;
+	const contentsOriginal = eol.LF(decoder.decode(await Deno.readFile(name)));
+	const targetBinPath =
+		(contentsOriginal.match(/^[^\S\n]*\x22%_prog%\x22\s+\x22([^\x22]*)\x22.*$/m) || [])[1] ||
+		undefined;
+	const targetBinName = targetBinPath ? path.parse(targetBinPath).name : undefined;
+	const contentsUpdated = eol.CRLF(_.template(cmdShimTemplate)({ targetBinName, targetBinPath }));
+	return { name, targetBinPath, contentsOriginal, contentsUpdated };
+}, files));
 
 for await (const update of updates) {
 	// if (options.debug) {
