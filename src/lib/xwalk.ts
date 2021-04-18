@@ -1,7 +1,7 @@
 // spell-checker:ignore (*) xwalk
 
 // ToDO: create new xwalk module
-// * improve interface; guarantee no-throw
+// * improve interface; guarantee no-throw, collect errors?
 
 // Documentation and interface for walk were adapted from Go
 // https://golang.org/pkg/path/filepath/#Walk
