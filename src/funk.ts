@@ -95,6 +95,7 @@ export type Enumerable<T, K = EnumerableKeyOfT<T>, V = EnumerableValueOfT<T>> =
 	| AnyIterable<V>
 	| AnyIterator<V>;
 
+// dprint-ignore // ref: <https://github.com/dprint/dprint-plugin-typescript/issues/124>
 type EnumerableKeyOfT<T> = T extends [infer K, unknown][] ? K
 	: T extends ArrayLike<unknown> ? number
 	: T extends Set<infer K> ? K
@@ -107,16 +108,17 @@ type EnumerableKeyOfT<T> = T extends [infer K, unknown][] ? K
 	: unknown;
 // | AnySyncGenerator<[infer K, unknown], unknown, unknown> => K
 
+// dprint-ignore // ref: <https://github.com/dprint/dprint-plugin-typescript/issues/124>
 type EnumerableValueOfT<T> = T extends [unknown, infer V][] ? V
-	: T extends
-		| ArrayLike<infer V>
-		| MapLike<unknown, infer V>
-		| AnyIterable<infer V>
-		| AnyIterableIterator<infer V>
-		| AnyIterator<infer V> ? V
-	: T extends AnyGenerator<infer V, unknown, unknown> ? V
-	: T extends Enumerable<unknown, unknown, infer V> ? V
-	: unknown;
+  : T extends
+    | ArrayLike<infer V>
+    | MapLike<unknown, infer V>
+    | AnyIterable<infer V>
+    | AnyIterableIterator<infer V>
+    | AnyIterator<infer V> ? V
+  : T extends AnyGenerator<infer V, unknown, unknown> ? V
+  : T extends Enumerable<unknown, unknown, infer V> ? V
+  : unknown;
 // | AnySyncGenerator<[unknown, infer V], unknown, unknown> => V
 
 // ####
