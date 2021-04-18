@@ -1,4 +1,4 @@
-<!-- spell-checker:ignore (names) Deno Gitter -->
+<!-- spell-checker:ignore (names) Deno Gitter (utils) dprint -->
 
 # 🦕 Deno scripts
 
