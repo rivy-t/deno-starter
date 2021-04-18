@@ -1,5 +1,8 @@
 # Prettier "ignore" list
 
+# * uses dprint
+**/*.ts
+
 # * otherwise managed files
 .vscode/settings.json
 .vscode/extensions.json
