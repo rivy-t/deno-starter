@@ -21,8 +21,8 @@
 		"arrowFunction.useParentheses": "force",
 		"newLineKind": "lf",
 		"functionExpression.spaceAfterFunctionKeyword": true,
-		"taggedTemplate.spaceBeforeLiteral": false,
-		"conditionalExpression.preferSingleLine": true
+		"taggedTemplate.spaceBeforeLiteral": false
+		// "conditionalExpression.preferSingleLine": true
 		// "quoteStyle": "preferDouble",
 		// "ignoreNodeCommentText": "deno-fmt-ignore",
 		// "ignoreFileCommentText": "deno-fmt-ignore-file",
@@ -32,12 +32,14 @@
 	"json": {},
 	"markdown": {},
 	"rustfmt": {},
-	"includes": ["**/*.{ts,tsx,js,jsx,json,md,rs}"],
+	"includes": ["**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,rs}"],
 	"excludes": [".history", "**/node_modules", "**/*-lock.json", "**/target", "**/vendor"],
 	"plugins": [
 		"https://plugins.dprint.dev/typescript-0.40.3.wasm",
 		"https://plugins.dprint.dev/json-0.8.0.wasm",
 		"https://plugins.dprint.dev/markdown-0.5.1.wasm",
 		"https://plugins.dprint.dev/rustfmt-0.3.0.wasm"
+		// ref: <https://github.com/dprint/dprint-plugin-prettier>
+		// "https://plugins.dprint.dev/prettier-0.2.2.wasm"
 	]
 }
