@@ -48,10 +48,7 @@ const square = (x: number) => {
 
 map(
 	pipe([
-		fork({
-			original: identity,
-			squared: map(square),
-		}),
+		fork({ original: identity, squared: map(square) }),
 		({ original, squared }: { original: number; squared: number }) => {
 			console.log('squared:', original, '->', squared);
 		},

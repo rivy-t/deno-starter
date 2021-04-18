@@ -31,10 +31,7 @@ const z = await F.collect(F.zip(F.range(10, Infinity), ['a', 'bb', 'ccc', 'dddd'
 // const z = await F.collect(F.enumerate(new Map()));
 const flatZ = await F.collect(F.flatten(z));
 console.log({ z, flatZ });
-const m1 = new Map([
-	['a', 1],
-	['b', 20],
-]);
+const m1 = new Map([['a', 1], ['b', 20]]);
 const mE1 = await F.collect(F.enumerate(m1));
 const mZ1 = await F.collect(F.zip(F.range(10, Infinity), m1));
 const mFlatE1 = await F.collect(F.flatten(mE1));
@@ -53,11 +50,7 @@ console.log({
 	scan: F.collectSync(F.scanSync(sum, 0, flatY)),
 });
 
-const mInitArrayOfTuples: [string, number][] = [
-	['x', 1],
-	['y', 2],
-	['z', 30],
-];
+const mInitArrayOfTuples: [string, number][] = [['x', 1], ['y', 2], ['z', 30]];
 const m = new Map(mInitArrayOfTuples);
 const mEntries = F.collectEntriesSync(m);
 const mEntriesToMap = F.collectToMapSync(mEntries);
@@ -76,15 +69,7 @@ const mDouble = await F.collect(F.map(double, m));
 const mDoubleKV = await F.collect(F.mapKV(double, m));
 const mDoubleKVToNewMap = new Map(mDoubleKV);
 const mDoubleKVToMap = await F.collectToMap(F.mapKV(double, m));
-console.log({
-	m,
-	mEntries,
-	mEntriesToMap,
-	mDouble,
-	mDoubleKV,
-	mDoubleKVToNewMap,
-	mDoubleKVToMap,
-});
+console.log({ m, mEntries, mEntriesToMap, mDouble, mDoubleKV, mDoubleKVToNewMap, mDoubleKVToMap });
 
 const b = R.map(double, await F.collectToArray(F.flatten(y)));
 console.log({ b });

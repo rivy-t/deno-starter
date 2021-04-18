@@ -93,10 +93,7 @@ eol.LF = function (s: string) {
 // influenced by code from <https://github.com/npm/node-which/blob/master/which.js> (ISC License)
 // handle PATHEXT for Cygwin or MSYS?
 
-type findFileOptions = {
-	paths?: readonly string[];
-	extensions?: readonly string[];
-};
+type findFileOptions = { paths?: readonly string[]; extensions?: readonly string[] };
 
 async function* findExecutable(
 	name: string,
@@ -164,12 +161,7 @@ const updates = await collect(
 			undefined;
 		const targetBinName = targetBinPath ? path.parse(targetBinPath).name : undefined;
 		const contentsUpdated = eol.CRLF(_.template(cmdShimTemplate)({ targetBinName, targetBinPath }));
-		return {
-			name,
-			targetBinPath,
-			contentsOriginal,
-			contentsUpdated,
-		};
+		return { name, targetBinPath, contentsOriginal, contentsUpdated };
 	}, files),
 );
 

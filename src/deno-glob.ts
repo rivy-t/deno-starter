@@ -86,7 +86,7 @@ export async function* expandGlob(
 		includeDirs = true,
 		extended = false,
 		globstar = false,
-		dotglob = true,
+		// dotglob = true,
 		caseSensitive = isWindows ? false : true,
 	}: ExpandGlobOptions = {},
 ): AsyncIterableIterator<WalkEntry> {
@@ -133,10 +133,7 @@ export async function* expandGlob(
 			}
 			return;
 		} else if (globSegment == '**') {
-			return yield* walk(walkInfo.path, {
-				includeFiles: false,
-				skip: excludePatterns,
-			});
+			return yield* walk(walkInfo.path, { includeFiles: false, skip: excludePatterns });
 		}
 		yield* walk(walkInfo.path, {
 			maxDepth: 1,
@@ -187,7 +184,7 @@ export function* expandGlobSync(
 		includeDirs = true,
 		extended = false,
 		globstar = false,
-		dotglob = true,
+		// dotglob = true,
 		caseSensitive = isWindows ? false : true,
 	}: ExpandGlobOptions = {},
 ): IterableIterator<WalkEntry> {
@@ -234,10 +231,7 @@ export function* expandGlobSync(
 			}
 			return;
 		} else if (globSegment == '**') {
-			return yield* walkSync(walkInfo.path, {
-				includeFiles: false,
-				skip: excludePatterns,
-			});
+			return yield* walkSync(walkInfo.path, { includeFiles: false, skip: excludePatterns });
 		}
 		yield* walkSync(walkInfo.path, {
 			maxDepth: 1,

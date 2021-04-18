@@ -117,13 +117,11 @@ function localExpandGlob(glob: string) {
 		pathCaseSensitive ? void 0 : 'i',
 	);
 	const res = [re];
-	const fileEntries = collectSync(
-		fs.walkSync('.', {
-			// maxDepth: 1,
-			match: res,
-			// skip: [/[.]/],
-		}),
-	);
+	const fileEntries = collectSync(fs.walkSync('.', {
+		// maxDepth: 1,
+		match: res,
+		// skip: [/[.]/],
+	}));
 	// console.warn({ glob, re, res, fileEntries });
 	return fileEntries;
 }

@@ -128,7 +128,6 @@ export function shiftByBareWS(
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
-	const arr: Array<string> = [];
 	s.replace(/^\s+/, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let foundFullToken = false;

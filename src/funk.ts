@@ -1,6 +1,5 @@
-// spell-checker:ignore (names) Packt Rambda Ramda Rubico
-// spell-checker:ignore (people) Federico Kereki
-// spell-checker:ignore (vars) en enumer it iter
+// deno-lint-ignore-file no-mixed-spaces-and-tabs
+// spell-checker:ignore (names) Packt Rambda Ramda Rubico ; (people) Federico Kereki ; (utils) dprint ; (vars) en enumer it iter
 
 // ToDO: add fluency?
 // List<T> = Gen<T> with all functions (map, reduce, take, ...) attached producing more List<T>'s ; "lazy"
@@ -61,7 +60,9 @@ export type MapLike<K, V> =
 	| Map<K, V>
 	| MapLikeObject<ObjectKey, V>
 	| Record<ObjectKey, V>
-	| { entries: () => [K, V][] };
+	| {
+			entries: () => [K, V][];
+	  };
 
 type AnyGenerator<T = unknown, TReturn = unknown, TNext = unknown> =
 	| AsyncGenerator<T, TReturn, TNext>
@@ -117,22 +118,22 @@ type EnumerableValueOfT<T> = T extends [unknown, infer V][] ? V
 
 // ####
 
-const mN1 = new Map([['a', 'z']]);
+// const mN1 = new Map([['a', 'z']]);
 // const set_1 = new Set([1, 10, 100]);
 // type tsk = EnumerableKeyOfT<Set<string | number>>;
-const itN1 = mN1[Symbol.iterator]();
-const n = itN1.next();
-const [k, v] = !n.done ? n.value : [];
+// const itN1 = mN1[Symbol.iterator]();
+// const n = itN1.next();
+// const [k, v] = !n.done ? n.value : [];
 
-const o = { 1: 1, 2: 2 };
-const e = enumerate(
-	// new Map<string, number>([['a', 1]])
-	new Map<string, [number]>([['a', [1]]]),
-	// [1, 2]
-);
-const c = collect(e);
-const d = collect(iterate([1, 2]));
-const sy = Symbol('unique');
+// const o = { 1: 1, 2: 2 };
+// const e = enumerate(
+// 	// new Map<string, number>([['a', 1]])
+// 	new Map<string, [number]>([['a', [1]]]),
+// 	// [1, 2]
+// );
+// const c = collect(e);
+// const d = collect(iterate([1, 2]));
+// const sy = Symbol('unique');
 const ox = { 1: 'one', 2: 'two', sym: 10, truthy: true };
 type oxk = EnumerableKeyOfT<typeof ox>;
 type oxv = EnumerableValueOfT<typeof ox>;

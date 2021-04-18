@@ -38,9 +38,9 @@ const args = me.ARGS || '';
 const argvSplit = splitByBareWS(args);
 const argvSplitShift = splitByShiftBareWS(args);
 // const argvSplitBraceExpanded = splitByBareWS(args).flatMap(braceExpand);
-const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args)
-	.flatMap(braceExpand)
-	.flatMap(tildeExpand);
+const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args).flatMap(braceExpand).flatMap(
+	tildeExpand,
+);
 // const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
 // 	.flatMap(braceExpand)
 // 	.flatMap(tildeExpand)
