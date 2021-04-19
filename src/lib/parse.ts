@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu msu ; (names) SkyPack micromatch picomatch xwalk ; (options) nobrace noquantifiers nocase
+// spell-checker:ignore (js) gmsu msu ; (libs) micromatch picomatch xbraces xwalk ; (names) SkyPack ; (options) nobrace noquantifiers nocase
 
 // ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
 
@@ -26,10 +26,12 @@
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 import { exists, existsSync } from 'https://deno.land/std@0.93.0/fs/exists.ts';
 import { assert } from 'https://deno.land/std@0.93.0/testing/asserts.ts';
-// import { walk, walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
+
 import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
+
 import { walk, walkSync } from './xwalk.ts';
-// import * as Fmt from 'https://deno.land/std@0.93.0/fmt/printf.ts';
+
+export { braceExpand } from './xbraces.ts';
 
 // esm.sh
 // import Braces from 'https://cdn.esm.sh/braces@3.0.2';
@@ -45,13 +47,13 @@ import { walk, walkSync } from './xwalk.ts';
 // import MicromatchM from 'https://ga.jspm.io/npm:micromatch@4.0.2/index.js';
 // import PicomatchM from 'https://ga.jspm.io/npm:picomatch@2.2.2/index.js';
 // jspm.dev
-import * as BracesT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/braces/index.d.ts';
+// import * as BracesT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/braces/index.d.ts';
 // import * as MicromatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/micromatch/index.d.ts';
 import * as PicomatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/DefinitelyTyped@7121cbff79/types/picomatch/index.d.ts';
-import BracesM from 'https://jspm.dev/npm:braces@3.0.2';
+// import BracesM from 'https://jspm.dev/npm:braces@3.0.2';
 // import MicromatchM from 'https://jspm.dev/npm:micromatch@4.0.2';
 import PicomatchM from 'https://jspm.dev/npm:picomatch@2.2.2';
-const Braces = BracesM as typeof BracesT;
+// const Braces = BracesM as typeof BracesT;
 // const Micromatch = MicromatchM as typeof MicromatchT;
 const Picomatch = PicomatchM as typeof PicomatchT;
 
@@ -225,60 +227,6 @@ export function splitByBareWS(
 		}
 	}
 	return arr;
-}
-
-export function braceExpand(s: string): Array<string> {
-	// brace expand a string
-	// * no character escape sequences are recognized
-	// * unbalanced quotes are allowed (parsed as if completed by EOL)
-	const arr: Array<string> = [];
-	s.replace(/^\s+/msu, ''); // trim leading whitespace
-	// console.warn({ _: 'braceExpand()', s });
-	const tokenRe = TokenReS.brace; // == (tokenFragment)(restOfString)
-	let text = '';
-	while (s) {
-		const m = s.match(tokenRe);
-		if (m) {
-			let matchStr = m[1];
-			if (matchStr.length > 0) {
-				const bracesEscChar = '\\'; // `braces` escape character == backslash
-				if (matchStr[0] === DQ || matchStr[0] === SQ) {
-					// "..." or '...' => escape contents
-					const qChar = matchStr[0];
-					const spl = matchStr.split(qChar);
-					matchStr = spl[1];
-					// escape contents
-					// * 1st, escape the braces escape character
-					matchStr = matchStr.replace(bracesEscChar, `${bracesEscChar}${bracesEscChar}`);
-					// * escape string contents
-					matchStr = matchStr.replace(/(.)/gmsu, `${bracesEscChar}$1`);
-					// add surrounding escaped quotes
-					matchStr = `${bracesEscChar}${qChar}` + matchStr + `${bracesEscChar}${qChar}`;
-				} else {
-					// unquoted text => escape special characters
-					// * 1st, escape the braces escape character
-					matchStr = matchStr.replace(bracesEscChar, `${bracesEscChar}${bracesEscChar}`);
-					// * escape any 'special' (braces escape or glob) characters
-					matchStr = matchStr.replace(
-						new RegExp(`([\\${bracesEscChar}?*\\[\\]])`, 'gmsu'),
-						`${bracesEscChar}$1`,
-					);
-				}
-			}
-			text += matchStr;
-			s = m[2];
-			if (!s) {
-				arr.push(text);
-				text = '';
-			}
-		} else {
-			arr.push(text);
-			text = s = '';
-		}
-	}
-	// console.warn({ _: 'braceExpand', arr });
-	// return arr.flatMap((v) => Braces.expand(v));
-	return arr.flatMap((v) => Braces.expand(v)).map((v) => v.replace(/\\(\\)/gmsu, '$1'));
 }
 
 export function tildeExpand(s: string): string {
