@@ -1,6 +1,30 @@
-// spell-checker:ignore (abbrev) PRNG
+// spell-checker:ignore (abbrev) LOGLEVEL NOTSET PRNG
 
+import { getLevelByName } from 'https://deno.land/std@0.93.0/log/levels.ts';
 import * as Log from 'https://deno.land/std@0.93.0/log/mod.ts';
+
+const logLevels = ['NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'];
+const logFromEnv = Deno.env.get('LOG_LEVEL') ||
+	Deno.env.get('LOGLEVEL') ||
+	(Deno.env.get('DEBUG') ? 'DEBUG' : undefined) ||
+	'';
+const logLevelName = logLevels.find((v) => v === logFromEnv) || 'INFO';
+const logLevel = getLevelByName(logLevelName as unknown as any);
+
+// await Log.setup({
+// 	handlers: {
+// 		console: new Log.handlers.ConsoleHandler('DEBUG'),
+// 	},
+// 	loggers: {
+// 		default: {
+// 			level: 'INFO',
+// 			handlers: ['console'],
+// 		},
+// 	},
+// });
+
+const log = Log.getLogger();
+log.level = log.handlers[0].level = logLevel; // quick, but hackish (for handler level setting) => assumes console is `handlers[0]`
 
 import {
 	bench,
@@ -17,12 +41,20 @@ import { Seed } from 'https://deno.land/x/seed@1.0.0/index.ts';
 
 import * as Parser from '../lib/parse.ts';
 
-Log.debug('setup');
+log.debug('setup: started');
+// log.info('setup');
+// log.warning('setup');
+// log.error('setup');
+// log.critical('setup');
+
+performance.mark('setup:start');
+
+const runs = 5000;
 
 const usePresetPRNGSeed = false;
 const presetPRNGSeed = 'bpcc2cfyslscmgrylcy2'; // spell-checker:disable-line
 const seed = usePresetPRNGSeed ? presetPRNGSeed : (new Random()).string(20);
-Log.info({ seed });
+log.info({ seed });
 
 const seededPRNG = new Seed(seed);
 const random = new Random(() => seededPRNG.randomFloat());
@@ -54,9 +86,7 @@ for (let i = 0; i < size; i++) {
 	arr.push(randomTokenString());
 }
 
-Log.debug({ arrEg: arr.slice(0, 10) });
-
-const runs = 5000;
+log.debug({ arrEg: arr.slice(0, 10) });
 
 bench({
 	name: 'Single function parse',
@@ -86,11 +116,40 @@ bench({
 	})(),
 });
 
-Log.debug('starting');
+performance.mark('setup:stop');
+performance.measure('setup', 'setup:start', 'setup:stop');
 
-runBenchmarks(
+log.debug(
+	`setup done (duration: ${
+		(() => {
+			const duration = performance.getEntriesByName('setup')[0].duration;
+			const [unit, n] = (duration > 1000) ? ['s', duration / 1000] : ['ms', duration];
+			return (new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(n)) + ' ' +
+				unit;
+		})()
+	})`,
+);
+
+log.debug('starting benchmarking');
+
+performance.mark('bench:start');
+
+await runBenchmarks(
 	{ silent: true, skip: /_long/ },
 	prettyBenchmarkProgress(),
 ).then(
 	prettyBenchmarkResult(),
+);
+
+performance.mark('bench:stop');
+performance.measure('bench', 'bench:start', 'bench:stop');
+log.debug(
+	`benchmarking done (duration: ${
+		(() => {
+			const duration = performance.getEntriesByName('bench')[0].duration;
+			const [unit, n] = (duration > 1000) ? ['s', duration / 1000] : ['ms', duration];
+			return (new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(n)) + ' ' +
+				unit;
+		})()
+	})`,
 );
