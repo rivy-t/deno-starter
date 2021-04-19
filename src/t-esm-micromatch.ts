@@ -12,9 +12,9 @@ import {
 	// filenameExpandSync,
 	// globToReS,
 	// parseGlob,
-	shiftByBareWS,
+	// shiftByBareWS,
 	splitByBareWS,
-	splitByShiftBareWS,
+	// splitByShiftBareWS,
 	// splitByBareWSToPreBrace,
 	tildeExpand,
 } from './lib/parse.ts';
@@ -35,12 +35,12 @@ if (Deno.build.os === 'windows' && !me[0]) {
 // ref: [bash ~ Shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
 
 const args = me.ARGS || '';
-const argvSplit = splitByBareWS(args);
-const argvSplitShift = splitByShiftBareWS(args);
+// const argvSplit = splitByBareWS(args);
+// const argvSplitShift = splitByShiftBareWS(args);
 // const argvSplitBraceExpanded = splitByBareWS(args).flatMap(braceExpand);
-const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args).flatMap(braceExpand).flatMap(
-	tildeExpand,
-);
+// const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args)
+// 	.flatMap(braceExpand)
+// 	.flatMap(tildeExpand);
 // const argvSplitBraceExpandedTildeExpandedGlobExpanded = splitByBareWS(args)
 // 	.flatMap(braceExpand)
 // 	.flatMap(tildeExpand)
@@ -56,21 +56,21 @@ const argvSplitBraceExpandedTildeExpanded = splitByBareWS(args).flatMap(braceExp
 // const argsBraceExpanded = braceExpand(args);
 // const parsedGlobs = argvSplitBraceExpandedTildeExpanded.map(parseGlob);
 
-const argvViaShift = [];
-let restOfArgs = args;
-let token = '';
-do {
-	[token, restOfArgs] = shiftByBareWS(restOfArgs);
-	if (token) {
-		argvViaShift.push(token);
-	}
-} while (token && restOfArgs);
+// const argvViaShift = [];
+// let restOfArgs = args;
+// let token = '';
+// do {
+// 	[token, restOfArgs] = shiftByBareWS(restOfArgs);
+// 	if (token) {
+// 		argvViaShift.push(token);
+// 	}
+// } while (token && restOfArgs);
 
 const argv = [];
-const vGen = argvSplitBraceExpandedTildeExpanded.flatMap(filenameExpand);
+const vGen = splitByBareWS(args).flatMap(braceExpand).flatMap(tildeExpand).flatMap(filenameExpand);
 for (const vs of vGen) {
 	for await (const v of vs) {
-		console.log({ v });
+		// console.log({ v });
 		argv.push(v);
 	}
 }
@@ -79,12 +79,12 @@ console.warn(
 	me.name,
 	{
 		args,
-		argvSplitBraceExpandedTildeExpanded,
+		// argvSplitBraceExpandedTildeExpanded,
 		// vGen,
 		// // argsBraceExpanded,
-		argvViaShift,
-		argvSplit,
-		argvSplitShift,
+		// argvViaShift,
+		// argvSplit,
+		// argvSplitShift,
 		// argvSplitBraceExpanded,
 		// argvSplitBraceExpandedTildeExpanded,
 		// argvSplitBraceExpandedTildeExpandedGlobExpanded,
