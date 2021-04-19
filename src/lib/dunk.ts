@@ -1,3 +1,4 @@
+// Modified from 'dunce' (MIT license)
 // ref: ['dunce' crate](https://gitlab.com/kornelski/dunce) (aka de-UNC)
 // * see <https://gitlab.com/kornelski/dunce/-/blob/master/src/lib.rs>
 
