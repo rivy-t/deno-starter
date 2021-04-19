@@ -17,7 +17,7 @@ import { Seed } from 'https://deno.land/x/seed@1.0.0/index.ts';
 
 import * as Parser from '../lib/parse.ts';
 
-Log.info('setup');
+Log.debug('setup');
 
 const usePresetPRNGSeed = false;
 const presetPRNGSeed = 'bpcc2cfyslscmgrylcy2'; // spell-checker:disable-line
@@ -26,8 +26,6 @@ Log.info({ seed });
 
 const seededPRNG = new Seed(seed);
 const random = new Random(() => seededPRNG.randomFloat());
-
-Log.info('starting');
 
 function randomBoolean() {
 	return random.real(0, 1) > 0.5;
@@ -66,8 +64,9 @@ bench({
 	func: (() => {
 		let passN = 0;
 		return (b: BenchmarkTimer) => {
+			const idx = passN++ % arr.length;
 			b.start();
-			Parser.splitByBareWS(arr[passN++ % arr.length]);
+			Parser.splitByBareWS(arr[idx]);
 			b.stop();
 		};
 	})(),
@@ -79,22 +78,15 @@ bench({
 	func: (() => {
 		let passN = 0;
 		return (b: BenchmarkTimer) => {
+			const idx = passN++ % arr.length;
 			b.start();
-			Parser.splitByShiftBareWS(arr[passN++ % arr.length]);
+			Parser.splitByShiftBareWS(arr[idx]);
 			b.stop();
 		};
 	})(),
 });
 
-// bench({
-// 	name: 'Rotating arrays',
-// 	runs: 1000,
-// 	func(b): void {
-// 		b.start();
-// 		Parser.splitByShiftBareWS(s);
-// 		b.stop();
-// 	},
-// });
+Log.debug('starting');
 
 runBenchmarks(
 	{ silent: true, skip: /_long/ },
