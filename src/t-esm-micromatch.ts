@@ -67,7 +67,7 @@ const args = me.ARGS || '';
 // } while (token && restOfArgs);
 
 const argv = [];
-const vGen = splitByBareWS(args).flatMap(braceExpand).flatMap(tildeExpand).flatMap(filenameExpand);
+const vGen = splitByBareWS(args).flatMap(braceExpand).map(tildeExpand).map(filenameExpand);
 for (const vs of vGen) {
 	for await (const v of vs) {
 		// console.log({ v });
