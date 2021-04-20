@@ -475,3 +475,19 @@ export function globToReS(s: string) {
 	// deno-lint-ignore no-explicit-any
 	return ((parsed as unknown) as any).output;
 }
+
+export function argv(args?: string) {
+	if (args == null) return Deno.args;
+	return [];
+}
+
+export function argvIt(args: string) {
+	// lazy iterable version (async)
+	if (args == null) return Deno.args; // as iter...
+	return ['iter'];
+}
+export function argvItSync(args: string) {
+	// lazy iterable version (sync)
+	if (args == null) return Deno.args; // as iter...
+	return ['iter']; // ? [iter, restOfArgs]
+}
