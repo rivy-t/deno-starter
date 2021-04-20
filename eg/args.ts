@@ -86,11 +86,17 @@ function* transformSync<T>(generatorList: Generator<T>[]) {
 }
 
 const args = Me.info().ARGS;
-const argvGen = Parse.splitByShiftBareWS(args || '')
+const argv = Parse.splitByShiftBareWS(args || '')
 	.flatMap(Parse.braceExpand)
 	.map(Parse.tildeExpand)
 	.map(Parse.filenameExpandSync);
-const argv = [];
-for (const v of argvGen) argv.push(v);
 
-console.log({ args, argv, argvGen });
+// const argvIt = Parse.splitByShiftBareWS(args || '')
+// 	.flatMap(Parse.braceExpand)
+// 	.map(Parse.tildeExpand)
+// 	.flatMap(Parse.filenameExpandSync);
+// const argvL = [];
+// for (const gen of argvIt) for (const v of gen) argvL.push(v);
+// console.log({ args, argv, argvL });
+
+console.log({ args, argv });
