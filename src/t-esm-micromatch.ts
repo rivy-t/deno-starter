@@ -9,7 +9,9 @@ import * as Me from './lib/me.ts';
 import {
 	braceExpand,
 	filenameExpand,
-	// filenameExpandSync,
+	filenameExpandIter,
+	filenameExpandIterSync,
+	filenameExpandSync,
 	// globToReS,
 	// parseGlob,
 	// shiftByBareWS,
@@ -67,7 +69,7 @@ const args = me.ARGS || '';
 // } while (token && restOfArgs);
 
 const argv = [];
-const vGen = splitByBareWS(args).flatMap(braceExpand).map(tildeExpand).map(filenameExpand);
+const vGen = splitByBareWS(args).flatMap(braceExpand).map(tildeExpand).map(filenameExpandIter);
 for (const vs of vGen) {
 	for await (const v of vs) {
 		// console.log({ v });

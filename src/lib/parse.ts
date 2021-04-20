@@ -250,11 +250,12 @@ export function shellExpand(_s: string): Array<string> {
 	throw 'unimplemented';
 }
 
-export async function* filenameExpand(s: string) {
+export async function* filenameExpandIter(s: string) {
 	// filename (glob) expansion
+	const nullglob = false;
 	const parsed = parseGlob(s);
 
-	// console.warn({ _: 'filenameExpand()', parsed });
+	// console.warn({ _: 'filenameExpandIter()', parsed });
 
 	let found = false;
 	if (parsed.glob) {
@@ -277,26 +278,30 @@ export async function* filenameExpand(s: string) {
 		}
 	}
 
-	if (!found) {
+	if (!found && !nullglob) {
 		yield s;
 	}
 }
 
-export function* filenameExpandSync(s: string) {
+export function* filenameExpandIterSync(s: string) {
 	// filename (glob) expansion
+	const nullglob = false;
 	const parsed = parseGlob(s);
+
+	// console.warn({ _: 'filenameExpandIter()', parsed });
 
 	let found = false;
 	if (parsed.glob) {
 		const currentWorkingDirectory = Deno.cwd();
 		const resolvedPrefix = Path.resolve(parsed.prefix);
 		if (existsSync(resolvedPrefix)) {
+			// console.warn('here', { resolvedPrefix });
 			Deno.chdir(resolvedPrefix);
 			// prettier-ignore
 			for (
 				const e of walkSync('.', {
-					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
-					maxDepth: parsed.globScan.maxDepth,
+					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'imsu' : 'msu')],
+					maxDepth: parsed.globScan.maxDepth ? parsed.globScan.maxDepth : 1,
 				})
 			) {
 				found = true;
@@ -306,48 +311,24 @@ export function* filenameExpandSync(s: string) {
 		}
 	}
 
-	if (!found) {
+	if (!found && !nullglob) {
 		yield s;
 	}
 }
 
-export function filenameExpandToCollection(s: string): Array<string> {
+export async function filenameExpand(s: string) {
 	// filename (glob) expansion
-	const arr: string[] = [];
-	const parsed = parseGlob(s);
-
-	// console.warn({ _: 'filenameExpandToCollection()', parsed });
-
-	if (parsed.glob) {
-		const currentWorkingDirectory = Deno.cwd();
-		const resolvedPrefix = Path.resolve(parsed.prefix);
-		if (existsSync(resolvedPrefix)) {
-			// console.warn({
-			// 	_: 'filenameExpandSync()',
-			// 	resolvedPrefix,
-			// 	maxDepth: parsed.globScan.maxDepth,
-			// });
-			Deno.chdir(resolvedPrefix);
-			// try {
-			// prettier-ignore
-			for (
-				const e of walkSync('.', {
-					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'i' : '')],
-					// maxDepth: 4,
-					maxDepth: parsed.globScan.maxDepth,
-				})
-			) {
-				arr.push(Path.join(parsed.prefix, e.path));
-			}
-			// } catch (e) {
-			// 	console.warn('ERROR!:', e);
-			// }
-			Deno.chdir(currentWorkingDirectory);
-		}
+	const arr = [];
+	for await (const e of filenameExpandIter(s)) {
+		arr.push(e);
 	}
-
-	if (arr.length < 1) {
-		arr.push(s);
+	return arr;
+}
+export function filenameExpandSync(s: string) {
+	// filename (glob) expansion
+	const arr = [];
+	for (const e of filenameExpandIterSync(s)) {
+		arr.push(e);
 	}
 	return arr;
 }

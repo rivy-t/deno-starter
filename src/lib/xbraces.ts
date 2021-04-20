@@ -59,9 +59,9 @@ const text = '{a,b} text string {1..10..2}';
 const expansion = braceExpand('{a,b} text string');
 ```
 */
-export function braceExpand(s: string): Array<string> {
+export function braceExpand(s: string) {
 	// brace expand a string
-	const arr: Array<string> = [];
+	const arr = [];
 	s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'braceExpand()', s });
 	let text = '';
