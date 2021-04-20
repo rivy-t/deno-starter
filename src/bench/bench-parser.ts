@@ -39,7 +39,7 @@ import {
 import Random from 'https://deno.land/x/random@v1.1.2/Random.js';
 import { Seed } from 'https://deno.land/x/seed@1.0.0/index.ts';
 
-import * as Parser from '../lib/parse.ts';
+import * as Parser from '../lib/xArgs.ts';
 
 log.debug('setup: started');
 // log.info('setup');

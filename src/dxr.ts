@@ -7,8 +7,8 @@ import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expa
 import { walk, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync, walk, walkSync };
 
-import * as Me from './lib/me.ts';
-import { shiftByBareWS } from './lib/parse.ts';
+import { shiftByBareWS } from './lib/xArgs.ts';
+import * as Me from './lib/xProcess.ts';
 
 // const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;
@@ -17,16 +17,15 @@ import { shiftByBareWS } from './lib/parse.ts';
 // const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 // const pathCaseSensitive = !isWinOS;
 
-const me = Me.info();
 // console.warn(me.name, { me });
-if (Deno.build.os === 'windows' && !me[0]) {
+if (Deno.build.os === 'windows' && !Me.arg0) {
 	console.warn(
-		me.name +
+		Me.name +
 			': warn: diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
 	);
 }
 
-const args = me.ARGS || Deno.args.join(' ');
+const args = Me.args || Deno.args.join(' ');
 // const argv = splitByBareWS(args);
 // console.warn(me.name, { args, argv });
 // const targetPath = argv.shift();
@@ -34,11 +33,11 @@ const args = me.ARGS || Deno.args.join(' ');
 const [targetPath, targetArgs] = shiftByBareWS(args);
 
 if (!targetPath) {
-	console.error(`${me.name}: err!: no target name supplied (use \`${me.name} TARGET\`)`);
+	console.error(`${Me.name}: err!: no target name supplied (use \`${Me.name} TARGET\`)`);
 	Deno.exit(1);
 } else {
 	if (!fs.existsSync(targetPath)) {
-		console.error(`${me.name}: err!: target ('${targetPath}') does not exist`);
+		console.error(`${Me.name}: err!: target ('${targetPath}') does not exist`);
 		Deno.exit(1);
 	}
 	const denoOptions = ['run', '-A'];
@@ -48,7 +47,7 @@ if (!targetPath) {
 		stdin: 'inherit',
 		stdout: 'inherit',
 		env: {
-			DENO_SHIM_0: `${me[0] ? me[0] : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
+			DENO_SHIM_0: `${Me.arg0 ? Me.arg0 : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
 			DENO_SHIM_ARGS: targetArgs,
 		},
 	};

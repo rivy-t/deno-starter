@@ -2,7 +2,7 @@
 
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
-import * as Me from './lib/me.ts';
+import * as Me from './lib/xProcess.ts';
 
 const me = Me.info();
 const meExec = Deno.execPath();

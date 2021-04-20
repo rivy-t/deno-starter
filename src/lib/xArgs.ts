@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu msu ; (libs) micromatch picomatch xbraces xwalk ; (names) SkyPack ; (options) nobrace noquantifiers nocase
+// spell-checker:ignore (js) gmsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) nobrace noquantifiers nocase
 
 // ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
 
@@ -29,12 +29,12 @@ import { assert } from 'https://deno.land/std@0.93.0/testing/asserts.ts';
 
 import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 
-import { walk, walkSync } from './xwalk.ts';
+import { walk, walkSync } from './xWalk.ts';
 
-// import * as Walk from './xwalk.ts';
-import * as Braces from './xbraces.ts';
+// import * as Walk from './xWalk.ts';
+import * as Braces from './xBraces.ts';
 
-export { expand as braceExpand } from './xbraces.ts';
+export { expand as braceExpand } from './xBraces.ts';
 
 // esm.sh
 // import Braces from 'https://cdn.esm.sh/braces@3.0.2';
@@ -476,8 +476,7 @@ export function globToReS(s: string) {
 	return ((parsed as unknown) as any).output;
 }
 
-export function argv(args?: string | string[]) {
-	if (args == undefined) return Deno.args; // undefined/null => return Deno.args
+export function argv(args: string | string[]) {
 	const arr = Array.isArray(args) ? args : splitByShiftBareWS(args);
 	return arr
 		.flatMap(Braces.expand)

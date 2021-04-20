@@ -21,7 +21,7 @@ const assertType = (s: ValidatorType, value: unknown) => {
 	}
 };
 
-import * as Parse from '../src/lib/parse.ts';
+import * as Parse from '../src/lib/xArgs.ts';
 
 const e = new TextEncoder();
 

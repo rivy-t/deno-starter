@@ -5,7 +5,6 @@
 // import Micromatch from 'https://esm.sh/micromatch@4.0.2';
 // import braces from 'https://esm.sh/braces@3.0.2';
 
-import * as Me from './lib/me.ts';
 import {
 	braceExpand,
 	filenameExpand,
@@ -19,14 +18,15 @@ import {
 	// splitByShiftBareWS,
 	// splitByBareWSToPreBrace,
 	tildeExpand,
-} from './lib/parse.ts';
+} from './lib/xArgs.ts';
+import * as Me from './lib/xProcess.ts';
 
 // import * as Fmt from 'https://deno.land/std@0.93.0/fmt/printf.ts';
 // import * as Util from 'https://deno.land/std@0.93.0/node/util.ts';
 
-const me = Me.info();
+const me = Me;
 console.warn(me.name, { me });
-if (Deno.build.os === 'windows' && !me[0]) {
+if (Deno.build.os === 'windows' && !me.arg0) {
 	console.warn(
 		me.name +
 			': warn: diminished capacity; full functionality requires an enhanced runner (use `dxr` or install with `dxi`)',
@@ -36,7 +36,7 @@ if (Deno.build.os === 'windows' && !me[0]) {
 // bash-type command line expansion
 // ref: [bash ~ Shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
 
-const args = me.ARGS || '';
+const args = me.args || '';
 // const argvSplit = splitByBareWS(args);
 // const argvSplitShift = splitByShiftBareWS(args);
 // const argvSplitBraceExpanded = splitByBareWS(args).flatMap(braceExpand);

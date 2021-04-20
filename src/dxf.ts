@@ -7,8 +7,8 @@ import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expa
 import { walk, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync, walk, walkSync };
 
-import * as Me from './lib/me.ts';
-import { splitByBareWS } from './lib/parse.ts';
+import { splitByBareWS } from './lib/xArgs.ts';
+import * as Me from './lib/xProcess.ts';
 
 // const isWinOS = Deno.build.os === 'windows';
 // const pathSeparator = isWinOS ? /[\\/]/ : /\//;

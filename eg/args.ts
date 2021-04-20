@@ -1,9 +1,18 @@
-import * as Me from '../src/lib/me.ts';
-import * as Parse from '../src/lib/parse.ts';
+import * as Log from 'https://deno.land/std@0.93.0/log/mod.ts';
 
-console.log('processInfo:', Me.info());
+import * as Me from '../src/lib/xProcess.ts';
 
-const args = Me.info().ARGS;
-const argv = Parse.argv(args);
+const isWinOS = Deno.build.os === 'windows';
+
+if (isWinOS && !Me.arg0) {
+	Log.warning(
+		'diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
+	);
+}
+
+console.log('xProcess:', Me);
+
+const args = Me.args;
+const argv = Me.argv();
 
 console.log({ args, argv });
