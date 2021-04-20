@@ -31,6 +31,9 @@ import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 
 import { walk, walkSync } from './xwalk.ts';
 
+// import * as Walk from './xwalk.ts';
+// import * as Braces from './xbraces.ts';
+
 export { braceExpand } from './xbraces.ts';
 
 // esm.sh

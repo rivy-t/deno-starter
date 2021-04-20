@@ -7,7 +7,7 @@ export function info() {
 		// needs ~ for best CLI operations
 		0: Deno.env.get('DENO_SHIM_0'), // executable string which initiated execution of the current process
 		ARGS: Deno.env.get('DENO_SHIM_ARGS'), // argument string for current process (needed for modern Windows argument processing (CMD/PowerShell defer to process for argument processing); generally not useful for POSIX as shell will have already processed the command line)
-		// useful ~ for Windows modification of parent environment (needed for creation of equivalents for `cd` and `source` applications)
+		// useful ~ for Windows modification of parent environment (needed for creation of equivalents for enhanced-`cd` (`enhan-cd`, `goto`, `scd`, ...) and `source` applications)
 		PIPE: Deno.env.get('DENO_SHIM_PIPE'), // path of pipe file (an escape hatch which allows modification of parent environment (variables and CWD))
 		// implementation detail
 		EXEC: Deno.env.get('DENO_SHIM_EXEC'), // executable path of secondary shim (when needed; generally windows only) // ToDO? remove as implementation detail?
