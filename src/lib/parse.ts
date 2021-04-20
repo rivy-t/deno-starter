@@ -32,9 +32,9 @@ import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 import { walk, walkSync } from './xwalk.ts';
 
 // import * as Walk from './xwalk.ts';
-// import * as Braces from './xbraces.ts';
+import * as Braces from './xbraces.ts';
 
-export { braceExpand } from './xbraces.ts';
+export { expand as braceExpand } from './xbraces.ts';
 
 // esm.sh
 // import Braces from 'https://cdn.esm.sh/braces@3.0.2';
@@ -476,9 +476,13 @@ export function globToReS(s: string) {
 	return ((parsed as unknown) as any).output;
 }
 
-export function argv(args?: string) {
-	if (args == null) return Deno.args;
-	return [];
+export function argv(args?: string | string[]) {
+	if (args == undefined) return Deno.args; // undefined/null => return Deno.args
+	const arr = Array.isArray(args) ? args : splitByShiftBareWS(args);
+	return arr
+		.flatMap(Braces.expand)
+		.map(tildeExpand)
+		.flatMap(filenameExpandSync);
 }
 
 export function argvIt(args: string) {
