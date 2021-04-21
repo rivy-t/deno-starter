@@ -179,6 +179,7 @@ export function splitByShiftBareWS(
 	// * supports both single and double quotes
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
+	// * note: by bench-test, this (`splitByShiftBareWS()`) is approx 10% slower than `splitByBareWS()` (~3.3µs vs ~2.9µs)
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	while (s) {
