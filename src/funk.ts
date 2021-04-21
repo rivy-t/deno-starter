@@ -211,7 +211,7 @@ export async function* enumerate<
 			yield ([k, Reflect.get(enumerable, k)] as unknown) as [TKey, TValue];
 		}
 	} else {
-		yield ([idx++, enumerable] as unknown) as [TKey, TValue];
+		yield ([idx, enumerable] as unknown) as [TKey, TValue];
 	}
 }
 export function* enumerateSync<
@@ -241,7 +241,7 @@ export function* enumerateSync<
 			yield ([k, Reflect.get(enumerable, k)] as unknown) as [TKey, TValue];
 		}
 	} else {
-		yield ([idx++, enumerable] as unknown) as [TKey, TValue];
+		yield ([idx, enumerable] as unknown) as [TKey, TValue];
 	}
 }
 
