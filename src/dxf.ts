@@ -1,4 +1,4 @@
-// spell-checker:ignore (vars) arr globstar gmsu nullglob PATHEXT
+// spell-checker:ignore (vars) arr globstar gmsu nullglob PATHEXT ; (utils) dprint dprintrc
 
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
@@ -17,42 +17,50 @@ import * as Me from './lib/xProcess.ts';
 // const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 // const pathCaseSensitive = !isWinOS;
 
-const me = Me.info();
-// console.warn(me.name, { me });
-if (Deno.build.os === 'windows' && !me[0]) {
+// console.warn(Me.name, { Me });
+
+if (Deno.build.os === 'windows' && !Me.arg0) {
 	console.warn(
-		me.name +
+		Me.name +
 			': warn: diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
 	);
 }
 
-const args = me.ARGS || Deno.args.join(' ');
-const argv = splitByBareWS(args);
+const argv = splitByBareWS(Me.argsText || '');
 
 // console.warn(me.name, { args, argv });
 
-// const dprintConfigReS = /[.]?dprint(rc)?[.]json/;
-const dprintConfigPaths = ['.dprintrc.json', '.dprint.json', 'dprint.json'];
-const dprintConfig = dprintConfigPaths.filter(fs.existsSync);
+const runOptions: Deno.RunOptions = (() => {
+	let options: Deno.RunOptions;
+	const dprintConfigPaths = ['.dprint.json', 'dprint.json', '.dprintrc.json'];
+	const dprintConfigPath = dprintConfigPaths.filter(fs.existsSync);
+	if (dprintConfigPath) {
+		// console.info('Using `dprint` formatting');
+		const dprintConfig = dprintConfigPath ? ['--config', dprintConfigPath[0]] : [];
+		const dprintConfigArgs = [...dprintConfig, ...argv];
+		const cmd = ['dprint', ...['fmt', ...dprintConfigArgs, ...argv]];
+		// console.info({ cmd });
+		options = {
+			cmd,
+			stderr: 'inherit',
+			stdin: 'inherit',
+			stdout: 'inherit',
+			// env: { DENO_SHIM_0: targetPath, DENO_SHIM_ARGS: targetArgs },
+		};
+	} else {
+		// console.info('Using `deno` formatting');
+		options = {
+			cmd: ['deno', ...['fmt', ...argv]],
+			stderr: 'inherit',
+			stdin: 'inherit',
+			stdout: 'inherit',
+			// env: { DENO_SHIM_0: targetPath, DENO_SHIM_ARGS: targetArgs },
+		};
+	}
+	return options;
+})();
 
-if (dprintConfig) {
-	const runOptions: Deno.RunOptions = {
-		cmd: ['dprint', ...['fmt', ...argv]],
-		stderr: 'inherit',
-		stdin: 'inherit',
-		stdout: 'inherit',
-		// env: { DENO_SHIM_0: targetPath, DENO_SHIM_ARGS: targetArgs },
-	};
-} else {
-	const runOptions: Deno.RunOptions = {
-		cmd: ['deno', ...['fmt', ...argv]],
-		stderr: 'inherit',
-		stdin: 'inherit',
-		stdout: 'inherit',
-		// env: { DENO_SHIM_0: targetPath, DENO_SHIM_ARGS: targetArgs },
-	};
-	// console.warn(me.name, { runOptions });
-	const process = Deno.run(runOptions);
-	const status = await process.status();
-	Deno.exit(status.success ? 0 : status.code);
-}
+// console.warn(me.name, { runOptions });
+const process = Deno.run(runOptions);
+const status = await process.status();
+Deno.exit(status.success ? 0 : status.code);
