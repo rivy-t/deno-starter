@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) nobrace noquantifiers nocase
+// spell-checker:ignore (js) gmsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) nobrace noquantifiers nocase nullglob
 
 // ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
 
