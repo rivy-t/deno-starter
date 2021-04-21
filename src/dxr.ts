@@ -7,7 +7,7 @@ import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expa
 import { walk, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync, walk, walkSync };
 
-import { shiftByBareWS } from './lib/xArgs.ts';
+import { argsIt } from './lib/xArgs.ts';
 import * as Me from './lib/xProcess.ts';
 
 // const isWinOS = Deno.build.os === 'windows';
@@ -25,12 +25,14 @@ if (Deno.build.os === 'windows' && !Me.arg0) {
 	);
 }
 
-const args = Me.args || Deno.args.join(' ');
+// const argsText = Me.argsText;
 // const argv = splitByBareWS(args);
 // console.warn(me.name, { args, argv });
 // const targetPath = argv.shift();
 // const targetArgs = argv.join(' ');
-const [targetPath, targetArgs] = shiftByBareWS(args);
+const it = argsIt(Me.argsText || '');
+const itNext = await it.next();
+const [targetPath, targetArgs] = !itNext.done ? itNext.value : [];
 
 if (!targetPath) {
 	console.error(`${Me.name}: err!: no target name supplied (use \`${Me.name} TARGET\`)`);

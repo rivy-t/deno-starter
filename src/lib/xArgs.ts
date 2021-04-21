@@ -505,7 +505,7 @@ export function args(argsText: string | string[]) {
 		.flatMap(filenameExpandSync);
 }
 
-// `argIt`
+// `argsIt`
 /** parse (if needed) and 'shell'-expand argument string(s); returning a lazy iterator of arguments with a corresponding remaining argument string
 
 - Performs `bash`-like expansion (compatible with the Bash v4.3 specification).
@@ -522,7 +522,7 @@ Uses the [*braces*](https://github.com/micromatch/braces) and [*picomatch*](http
 ```js
 // eg, for `env`
 const argsText = '--envOptions ... -- targetExecutable {.,}* "text*string" ./src/file_{1..10..2}_*.ts';
-const argIt = argIt(argsText);
+const argIt = argsIt(argsText);
 const processArgs = [];
 let targetArgsText = '';
 let options = null;
@@ -539,14 +539,32 @@ if (options.targetExecutable) {
 }
 ```
 */
-export function argIt(args: string) {
-	// lazy iterable version (async)
-	if (args == null) return Deno.args; // as iter...
-	return ['iter'];
+export async function* argsIt(argsText: string) {
+	while (argsText) {
+		let argText = '';
+		[argText, argsText] = shiftByBareWS(argsText);
+		const argExpansion = [argText]
+			.flatMap(Braces.expand)
+			.map(tildeExpand)
+			.map(filenameExpand);
+		for (const argsFuture of argExpansion) {
+			for (const arg of await argsFuture) {
+				yield [arg, argsText];
+			}
+		}
+	}
 }
 // `argItSync`
-export function argItSync(args: string) {
-	// lazy iterable version (sync)
-	if (args == null) return Deno.args; // as iter...
-	return ['iter']; // ? [iter, restOfArgs]
+export function* argsItSync(argsText: string) {
+	while (argsText) {
+		let argText = '';
+		[argText, argsText] = shiftByBareWS(argsText);
+		const argExpansion = [argText]
+			.flatMap(Braces.expand)
+			.map(tildeExpand)
+			.flatMap(filenameExpandSync);
+		for (const arg of argExpansion) {
+			yield [arg, argsText];
+		}
+	}
 }
