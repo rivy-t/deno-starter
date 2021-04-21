@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) nobrace noquantifiers nocase nullglob
+// spell-checker:ignore (js) gmsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) globstar nobrace noquantifiers nocase nullglob
 
 // ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
 
@@ -478,20 +478,68 @@ export function globToReS(s: string) {
 	return ((parsed as unknown) as any).output;
 }
 
+// `argv`
+/** parse (if needed) and 'shell'-expand argument string(s)
+
+- Performs `bash`-like expansion (compatible with the Bash v4.3 specification).
+- Quotes (single or double) are used to protect braces, tildes, and globs from expansion;
+	unbalanced quotes are allowed (and parsed as if completed by the end of the string).
+  Otherwise, no character escape sequences are recognized.
+- Brace expansion is fully implemented (including nested braces and "brace bomb" protections).
+- Glob expansion supports `globstar` and full extended glob syntax.
+
+Uses the [*braces*](https://github.com/micromatch/braces) and [*picomatch*](https://github.com/micromatch/picomatch) JS modules.
+
+@returns Array (aka 'vector') of expansions (possibly empty)
+@example
+```js
+const argString = '{.,}* "text string" ./src/file_{1..10..2}_*.ts';
+const expansion: string[] = argv(argString);
+```
+*/
 export function argv(args: string | string[]) {
-	const arr = Array.isArray(args) ? args : splitByShiftBareWS(args);
+	const arr = Array.isArray(args) ? args : splitByBareWS(args);
 	return arr
 		.flatMap(Braces.expand)
 		.map(tildeExpand)
 		.flatMap(filenameExpandSync);
 }
 
-export function argvIt(args: string) {
+// `argIt`
+/** parse (if needed) and 'shell'-expand argument string(s); returning a lazy iterator of arguments with a corresponding remaining argument string
+
+- Performs `bash`-like expansion (compatible with the Bash v4.3 specification).
+- Quotes (single or double) are used to protect braces, tildes, and globs from expansion;
+	unbalanced quotes are allowed (and parsed as if completed by the end of the string).
+  Otherwise, no character escape sequences are recognized.
+- Brace expansion is fully implemented (including nested braces and "brace bomb" protections).
+- Glob expansion supports `globstar` and full extended glob syntax.
+
+Uses the [*braces*](https://github.com/micromatch/braces) and [*picomatch*](https://github.com/micromatch/picomatch) JS modules.
+
+@returns Iterator of expansions with corresponding remaining argument string (ie, `[arg, restOfArgS]`)
+@example
+```js
+// eg, for `env`
+const argString = '--envOptions ... -- targetExecutable {.,}* "text*string" ./src/file_{1..10..2}_*.ts';
+const argIt = argIt(argString);
+const envArgs = [];
+let targetArgS = '';
+for (const [arg, restOfArgString] in argIt) {
+	if (arg == '--') { targetArgS = restOfArgString; break; };
+	envArgs.push(arg);
+}
+// parse `env` options from `envArgs`
+...
+// run `targetExecutble` from `targetArgS` with un-processed arguments
+```
+*/
+export function argIt(args: string) {
 	// lazy iterable version (async)
 	if (args == null) return Deno.args; // as iter...
 	return ['iter'];
 }
-export function argvItSync(args: string) {
+export function argItSync(args: string) {
 	// lazy iterable version (sync)
 	if (args == null) return Deno.args; // as iter...
 	return ['iter']; // ? [iter, restOfArgs]
