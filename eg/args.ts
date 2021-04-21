@@ -6,7 +6,7 @@ const isWinOS = Deno.build.os === 'windows';
 
 if (isWinOS && !Me.arg0) {
 	Log.warning(
-		'diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
+		'diminished capacity; full command line functionality requires an enhanced runner (use `dxr` or install with `dxi`)',
 	);
 }
 
