@@ -106,7 +106,7 @@ export function splitByBareWSo(s: string): Array<string> {
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const arr: Array<string> = [];
-	s.replace(/^\s+/msu, ''); // trim leading whitespace
+	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWSo()', s });
 	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+)*)(.*$)`, 'msu');
 	while (s) {
@@ -138,7 +138,7 @@ export function shiftByBareWS(
 	const { autoQuote } = options;
 	const initialS = s;
 	// console.warn({ _: 'shiftByBareWS()', s, options, initialS });
-	s.replace(/^\s+/msu, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
+	s = s.replace(/^\s+/msu, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let foundFullToken = false;
 	let token = '';
@@ -180,7 +180,7 @@ export function splitByShiftBareWS(
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const arr: Array<string> = [];
-	s.replace(/^\s+/msu, ''); // trim leading whitespace
+	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	while (s) {
 		const [token, restOfString] = shiftByBareWS(s, options);
 		arr.push(token);
@@ -200,7 +200,7 @@ export function splitByBareWS(
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
 	const arr: Array<string> = [];
-	s.replace(/^\s+/msu, ''); // trim leading whitespace
+	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWS()', s });
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let text = '';
@@ -236,7 +236,7 @@ export function tildeExpand(s: string): string {
 	// tilde expand a string
 	// * any leading whitespace is removed
 	// ToDO?: handle `~USERNAME` for other users
-	s.replace(/^\s+/msu, ''); // trim leading whitespace
+	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'tildeExpand()', s });
 	// const sepReS = portablePathSepReS;
 	const username = Deno.env.get('USER') || Deno.env.get('USERNAME') || '';
