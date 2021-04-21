@@ -55,7 +55,6 @@
 
 export type ObjectKey = number | string | symbol;
 export type MapLikeObject<K extends ObjectKey, T> = { [P in K]: T };
-// prettier-ignore
 export type MapLike<K, V> =
 	| Map<K, V>
 	| MapLikeObject<ObjectKey, V>
