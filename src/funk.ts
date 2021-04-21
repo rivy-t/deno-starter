@@ -267,6 +267,7 @@ export function* iterateSync<
 
 /**
  *  Collect all sequence values into a promised array (`Promise<T[]>`)
+ *  * exhausts input enumerable
  */
 export async function collect<
 	T extends Enumerable<T>,
@@ -864,6 +865,7 @@ export function* scanKVSync<
 
 /**
  * Converts a (potentially infinite) sequence into a sequence of length `n`
+ * * _does not_ exhaust input enumerable
  */
 export async function* take<
 	T extends Enumerable<T>,
