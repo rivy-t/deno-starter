@@ -242,7 +242,8 @@ export function tildeExpand(s: string): string {
 	// const sepReS = portablePathSepReS;
 	const username = Deno.env.get('USER') || Deno.env.get('USERNAME') || '';
 	const usernameReS = username.replace(/(.)/gmsu, '\\$1');
-	const re = new RegExp(`^\s*(~(?:${usernameReS})?)(${sepReS}|$)(.*)`, 'i');
+	const caseSensitive = !isWinOS;
+	const re = new RegExp(`^\s*(~(?:${usernameReS})?)(${sepReS}|$)(.*)`, caseSensitive ? '' : 'i');
 	const m = s.match(re);
 	if (m) {
 		s = OSPaths.home() + (m[2] ? m[2] : '') + (m[3] ? m[3] : '');
