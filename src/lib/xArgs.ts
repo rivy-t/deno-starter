@@ -478,7 +478,7 @@ export function globToReS(s: string) {
 	return ((parsed as unknown) as any).output;
 }
 
-// `argv`
+// `argsText`
 /** parse (if needed) and 'shell'-expand argument string(s)
 
 - Performs `bash`-like expansion (compatible with the Bash v4.3 specification).
@@ -490,15 +490,15 @@ export function globToReS(s: string) {
 
 Uses the [*braces*](https://github.com/micromatch/braces) and [*picomatch*](https://github.com/micromatch/picomatch) JS modules.
 
-@returns Array (aka 'vector') of expansions (possibly empty)
+@returns Iterator of argument expansions (possibly empty)
 @example
 ```js
-const argString = '{.,}* "text string" ./src/file_{1..10..2}_*.ts';
-const expansion: string[] = argv(argString);
+const argsText = '{.,}* "text string" ./src/file_{1..10..2}_*.ts';
+const expansion: string[] = args(argsText);
 ```
 */
-export function argv(args: string | string[]) {
-	const arr = Array.isArray(args) ? args : splitByBareWS(args);
+export function args(argsText: string | string[]) {
+	const arr = Array.isArray(argsText) ? argsText : splitByBareWS(argsText);
 	return arr
 		.flatMap(Braces.expand)
 		.map(tildeExpand)
@@ -521,17 +521,22 @@ Uses the [*braces*](https://github.com/micromatch/braces) and [*picomatch*](http
 @example
 ```js
 // eg, for `env`
-const argString = '--envOptions ... -- targetExecutable {.,}* "text*string" ./src/file_{1..10..2}_*.ts';
-const argIt = argIt(argString);
-const envArgs = [];
-let targetArgS = '';
-for (const [arg, restOfArgString] in argIt) {
-	if (arg == '--') { targetArgS = restOfArgString; break; };
+const argsText = '--envOptions ... -- targetExecutable {.,}* "text*string" ./src/file_{1..10..2}_*.ts';
+const argIt = argIt(argsText);
+const processArgs = [];
+let targetArgsText = '';
+let options = null;
+for await (const [arg, restOfArgsText] in argIt) {
 	envArgs.push(arg);
+	options = getOptions(envArgs);
+	if (options.targetExecutable) {
+		targetArgsText = restOfArgsText;
+		break;
+	}
 }
-// parse `env` options from `envArgs`
-...
-// run `targetExecutble` from `targetArgS` with un-processed arguments
+if (options.targetExecutable) {
+	// run `targetExecutable` with `targetArgsText` (un-processed argument text)
+}
 ```
 */
 export function argIt(args: string) {
@@ -539,6 +544,7 @@ export function argIt(args: string) {
 	if (args == null) return Deno.args; // as iter...
 	return ['iter'];
 }
+// `argItSync`
 export function argItSync(args: string) {
 	// lazy iterable version (sync)
 	if (args == null) return Deno.args; // as iter...

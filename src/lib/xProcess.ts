@@ -1,20 +1,20 @@
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
 import { splitByBareWS } from '../lib/xArgs.ts';
-import { argv as xArgv } from '../lib/xArgs.ts';
+import { args as xArgs } from '../lib/xArgs.ts';
 
 const isWinOS = Deno.build.os === 'windows';
 
 // needs ~ for best CLI operations
 /** * executable string which initiated execution of the current process */
 export const arg0 = Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
-/** * argument string for current process (needed for modern Windows argument processing, but generally not useful for POSIX) */
-export const args = Deno.env.get('DENO_SHIM_ARGS');
+/** * raw argument text string for current process (needed for modern Windows argument processing, but generally not useful for POSIX) */
+export const argsText = Deno.env.get('DENO_SHIM_ARGS');
 
-/** * array (aka 'vector') of 'shell'-expanded arguments; simple pass-through of `Deno.args` for non-Windows platforms */
-export const argv = () => {
+/** * array of 'shell'-expanded arguments; simple pass-through of `Deno.args` for non-Windows platforms */
+export const args = () => {
 	if (!isWinOS) return Deno.args; // pass-through of `Deno.args` for non-Windows platforms
-	return xArgv(args || Deno.args);
+	return xArgs(argsText || Deno.args);
 };
 
 /** * path string of main script file (best guess from all available sources) */
