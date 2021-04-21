@@ -8,7 +8,7 @@ const logFromEnv = Deno.env.get('LOG_LEVEL') ||
 	Deno.env.get('LOGLEVEL') ||
 	(Deno.env.get('DEBUG') ? 'DEBUG' : undefined) ||
 	'';
-const logLevelName = logLevels.find((v) => v === logFromEnv) || 'INFO';
+const logLevelName = logLevels.find((v) => v === logFromEnv.toLocaleUpperCase()) || 'INFO';
 const logLevel = getLevelByName(logLevelName as unknown as any);
 
 // await Log.setup({
