@@ -50,7 +50,6 @@ const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\
 @:...prep...
 @:launch
 @rem:: DENO_SHIM_EXEC convolution is to avoid \`%*\` within the final parse group [o/w paren args cause parsing misbehavior]
-@rem:: ... this revision does now require balanced double-quotes (when double-quotes are used); this can be avoided if/when Deno handles packaging the command line argument string
 @>>"%DENO_SHIM_EXEC%" echo @set DENO_SHIM_ARGS=%*
 @>>"%DENO_SHIM_EXEC%" echo @goto _undef_ 2^>NUL ^|^| @for %%%%G in ("%COMSPEC%") do @title %%%%~nG ^& @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %%DENO_SHIM_ARGS%%
 @(
