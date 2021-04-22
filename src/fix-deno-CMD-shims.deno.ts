@@ -113,7 +113,7 @@ function joinFullyDefinedPaths(...paths: (string | undefined)[]): string | undef
 	if (paths.find((v) => typeof v === 'undefined')) {
 		return void 0;
 	}
-	return Path.join(...(paths as string[]));
+	return Path.join(...(paths as string[])); // noSonar // false positive; ref: <https://github.com/SonarSource/SonarJS/issues/1961>
 }
 
 // EOL handler
@@ -150,14 +150,21 @@ if (denoInstallRoot && fs.existsSync(denoInstallRoot)) {
 // ref: [deno issue ~ add `caseSensitive` option to `expandGlob`](https://github.com/denoland/deno/issues/9208)
 // ref: [deno/std ~ `expandGlob` discussion](https://github.com/denoland/deno/issues/1856)
 
+function disableWinGlobEscape(s: string) {
+	// * disable '`' escape character (by escaping all occurences)
+	const winGlobEscapeChar = '`';
+	return s.replace(winGlobEscapeChar, winGlobEscapeChar + winGlobEscapeChar);
+}
+
 const cmdGlob = '*.cmd';
-// * disable '`' escape character (by escaping all occurences)
-const winGlobEscape = '`';
-cmdGlob.replace(winGlobEscape, winGlobEscape + winGlobEscape);
 // configure regex (`[\\/]` as path separators, no escape characters (use character sets (`[..]`)instead) )
 const re = new RegExp(
 	// Path.globToRegExp(cmdGlob, { extended: true, globstar: true, os: 'windows' }),
-	Path.globToRegExp(cmdGlob, { extended: true, globstar: true, os: 'windows' }).source.replace(
+	Path.globToRegExp(disableWinGlobEscape(cmdGlob), {
+		extended: true,
+		globstar: true,
+		os: 'windows',
+	}).source.replace(
 		// * remove leading "anchor"
 		/^[^]/,
 		'',
