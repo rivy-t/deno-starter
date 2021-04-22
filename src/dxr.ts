@@ -17,10 +17,10 @@ if (Deno.build.os === 'windows' && !Me.arg0) {
 	);
 }
 
-const [targetPath, targetArgs] = await (async () => {
+const { arg: targetPath, tailOfArgText: targetArgs } = await (async () => {
 	const it = argsIt(Me.argsText || '');
 	const itNext = await it.next();
-	return !itNext.done ? itNext.value : [];
+	return !itNext.done ? itNext.value : {};
 })();
 
 if (!targetPath) {
@@ -33,13 +33,13 @@ if (!targetPath) {
 	}
 	const denoOptions = ['run', '-A'];
 	const runOptions: Deno.RunOptions = {
-		cmd: ['deno', ...denoOptions, ...[targetPath, targetArgs]],
+		cmd: ['deno', ...denoOptions, targetPath, targetArgs || ''],
 		stderr: 'inherit',
 		stdin: 'inherit',
 		stdout: 'inherit',
 		env: {
 			DENO_SHIM_0: `${Me.arg0 ? Me.arg0 : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
-			DENO_SHIM_ARGS: targetArgs,
+			DENO_SHIM_ARGS: targetArgs || '',
 		},
 	};
 	// console.warn(me.name, { runOptions });

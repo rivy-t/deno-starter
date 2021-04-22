@@ -1,7 +1,6 @@
 import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
-import { splitByBareWS } from '../lib/xArgs.ts';
-import { args as xArgs } from '../lib/xArgs.ts';
+import * as xArgs from '../lib/xArgs.ts';
 
 const isWinOS = Deno.build.os === 'windows';
 
@@ -14,14 +13,14 @@ export const argsText = Deno.env.get('DENO_SHIM_ARGS');
 /** * array of 'shell'-expanded arguments; simple pass-through of `Deno.args` for non-Windows platforms */
 export const args = () => {
 	if (!isWinOS) return Deno.args; // pass-through of `Deno.args` for non-Windows platforms
-	return xArgs(argsText || Deno.args);
+	return xArgs.args(argsText || Deno.args);
 };
 
 /** * path string of main script file (best guess from all available sources) */
 export const path = (() => {
 	const denoExec = Deno.execPath();
 	const denoMain = Deno.mainModule;
-	const nameFromArg0 = arg0 ? splitByBareWS(arg0).pop() : undefined;
+	const nameFromArg0 = arg0 ? xArgs.splitByBareWS(arg0).pop() : undefined;
 	return nameFromArg0
 		? nameFromArg0
 		: !Path.basename(denoExec).match(/^deno([.]exe)?$/)

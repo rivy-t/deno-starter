@@ -1,6 +1,6 @@
 // spell-checker:ignore (vars) arr globstar gmsu nullglob PATHEXT ; (utils) dprint dprintrc
 
-import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
+// import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 
 import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
@@ -26,9 +26,9 @@ if (Deno.build.os === 'windows' && !Me.arg0) {
 	);
 }
 
-const argv = splitByBareWS(Me.argsText || '');
+const args = splitByBareWS(Me.argsText || '');
 
-// console.warn(me.name, { args, argv });
+// console.warn(me.name, { args, args });
 
 const runOptions: Deno.RunOptions = (() => {
 	let options: Deno.RunOptions;
@@ -37,8 +37,8 @@ const runOptions: Deno.RunOptions = (() => {
 	if (dprintConfigPath) {
 		// console.info('Using `dprint` formatting');
 		const dprintConfig = dprintConfigPath ? ['--config', dprintConfigPath[0]] : [];
-		const dprintConfigArgs = [...dprintConfig, ...argv];
-		const cmd = ['dprint', ...['fmt', ...dprintConfigArgs, ...argv]];
+		const dprintConfigArgs = [...dprintConfig, ...args];
+		const cmd = ['dprint', 'fmt', ...dprintConfigArgs, ...args];
 		// console.info({ cmd });
 		options = {
 			cmd,
@@ -49,8 +49,10 @@ const runOptions: Deno.RunOptions = (() => {
 		};
 	} else {
 		// console.info('Using `deno` formatting');
+		const cmd = ['deno', 'fmt', ...args];
+		// console.info({ cmd });
 		options = {
-			cmd: ['deno', ...['fmt', ...argv]],
+			cmd,
 			stderr: 'inherit',
 			stdin: 'inherit',
 			stdout: 'inherit',

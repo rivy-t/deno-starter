@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu imsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) globstar nobrace noquantifiers nocase nullglob
+// spell-checker:ignore (js) gmsu imsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) globstar nobrace noquantifiers nocase nullglob ; (utils) xargs
 
 // ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
 
@@ -31,7 +31,6 @@ import OSPaths from 'https://deno.land/x/os_paths@v6.9.0/src/mod.deno.ts';
 
 import { walk, walkSync } from './xWalk.ts';
 
-// import * as Walk from './xWalk.ts';
 import * as Braces from './xBraces.ts';
 
 export { expand as braceExpand } from './xBraces.ts';
@@ -505,8 +504,10 @@ export function args(argsText: string | string[]) {
 		.flatMap(filenameExpandSync);
 }
 
+export type ArgIncrement = { arg?: string; tailOfArgText?: string };
+
 // `argsIt`
-/** parse (if needed) and 'shell'-expand argument string(s); returning a lazy iterator of arguments with a corresponding remaining argument string
+/** incrementally parse and 'shell'-expand argument text; returning a lazy iterator of ArgIncrement's
 
 - Performs `bash`-like expansion (compatible with the Bash v4.3 specification).
 - Quotes (single or double) are used to protect braces, tildes, and globs from expansion;
@@ -520,15 +521,15 @@ Uses the [*braces*](https://github.com/micromatch/braces) and [*picomatch*](http
 @returns Iterator of expansions with corresponding remaining argument string (ie, `[arg, restOfArgS]`)
 @example
 ```js
-// eg, for `env`
-const argsText = '--envOptions ... -- targetExecutable {.,}* "text*string" ./src/file_{1..10..2}_*.ts';
+// eg, for `deno`, `dxr`, `env`, `xargs`, ...
+const argsText = '--processOptions ... targetExecutable {.,}* "text*string" ./src/file_{1..10..2}_*.ts';
 const argIt = argsIt(argsText);
 const processArgs = [];
 let targetArgsText = '';
 let options = null;
 for await (const [arg, restOfArgsText] in argIt) {
-	envArgs.push(arg);
-	options = getOptions(envArgs);
+	processArgs.push(arg);
+	options = getOptions(processArgs);
 	if (options.targetExecutable) {
 		targetArgsText = restOfArgsText;
 		break;
@@ -549,7 +550,7 @@ export async function* argsIt(argsText: string) {
 			.map(filenameExpand);
 		for (const argsFuture of argExpansion) {
 			for (const arg of await argsFuture) {
-				yield [arg, argsText];
+				yield { arg, tailOfArgText: argsText } as ArgIncrement;
 			}
 		}
 	}
@@ -564,7 +565,7 @@ export function* argsItSync(argsText: string) {
 			.map(tildeExpand)
 			.flatMap(filenameExpandSync);
 		for (const arg of argExpansion) {
-			yield [arg, argsText];
+			yield { arg, tailOfArgText: argsText } as ArgIncrement;
 		}
 	}
 }
