@@ -270,30 +270,30 @@ export async function* filenameExpandIter(s: string): AsyncIterableIterator<stri
 		const resolvedPrefix = Path.resolve(parsed.prefix);
 		// console.warn('filenameExpandIter', { parsed, resolvedPrefix });
 		if (await exists(resolvedPrefix)) {
-			const rP = resolvedPrefix +
+			// normalize prefix to have a trailing separator
+			const normalizedPrefix = resolvedPrefix +
 				(resolvedPrefix.endsWith('/') || resolvedPrefix.endsWith('\\') ? '' : Path.SEP);
-			const gE = escapeRegExp(rP).replace(/\\\\|\//g, '[\\\\/]');
+			const globEscapedPrefix = escapeRegExp(normalizedPrefix).replace(/\\\\|\//g, '[\\\\/]');
 			// some paths are resolved to paths with trailing separators (eg, network paths) and some are not
-			// const trailingSep = gE.endsWith('[\\\\/]');
-			const maxD = (parsed.globScanTokens as unknown as any).reduce(
+			// const trailingSep = globEscapedPrefix.endsWith('[\\\\/]');
+			const maxDepth = (parsed.globScanTokens as unknown as any).reduce(
 				(acc: number, value: { value: string; depth: number; isGlob: boolean }) =>
 					acc + (value.isGlob ? value.depth : 0),
 				0,
 			);
 			const re = new RegExp(
-				'^' + gE +
-					// + (trailingSep ? '' : '[\\\\/]')
+				'^' + globEscapedPrefix +
 					parsed.globAsReS + '$',
 				isWinOS ? 'imsu' : 'msu',
 			);
-			// console.warn('filenameExpandIter', { rP, gE, maxD, re });
+			// console.warn('filenameExpandIter', { normalizedPrefix, globEscapedPrefix, maxDepth, re });
 			// note: `walk` match re is compared to the full path during the walk
 			const walkIt = walk(resolvedPrefix, {
 				match: [re],
-				maxDepth: maxD ? maxD : 1,
+				maxDepth: maxDepth ? maxDepth : 1,
 			});
 			for await (const e of walkIt) {
-				const p = e.path.replace(new RegExp('^' + gE), '');
+				const p = e.path.replace(new RegExp('^' + globEscapedPrefix), '');
 				if (p) {
 					found = true;
 					yield Path.join(parsed.prefix, p);
@@ -319,30 +319,30 @@ export function* filenameExpandIterSync(s: string) {
 		const resolvedPrefix = Path.resolve(parsed.prefix);
 		// console.warn('filenameExpandIter', { parsed, resolvedPrefix });
 		if (existsSync(resolvedPrefix)) {
-			const rP = resolvedPrefix +
+			// normalize prefix to have a trailing separator
+			const normalizedPrefix = resolvedPrefix +
 				(resolvedPrefix.endsWith('/') || resolvedPrefix.endsWith('\\') ? '' : Path.SEP);
-			const gE = escapeRegExp(rP).replace(/\\\\|\//g, '[\\\\/]');
+			const globEscapedPrefix = escapeRegExp(normalizedPrefix).replace(/\\\\|\//g, '[\\\\/]');
 			// some paths are resolved to paths with trailing separators (eg, network paths) and some are not
-			// const trailingSep = gE.endsWith('[\\\\/]');
+			// const trailingSep = globEscapedPrefix.endsWith('[\\\\/]');
 			const maxD = (parsed.globScanTokens as unknown as any).reduce(
 				(acc: number, value: { value: string; depth: number; isGlob: boolean }) =>
 					acc + (value.isGlob ? value.depth : 0),
 				0,
 			);
 			const re = new RegExp(
-				'^' + gE +
-					// + (trailingSep ? '' : '[\\\\/]')
+				'^' + globEscapedPrefix +
 					parsed.globAsReS + '$',
 				isWinOS ? 'imsu' : 'msu',
 			);
-			// console.warn('filenameExpandIter', { rP, gE, maxD, re });
+			// console.warn('filenameExpandIter', { normalizedPrefix, globEscapedPrefix, maxD, re });
 			// note: `walkSync` match re is compared to the full path during the walk
 			const walkIt = walkSync(resolvedPrefix, {
 				match: [re],
 				maxDepth: maxD ? maxD : 1,
 			});
 			for (const e of walkIt) {
-				const p = e.path.replace(new RegExp('^' + gE), '');
+				const p = e.path.replace(new RegExp('^' + globEscapedPrefix), '');
 				if (p) {
 					found = true;
 					yield Path.join(parsed.prefix, p);
