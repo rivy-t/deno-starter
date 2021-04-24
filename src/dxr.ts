@@ -38,6 +38,7 @@ if (!targetPath) {
 	// }
 	// const targetArgs = [...tailOfArgExpansion.flat(), tailOfArgText].join(' ');
 	const targetArgs = [
+		// FixME ~ tailOfArgExpansion is incorrect (here and/or in filenameExpansionIter/Sync)
 		// ...tailOfArgExpansion.map(async (v) => {
 		// 	const arr = [];
 		// 	for await (const e of v) arr.push(e);
