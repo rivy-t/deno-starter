@@ -254,7 +254,11 @@ export function shellExpand(_s: string): Array<string> {
 	throw 'unimplemented';
 }
 
-export async function* filenameExpandIter(s: string) {
+function escapeRegExp(s: string) {
+	return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export async function* filenameExpandIter(s: string): AsyncIterableIterator<string> {
 	// filename (glob) expansion
 	const nullglob = false;
 	const parsed = parseGlob(s);
@@ -263,22 +267,38 @@ export async function* filenameExpandIter(s: string) {
 
 	let found = false;
 	if (parsed.glob) {
-		const currentWorkingDirectory = Deno.cwd();
 		const resolvedPrefix = Path.resolve(parsed.prefix);
+		// console.warn('filenameExpandIter', { parsed, resolvedPrefix });
 		if (await exists(resolvedPrefix)) {
-			// console.warn('here', { resolvedPrefix });
-			Deno.chdir(resolvedPrefix);
-			// prettier-ignore
-			for await (
-				const e of walk('.', {
-					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'imsu' : 'msu')],
-					maxDepth: parsed.globScan.maxDepth ? parsed.globScan.maxDepth : 1,
-				})
-			) {
-				found = true;
-				yield Path.join(parsed.prefix, e.path);
+			const rP = resolvedPrefix +
+				(resolvedPrefix.endsWith('/') || resolvedPrefix.endsWith('\\') ? '' : Path.SEP);
+			const gE = escapeRegExp(rP).replace(/\\\\|\//g, '[\\\\/]');
+			// some paths are resolved to paths with trailing separators (eg, network paths) and some are not
+			// const trailingSep = gE.endsWith('[\\\\/]');
+			const maxD = (parsed.globScanTokens as unknown as any).reduce(
+				(acc: number, value: { value: string; depth: number; isGlob: boolean }) =>
+					acc + (value.isGlob ? value.depth : 0),
+				0,
+			);
+			const re = new RegExp(
+				'^' + gE +
+					// + (trailingSep ? '' : '[\\\\/]')
+					parsed.globAsReS + '$',
+				isWinOS ? 'imsu' : 'msu',
+			);
+			// console.warn('filenameExpandIter', { rP, gE, maxD, re });
+			// note: `walk` match re is compared to the full path during the walk
+			const walkIt = walk(resolvedPrefix, {
+				match: [re],
+				maxDepth: maxD ? maxD : 1,
+			});
+			for await (const e of walkIt) {
+				const p = e.path.replace(new RegExp('^' + gE), '');
+				if (p) {
+					found = true;
+					yield Path.join(parsed.prefix, p);
+				}
 			}
-			Deno.chdir(currentWorkingDirectory);
 		}
 	}
 
@@ -296,22 +316,38 @@ export function* filenameExpandIterSync(s: string) {
 
 	let found = false;
 	if (parsed.glob) {
-		const currentWorkingDirectory = Deno.cwd();
 		const resolvedPrefix = Path.resolve(parsed.prefix);
+		// console.warn('filenameExpandIter', { parsed, resolvedPrefix });
 		if (existsSync(resolvedPrefix)) {
-			// console.warn('here', { resolvedPrefix });
-			Deno.chdir(resolvedPrefix);
-			// prettier-ignore
-			for (
-				const e of walkSync('.', {
-					match: [new RegExp('^' + parsed.globAsReS + '$', isWinOS ? 'imsu' : 'msu')],
-					maxDepth: parsed.globScan.maxDepth ? parsed.globScan.maxDepth : 1,
-				})
-			) {
-				found = true;
-				yield Path.join(parsed.prefix, e.path);
+			const rP = resolvedPrefix +
+				(resolvedPrefix.endsWith('/') || resolvedPrefix.endsWith('\\') ? '' : Path.SEP);
+			const gE = escapeRegExp(rP).replace(/\\\\|\//g, '[\\\\/]');
+			// some paths are resolved to paths with trailing separators (eg, network paths) and some are not
+			// const trailingSep = gE.endsWith('[\\\\/]');
+			const maxD = (parsed.globScanTokens as unknown as any).reduce(
+				(acc: number, value: { value: string; depth: number; isGlob: boolean }) =>
+					acc + (value.isGlob ? value.depth : 0),
+				0,
+			);
+			const re = new RegExp(
+				'^' + gE +
+					// + (trailingSep ? '' : '[\\\\/]')
+					parsed.globAsReS + '$',
+				isWinOS ? 'imsu' : 'msu',
+			);
+			// console.warn('filenameExpandIter', { rP, gE, maxD, re });
+			// note: `walkSync` match re is compared to the full path during the walk
+			const walkIt = walkSync(resolvedPrefix, {
+				match: [re],
+				maxDepth: maxD ? maxD : 1,
+			});
+			for (const e of walkIt) {
+				const p = e.path.replace(new RegExp('^' + gE), '');
+				if (p) {
+					found = true;
+					yield Path.join(parsed.prefix, p);
+				}
 			}
-			Deno.chdir(currentWorkingDirectory);
 		}
 	}
 
@@ -504,10 +540,19 @@ export function args(argsText: string | string[]) {
 		.flatMap(filenameExpandSync);
 }
 
-export type ArgIncrement = { arg?: string; tailOfArgText?: string };
+export type ArgIncrement = {
+	arg: string;
+	tailOfArgExpansion: AsyncIterableIterator<string>[];
+	tailOfArgText: string;
+};
+export type ArgIncrementSync = {
+	arg: string;
+	tailOfArgExpansion: string[][];
+	tailOfArgText: string;
+};
 
 // `argsIt`
-/** incrementally parse and 'shell'-expand argument text; returning a lazy iterator of ArgIncrement's
+/** incrementally parse and 'shell'-expand argument text; returning a lazy iterator of ArgIncrementSync's
 
 - Performs `bash`-like expansion (compatible with the Bash v4.3 specification).
 - Quotes (single or double) are used to protect braces, tildes, and globs from expansion;
@@ -540,32 +585,58 @@ if (options.targetExecutable) {
 }
 ```
 */
-export async function* argsIt(argsText: string) {
+export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrement> {
 	while (argsText) {
 		let argText = '';
 		[argText, argsText] = shiftByBareWS(argsText);
-		const argExpansion = [argText]
+		const argExpansions = [argText]
 			.flatMap(Braces.expand)
 			.map(tildeExpand)
-			.map(filenameExpand);
-		for (const argsFuture of argExpansion) {
-			for (const arg of await argsFuture) {
-				yield { arg, tailOfArgText: argsText } as ArgIncrement;
+			.map(filenameExpandIter);
+		for (let idx = 0; idx < argExpansions.length; idx++) {
+			const argExpansion = argExpansions[idx];
+			let current = await argExpansion.next();
+			while (!current.done) {
+				const next = await argExpansion.next();
+				// const tail = [argExpansion]
+				yield {
+					arg: current.value,
+					tailOfArgExpansion: [
+						...(!next.done
+							? [
+								(async function* () {
+									yield next.value;
+									for await (const e of argExpansion) yield e;
+								})(),
+							]
+							: []),
+						...argExpansions.slice(idx + 1),
+					],
+					tailOfArgText: argsText,
+				};
+				current = next;
 			}
 		}
 	}
 }
 // `argItSync`
-export function* argsItSync(argsText: string) {
+export function* argsItSync(argsText: string): IterableIterator<ArgIncrementSync> {
 	while (argsText) {
 		let argText = '';
 		[argText, argsText] = shiftByBareWS(argsText);
-		const argExpansion = [argText]
+		const argExpansions = [argText]
 			.flatMap(Braces.expand)
 			.map(tildeExpand)
-			.flatMap(filenameExpandSync);
-		for (const arg of argExpansion) {
-			yield { arg, tailOfArgText: argsText } as ArgIncrement;
+			.map(filenameExpandSync);
+		for (let idx = 0; idx < argExpansions.length; idx++) {
+			const argExpansion = argExpansions[idx];
+			for (let jdx = 0; jdx < argExpansion.length; jdx++) {
+				yield {
+					arg: argExpansion[jdx],
+					tailOfArgExpansion: [argExpansion.slice(jdx + 1), ...argExpansions.slice(idx + 1)],
+					tailOfArgText: argsText,
+				};
+			}
 		}
 	}
 }
