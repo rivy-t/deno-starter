@@ -1,5 +1,6 @@
 import * as Log from 'https://deno.land/std@0.93.0/log/mod.ts';
 
+import * as xArgs from '../src/lib/xArgs.ts';
 import * as Me from '../src/lib/xProcess.ts';
 
 const isWinOS = Deno.build.os === 'windows';
@@ -15,4 +16,10 @@ console.log('xProcess:', Me);
 const args = Me.argsText;
 const argv = Me.args();
 
-console.log({ args, argv, vsDeno: Deno.args });
+const argIts = [];
+for await (const argInc of xArgs.argsIt(args || '')) {
+	// console.log({ argInc });
+	argIts.push(argInc);
+}
+
+console.log({ args, argv, argIts, vsDeno: Deno.args });
