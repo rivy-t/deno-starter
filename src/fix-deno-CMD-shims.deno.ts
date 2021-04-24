@@ -113,7 +113,7 @@ function joinFullyDefinedPaths(...paths: (string | undefined)[]): string | undef
 	if (paths.find((v) => typeof v === 'undefined')) {
 		return void 0;
 	}
-	return Path.join(...(paths as string[])); // noSonar // false positive; ref: <https://github.com/SonarSource/SonarJS/issues/1961>
+	return Path.join(...(paths as string[])); // noSonar // false positive ("assertion not necessary"); ref: <https://github.com/SonarSource/SonarJS/issues/1961>
 }
 
 // EOL handler
