@@ -17,43 +17,34 @@ if (Deno.build.os === 'windows' && !Me.arg0) {
 	);
 }
 
-// export type ArgIncrement = { arg: string; tailOfArgExpansion: AsyncIterableIterator<string>[]; tailOfArgText: string; };
-// export type ArgIncrementSync = { arg: string; tailOfArgExpansion: string[][]; tailOfArgText: string };
-const { arg: targetPath, tailOfArgExpansion, tailOfArgText } = await (async () => {
+// export type ArgIncrement = { arg: string; tailOfArgExpansion: AsyncIterableIterator<string>[]; tailOfArgsText: string; };
+// export type ArgIncrementSync = { arg: string; tailOfArgExpansion: string[][]; tailOfArgsText: string };
+const { arg: targetPath, tailOfArgExpansion, tailOfArgsText } = await (async () => {
 	const it = xArgs.argsIt(Me.argsText || '');
 	const itNext = await it.next();
-	return !itNext.done ? itNext.value : { arg: '', tailOfArgExpansion: [], tailOfArgText: '' };
+	return !itNext.done ? itNext.value : { arg: '', tailOfArgExpansion: [], tailOfArgsText: '' };
 })();
 
 // console.warn({ targetPath, CWD: Deno.cwd() });
-
 if (!targetPath) {
 	console.error(`${Me.name}: err!: no target name supplied (use \`${Me.name} TARGET\`)`);
 	Deno.exit(1);
 } else {
 	// console.warn(Me.name, { targetPath });
-	// if (!fs.existsSync('eg/args.ts')) {
-	// 	console.error(`${Me.name}: err!: target ('${targetPath}') does not exist`);
-	// 	Deno.exit(1);
-	// }
-	// const targetArgs = [...tailOfArgExpansion.flat(), tailOfArgText].join(' ');
-	console.warn(Me.name, { tailOfArgExpansion });
-	// for (const aE of tailOfArgExpansion) for await (const a of aE) console.warn({ a });
-	const x = await tailOfArgExpansion.flatMap(async (it) => {
+	if (!fs.existsSync(targetPath)) {
+		console.error(`${Me.name}: err!: target ('${targetPath}') does not exist`);
+		Deno.exit(1);
+	}
+	const iteratedArgTail = (await Promise.all(tailOfArgExpansion.flatMap(async (it) => {
 		const arr: string[] = [];
 		for await (const a of it) arr.push(a);
 		return arr;
-	});
-	console.warn(Me.name, { x });
+	}))).flat();
+	// console.warn(Me.name, { tailOfArgExpansion, iteratedArgTail });
 
 	const targetArgs = [
-		// FixME ~ tailOfArgExpansion is incorrect (here and/or in filenameExpansionIter/Sync)
-		// ...tailOfArgExpansion.map(async (v) => {
-		// 	const arr = [];
-		// 	for await (const e of v) arr.push(e);
-		// 	return arr.join(' ');
-		// }),
-		tailOfArgText,
+		...iteratedArgTail,
+		tailOfArgsText,
 	].join(' ');
 	const denoOptions = ['run', '-A'];
 	const runOptions: Deno.RunOptions = {

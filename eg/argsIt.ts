@@ -13,13 +13,13 @@ if (isWinOS && !Me.arg0) {
 
 console.log(Me.name, 'xProcess:', Me);
 
-const args = Me.argsText;
-const argv = Me.args();
+const argsText = Me.argsText;
+const args = Me.args();
 
 const argIts = [];
-for await (const argInc of xArgs.argsIt(args || '')) {
+for await (const argInc of xArgs.argsIt(argsText || '')) {
 	// console.log({ argInc });
 	argIts.push(argInc);
 }
 
-console.log(Me.name, { args, argv, argIts, vsDeno: Deno.args });
+console.log(Me.name, { argsText, args, argIts, vsDeno: Deno.args });

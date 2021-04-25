@@ -12,7 +12,7 @@ if (isWinOS && !Me.arg0) {
 
 console.log(Me.name, 'xProcess:', Me);
 
-const args = Me.argsText;
-const argv = Me.args();
+const argsText = Me.argsText;
+const args = Me.args();
 
-console.log(Me.name, { args, argv, vsDeno: Deno.args });
+console.log(Me.name, { argsText, args, vsDeno: Deno.args });

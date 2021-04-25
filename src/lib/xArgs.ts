@@ -1,4 +1,4 @@
-// spell-checker:ignore (js) gmsu imsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) globstar nobrace noquantifiers nocase nullglob ; (utils) xargs
+// spell-checker:ignore (jargon) bikeshed ; (js) gmsu imsu msu ; (libs) micromatch picomatch ; (names) SkyPack ; (options) globstar nobrace noquantifiers nocase nullglob ; (utils) xargs
 
 // ToDO: review checks for progression in splits => continue to use an assert? what do we guarantee about returned 'token'?
 
@@ -76,6 +76,9 @@ const Picomatch = PicomatchM as typeof PicomatchT;
 // import Picomatch from 'https://cdn.skypack.dev/picomatch@2.2.2?dts';
 
 const isWinOS = Deno.build.os === 'windows';
+
+// const endExpansionToken = '--#';
+const endExpansionToken = '-~'; // ToDO: bikeshed best alternative for an end-of-expansion token
 
 export const portablePathSepReS = '[\\/]';
 
@@ -516,8 +519,6 @@ export function globToReS(s: string) {
 	return ((parsed as unknown) as any).output;
 }
 
-const endExpansionToken = '--#';
-
 // `args`
 /** parse (if needed) and 'shell'-expand argument string(s)
 
@@ -553,12 +554,12 @@ export function args(argsText: string | string[]) {
 export type ArgIncrement = {
 	arg: string;
 	tailOfArgExpansion: AsyncIterableIterator<string>[];
-	tailOfArgText: string;
+	tailOfArgsText: string;
 };
 export type ArgIncrementSync = {
 	arg: string;
 	tailOfArgExpansion: string[][];
-	tailOfArgText: string;
+	tailOfArgsText: string;
 };
 
 // `argsIt`
@@ -628,7 +629,7 @@ export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrem
 							: []),
 						...argExpansions.slice(idx + 1),
 					],
-					tailOfArgText: argsText,
+					tailOfArgsText: argsText,
 				};
 				current = next;
 			}
@@ -654,7 +655,7 @@ export function* argsItSync(argsText: string): IterableIterator<ArgIncrementSync
 				yield {
 					arg: argExpansion[jdx],
 					tailOfArgExpansion: [argExpansion.slice(jdx + 1), ...argExpansions.slice(idx + 1)],
-					tailOfArgText: argsText,
+					tailOfArgsText: argsText,
 				};
 			}
 		}
