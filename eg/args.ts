@@ -10,9 +10,9 @@ if (isWinOS && !Me.arg0) {
 	);
 }
 
-console.log('xProcess:', Me);
+console.log(Me.name, 'xProcess:', Me);
 
 const args = Me.argsText;
 const argv = Me.args();
 
-console.log({ args, argv, vsDeno: Deno.args });
+console.log(Me.name, { args, argv, vsDeno: Deno.args });

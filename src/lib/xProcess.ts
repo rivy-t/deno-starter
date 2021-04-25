@@ -20,7 +20,7 @@ export const args = () => {
 export const path = (() => {
 	const denoExec = Deno.execPath();
 	const denoMain = Deno.mainModule;
-	const nameFromArg0 = arg0 ? xArgs.splitByBareWS(arg0).pop() : undefined;
+	const nameFromArg0 = arg0 ? xArgs.tokenizeCLText(arg0).pop() : undefined;
 	return nameFromArg0
 		? nameFromArg0
 		: !Path.basename(denoExec).match(/^deno([.]exe)?$/)

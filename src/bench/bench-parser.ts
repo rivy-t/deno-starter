@@ -97,7 +97,7 @@ bench({
 		return (b: BenchmarkTimer) => {
 			const idx = passN++ % arr.length;
 			b.start();
-			Parser.splitByBareWS(arr[idx]);
+			Parser.tokenizeCLText(arr[idx]);
 			b.stop();
 		};
 	})(),
@@ -111,7 +111,7 @@ bench({
 		return (b: BenchmarkTimer) => {
 			const idx = passN++ % arr.length;
 			b.start();
-			Parser.splitByShiftBareWS(arr[idx]);
+			Parser.tokenizeCLTextByShift(arr[idx]);
 			b.stop();
 		};
 	})(),

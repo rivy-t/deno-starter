@@ -25,18 +25,27 @@ const { arg: targetPath, tailOfArgExpansion, tailOfArgText } = await (async () =
 	return !itNext.done ? itNext.value : { arg: '', tailOfArgExpansion: [], tailOfArgText: '' };
 })();
 
-console.warn({ targetPath, CWD: Deno.cwd() });
+// console.warn({ targetPath, CWD: Deno.cwd() });
 
 if (!targetPath) {
 	console.error(`${Me.name}: err!: no target name supplied (use \`${Me.name} TARGET\`)`);
 	Deno.exit(1);
 } else {
-	console.warn({ targetPath });
+	// console.warn(Me.name, { targetPath });
 	// if (!fs.existsSync('eg/args.ts')) {
 	// 	console.error(`${Me.name}: err!: target ('${targetPath}') does not exist`);
 	// 	Deno.exit(1);
 	// }
 	// const targetArgs = [...tailOfArgExpansion.flat(), tailOfArgText].join(' ');
+	console.warn(Me.name, { tailOfArgExpansion });
+	// for (const aE of tailOfArgExpansion) for await (const a of aE) console.warn({ a });
+	const x = await tailOfArgExpansion.flatMap(async (it) => {
+		const arr: string[] = [];
+		for await (const a of it) arr.push(a);
+		return arr;
+	});
+	console.warn(Me.name, { x });
+
 	const targetArgs = [
 		// FixME ~ tailOfArgExpansion is incorrect (here and/or in filenameExpansionIter/Sync)
 		// ...tailOfArgExpansion.map(async (v) => {

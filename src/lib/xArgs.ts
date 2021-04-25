@@ -129,7 +129,7 @@ const TokenReS = {
 	brace: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, ''),
 };
 
-export function shiftByBareWS(
+export function shiftCLTextToken(
 	s: string,
 	options: { autoQuote: boolean } = { autoQuote: true },
 ): [string, string] {
@@ -139,7 +139,7 @@ export function shiftByBareWS(
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
 	const initialS = s;
-	// console.warn({ _: 'shiftByBareWS()', s, options, initialS });
+	// console.warn({ _: 'shiftCLTextToken()', s, options, initialS });
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let foundFullToken = false;
@@ -169,11 +169,11 @@ export function shiftByBareWS(
 			s = '';
 		}
 	}
-	assert(!initialS || (s !== initialS), 'non-progression of `shiftByBareWS()`'); // assert progress has been made o/w panic
+	assert(!initialS || (s !== initialS), 'non-progression of `shiftCLTextToken()`'); // assert progress has been made o/w panic
 	return [token, s];
 }
 
-export function splitByShiftBareWS(
+export function tokenizeCLTextByShift(
 	s: string,
 	options: { autoQuote: boolean } = { autoQuote: true },
 ): Array<string> {
@@ -181,19 +181,19 @@ export function splitByShiftBareWS(
 	// * supports both single and double quotes
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
-	// * note: by bench-test, this (`splitByShiftBareWS()`) is approx 10% slower than `splitByBareWS()` (~3.3µs vs ~2.9µs)
+	// * note: by bench-test, this (`tokenizeCLTextByShift()`) is approx 10% slower than `tokenizeCLText()` (~3.3µs vs ~2.9µs)
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	while (s) {
-		const [token, restOfString] = shiftByBareWS(s, options);
+		const [token, restOfString] = shiftCLTextToken(s, options);
 		arr.push(token);
-		assert(s !== restOfString, 'non-progression of `splitByShiftBareWS()`'); // assert progress has been made o/w panic
+		assert(s !== restOfString, 'non-progression of `tokenizeCLTextByShift()`'); // assert progress has been made o/w panic
 		s = restOfString;
 	}
 	return arr;
 }
 
-export function splitByBareWS(
+export function tokenizeCLText(
 	s: string,
 	options: { autoQuote: boolean } = { autoQuote: true },
 ): Array<string> {
@@ -204,7 +204,7 @@ export function splitByBareWS(
 	const { autoQuote } = options;
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
-	// console.warn({ _: 'splitByBareWS()', s });
+	// console.warn({ _: 'tokenizeCLText()', s });
 	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let text = '';
 	while (s) {
@@ -516,7 +516,9 @@ export function globToReS(s: string) {
 	return ((parsed as unknown) as any).output;
 }
 
-// `argsText`
+const endExpansionToken = '--#';
+
+// `args`
 /** parse (if needed) and 'shell'-expand argument string(s)
 
 - Performs `bash`-like expansion (compatible with the Bash v4.3 specification).
@@ -536,11 +538,16 @@ const expansion: string[] = args(argsText);
 ```
 */
 export function args(argsText: string | string[]) {
-	const arr = Array.isArray(argsText) ? argsText : splitByBareWS(argsText);
-	return arr
+	const arr = Array.isArray(argsText) ? argsText : tokenizeCLText(argsText);
+	const idx = arr.findIndex((v) => v === endExpansionToken);
+	const expand = arr.length ? (arr.slice(0, (idx < 0 ? undefined : (idx + 1)))) : [];
+	const raw = (arr.length && (idx > 0) && (idx < arr.length)) ? arr.slice(idx + 1) : [];
+	// console.warn('args()', { arr, idx, expand, raw });
+	return expand
 		.flatMap(Braces.expand)
 		.map(tildeExpand)
-		.flatMap(filenameExpandSync);
+		.flatMap(filenameExpandSync)
+		.concat(raw);
 }
 
 export type ArgIncrement = {
@@ -589,13 +596,19 @@ if (options.targetExecutable) {
 ```
 */
 export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrement> {
+	let continueExpansions = true;
 	while (argsText) {
 		let argText = '';
-		[argText, argsText] = shiftByBareWS(argsText);
-		const argExpansions = [argText]
-			.flatMap(Braces.expand)
-			.map(tildeExpand)
-			.map(filenameExpandIter);
+		[argText, argsText] = shiftCLTextToken(argsText);
+		if (argText === endExpansionToken) continueExpansions = false;
+		const argExpansions = continueExpansions
+			? [argText]
+				.flatMap(Braces.expand)
+				.map(tildeExpand)
+				.map(filenameExpandIter)
+			: [(async function* () {
+				yield argText;
+			})()];
 		for (let idx = 0; idx < argExpansions.length; idx++) {
 			const argExpansion = argExpansions[idx];
 			let current = await argExpansion.next();
@@ -624,13 +637,17 @@ export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrem
 }
 // `argItSync`
 export function* argsItSync(argsText: string): IterableIterator<ArgIncrementSync> {
+	let continueExpansions = false;
 	while (argsText) {
 		let argText = '';
-		[argText, argsText] = shiftByBareWS(argsText);
-		const argExpansions = [argText]
-			.flatMap(Braces.expand)
-			.map(tildeExpand)
-			.map(filenameExpandSync);
+		[argText, argsText] = shiftCLTextToken(argsText);
+		if (argText === endExpansionToken) continueExpansions = false;
+		const argExpansions = continueExpansions
+			? [argText]
+				.flatMap(Braces.expand)
+				.map(tildeExpand)
+				.map(filenameExpandSync)
+			: [[argText]];
 		for (let idx = 0; idx < argExpansions.length; idx++) {
 			const argExpansion = argExpansions[idx];
 			for (let jdx = 0; jdx < argExpansion.length; jdx++) {
