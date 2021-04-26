@@ -7,6 +7,7 @@
 
 // ref: [bash shell expansion](https://tldp.org/LDP/Bash-Beginners-Guide/html/sect_03_04.html) @@ <https://archive.is/GFMJ1>
 // ref: [GNU ~ bash shell expansions](https://www.gnu.org/software/bash/manual/html_node/Shell-Expansions.html) @@ <https://archive.is/lHgK6>
+// ref: [GNU ~ bash quote removal](https://www.gnu.org/software/bash/manual/html_node/Quote-Removal.html) @@ <https://archive.is/sAYie>
 
 // ESM conversion refs
 // ref: <https://esbuild.github.io/plugins>
@@ -77,8 +78,15 @@ const Picomatch = PicomatchM as typeof PicomatchT;
 
 const isWinOS = Deno.build.os === 'windows';
 
-// const endExpansionToken = '--#';
-const endExpansionToken = '-~'; // ToDO: bikeshed best alternative for an end-of-expansion token
+// ToDO: add ArgsOptions = {
+//    endExpansionToken (default == '-+'; setting this also sets partialExpansion to true)
+//    partialExpansionAllowed (default == false)
+//    }
+
+// const endExpansionToken = '-~'; // ToDO: bikeshed best alternative for an end-of-expansion token
+// const endExpansionToken = '-.'; // ToDO: bikeshed best alternative for an end-of-expansion token
+const endExpansionToken = '-+'; // ToDO: bikeshed best alternative for an end-of-expansion token
+// const endExpansionToken = '--++'; // ToDO: bikeshed best alternative for an end-of-expansion token
 
 export const portablePathSepReS = '[\\/]';
 
