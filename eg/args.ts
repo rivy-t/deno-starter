@@ -10,6 +10,7 @@ if (isWinOS && !Me.arg0) {
 	);
 }
 
+console.log(Me.name, 'Deno:', { mainModule: Deno.mainModule, importMeta: import.meta });
 console.log(Me.name, 'xProcess:', Me);
 
 const argsText = Me.argsText;
