@@ -6,9 +6,10 @@ const isWinOS = Deno.build.os === 'windows';
 
 // needs ~ for best CLI operations
 /** * executable string which initiated execution of the current process */
-export const arg0 = Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
+export const arg0 = Deno.env.get('XPROCESS_ARG0') || Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
 /** * raw argument text string for current process (needed for modern Windows argument processing, but generally not useful for POSIX) */
-export const argsText = Deno.env.get('DENO_SHIM_ARGS');
+export const argsText = Deno.env.get('XPROCESS_ARGX') || Deno.env.get('XPROCESS_ARGS') ||
+	Deno.env.get('DENO_SHIM_ARGS');
 
 /** * array of 'shell'-expanded arguments; simple pass-through of `Deno.args` for non-Windows platforms */
 export const args = () => {
