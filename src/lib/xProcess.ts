@@ -4,11 +4,22 @@ import * as xArgs from '../lib/xArgs.ts';
 
 const isWinOS = Deno.build.os === 'windows';
 
+// FixME: problematic transfer of information down to sub-processes
+// ?... consume/reset all ENV variables when accessed;
+//      this might work if using customized env variables so only xProcess-aware apps would access the variables
+//      EXCEPT what of intervening non-xProcess aware app? The sub-process would see the API ENV vars but set for the non-aware parent by the grandparent.
+//      Seems to need a variable which is process specific (similar to `GetCommandLine()`) or a way to specify the target sub-process.
+// ?... same for SHIM_PIPE? (rename to xProcess_PIPE?)
+
+// FixME: avoid double-expansions of command lines
+// ?... use a stop-expansion token; but not transparent, requires coop of user process for option/argument processing
+// ?... use separate ENV var for expanded command line (re-quoted) ... sub-processes would only "bareWS" tokenize and de-quote
+
 // needs ~ for best CLI operations
 /** * executable string which initiated execution of the current process */
-export const arg0 = Deno.env.get('XPROCESS_ARG0') || Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
+export const arg0 = Deno.env.get('xProcess_ARG0') || Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
 /** * raw argument text string for current process (needed for modern Windows argument processing, but generally not useful for POSIX) */
-export const argsText = Deno.env.get('XPROCESS_ARGX') || Deno.env.get('XPROCESS_ARGS') ||
+export const argsText = Deno.env.get('xProcess_ARGX') || Deno.env.get('xProcess_ARGS') ||
 	Deno.env.get('DENO_SHIM_ARGS');
 
 /** * array of 'shell'-expanded arguments; simple pass-through of `Deno.args` for non-Windows platforms */
