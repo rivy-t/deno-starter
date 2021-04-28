@@ -46,19 +46,21 @@ const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\
 @set "DENO_SHIM_ERRORLEVEL="
 @setLocal
 @set "DENO_SHIM_PIPE="
-@set "xProcess_ARGS="
-@set "xProcess_ARGx="
+@set "DENO_SHIM_ARGS="
+@set "DENO_SHIM_ARGx="
+@set "DENO_SHIM_URL="
 @:...prep...
 @:launch
 @rem:: DENO_SHIM_EXEC convolution is to avoid \`%*\` within the final parse group [o/w paren args cause parsing misbehavior]
-@>>"%DENO_SHIM_EXEC%" echo @set xProcess_ARGS=%*
-@>>"%DENO_SHIM_EXEC%" echo @goto _undef_ 2^>NUL ^|^| @for %%%%G in ("%COMSPEC%") do @title %%%%~nG ^& @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %%xProcess_ARGS%%
+@>>"%DENO_SHIM_EXEC%" echo @set DENO_SHIM_ARGS=%*
+@>>"%DENO_SHIM_EXEC%" echo @goto _undef_ 2^>NUL ^|^| @for %%%%G in ("%COMSPEC%") do @title %%%%~nG ^& @deno.exe "run" <%= denoRunOptions ? (denoRunOptions + ' ') : '' %>-- <%=denoRunTarget%> %%DENO_SHIM_ARGS%%
 @(
 @goto _undef_ 2>NUL
 @for %%G in ("%COMSPEC%") do @title %%~nG
 @set "DENO_SHIM_EXEC=%DENO_SHIM_EXEC%"
 @set "DENO_SHIM_PIPE=%DENO_SHIM_PIPE%"
-@set "xProcess_ARG0=%~0"
+@set DENO_SHIM_ARG0=%~0
+@set DENO_SHIM_URL=<%=denoRunTarget%>
 @call "%DENO_SHIM_EXEC%"
 @call set DENO_SHIM_ERRORLEVEL=%%ERRORLEVEL%%
 @if EXIST "%DENO_SHIM_PIPE%" call "%DENO_SHIM_PIPE%" >NUL 2>NUL
@@ -66,8 +68,10 @@ const cmdShimBase = `% \`<%=shimBinName%>\` (*enhanced* Deno CMD shim; by \`dxi\
 @if EXIST "%DENO_SHIM_PIPE%" if NOT DEFINED DENO_SHIM_DEBUG del /q "%DENO_SHIM_PIPE%" 2>NUL
 @set "DENO_SHIM_EXEC="
 @set "DENO_SHIM_PIPE="
-@set "xProcess_ARG0="
-@set "xProcess_ARGS="
+@set "DENO_SHIM_ARG0="
+@set "DENO_SHIM_ARGS="
+@set "DENO_SHIM_ARGx="
+@set "DENO_SHIM_URL="
 @call %COMSPEC% /d/c "exit %%DENO_SHIM_ERRORLEVEL%%"
 )
 `;

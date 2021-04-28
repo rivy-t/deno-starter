@@ -17,10 +17,11 @@ const isWinOS = Deno.build.os === 'windows';
 
 // needs ~ for best CLI operations
 /** * executable string which initiated execution of the current process */
-export const arg0 = Deno.env.get('xProcess_ARG0') || Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
+export const arg0 = Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
 /** * raw argument text string for current process (needed for modern Windows argument processing, but generally not useful for POSIX) */
-export const argsText = Deno.env.get('xProcess_ARGX') || Deno.env.get('xProcess_ARGS') ||
-	Deno.env.get('DENO_SHIM_ARGS');
+// ... use already expanded argument text (re-quoted) when present to avoid double-expansions for sub-processes
+export const argsText = Deno.env.get('DENO_SHIM_ARGx') || Deno.env.get('DENO_SHIM_ARGS');
+// ... ToDO: add `alreadyExpanded` boolean to correctly avoid re-expansion for `args()`
 
 /** * array of 'shell'-expanded arguments; simple pass-through of `Deno.args` for non-Windows platforms */
 export const args = () => {
