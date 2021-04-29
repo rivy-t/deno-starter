@@ -1,5 +1,6 @@
 // spell-checker:ignore (vars) arr globstar gmsu nullglob PATHEXT
 
+import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
 import { exists, existsSync } from 'https://deno.land/std@0.92.0/fs/exists.ts';
 import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.92.0/fs/expand_glob.ts';
 import { walk, walkSync } from 'https://deno.land/std@0.92.0/fs/walk.ts';
@@ -14,6 +15,7 @@ if (Deno.build.os === 'windows' && !Me.arg0) {
 	console.warn(
 		Me.name +
 			': warn: diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
+		{ Me },
 	);
 }
 
@@ -55,6 +57,7 @@ if (!targetPath) {
 		env: {
 			DENO_SHIM_ARG0: `${Me.arg0 ? Me.arg0 : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
 			DENO_SHIM_ARGS: targetArgs,
+			DENO_SHIM_URL: Path.toFileUrl(Path.resolve(targetPath)).href,
 		},
 	};
 	// console.warn(me.name, { runOptions });

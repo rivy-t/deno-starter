@@ -15,8 +15,28 @@ const isWinOS = Deno.build.os === 'windows';
 // ?... use a stop-expansion token; but not transparent, requires coop of user process for option/argument processing
 // ?... use separate ENV var for expanded command line (re-quoted) ... sub-processes would only "bareWS" tokenize and de-quote
 
+const DQ = '"';
+const SQ = "'";
+// const DQStringReS = `${DQ}[^${DQ}]*(?:${DQ}|$)`; // double-quoted string (unbalanced at end-of-line is allowed)
+// const SQStringReS = `${SQ}[^${SQ}]*(?:${SQ}|$)`; // single-quoted string (unbalanced at end-of-line is allowed)
+// const DQStringStrictReS = '"[^"]*"'; // double-quoted string (quote balance is required)
+// const SQStringStrictReS = "'[^']*'"; // single-quoted string (quote balance is required)
+
+function dequote(s?: string) {
+	// ToDO: refactor/refine function
+	if (!s) return s;
+	let m = s.match(new RegExp(`${DQ}([^${DQ}]*)(?:${DQ}|$)`, 'msu'));
+	if (m) return m[1];
+	m = s.match(new RegExp(`${SQ}([^${SQ}]*)(?:${SQ}|$)`, 'msu'));
+	if (m) return m[1];
+	return s;
+}
+
 // needs ~ for best CLI operations
-const isShimTarget = (Deno.env.get('DENO_SHIM_URL') == Deno.mainModule); // ToDO: use `isShimTarget` to gate SHIM_ARGS/ARGx
+// ToDO: add conversion to URL (robustly; handling thrown error if present) o/w Path.toFileUrl(Path.resolve(...))
+export const shimTargetURL = dequote(Deno.env.get('DENO_SHIM_URL'));
+console.warn({ shimTargetURL });
+const isShimTarget = (shimTargetURL === Deno.mainModule); // ToDO: use `isShimTarget` to gate SHIM_ARGS/ARGx
 /** * executable string which initiated execution of the current process */
 export const arg0 = isShimTarget ? Deno.env.get('DENO_SHIM_ARG0') : undefined; // note: DENO_SHIM_ARG0 == `[runner [runner_args]] name`
 /** * raw argument text string for current process (needed for modern Windows argument processing, but generally not useful for POSIX) */
@@ -24,6 +44,8 @@ export const argsTextRaw = Deno.env.get('DENO_SHIM_ARGS');
 /** * already expanded argument text (re-quoted); when present, avoids double-expansions for sub-processes */
 export const argsTextExpanded = Deno.env.get('DENO_SHIM_ARGx');
 export const argsText = argsTextExpanded || argsTextRaw;
+
+export const targetURL = Deno.env.get('DENO_SHIM_URL');
 
 // ... ToDO: add `alreadyExpanded` boolean to correctly avoid re-expansion for `args()`
 
