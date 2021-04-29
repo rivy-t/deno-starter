@@ -20,7 +20,7 @@ import { collectSync } from './funk.ts';
 // const pathExtensions = (isWinOS && Deno.env.get('PATHEXT')?.split(pathListSeparator)) || [];
 // const pathCaseSensitive = !isWinOS;
 
-console.log(Deno.env.get('DENO_SHIM_0'));
+console.log(Deno.env.get('DENO_SHIM_ARG0'));
 console.log(Deno.env.get('DENO_SHIM_ARGS'));
 console.log(Deno.env.get('DENO_SHIM_PIPE'));
 

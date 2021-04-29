@@ -53,7 +53,7 @@ if (!targetPath) {
 		stdin: 'inherit',
 		stdout: 'inherit',
 		env: {
-			DENO_SHIM_0: `${Me.arg0 ? Me.arg0 : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
+			DENO_SHIM_ARG0: `${Me.arg0 ? Me.arg0 : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
 			DENO_SHIM_ARGS: targetArgs,
 		},
 	};

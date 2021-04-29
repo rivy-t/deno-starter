@@ -16,29 +16,32 @@ const isWinOS = Deno.build.os === 'windows';
 // ?... use separate ENV var for expanded command line (re-quoted) ... sub-processes would only "bareWS" tokenize and de-quote
 
 // needs ~ for best CLI operations
+const isShimTarget = (Deno.env.get('DENO_SHIM_URL') == Deno.mainModule); // ToDO: use `isShimTarget` to gate SHIM_ARGS/ARGx
 /** * executable string which initiated execution of the current process */
-export const arg0 = Deno.env.get('DENO_SHIM_0'); // note: DENO_SHIM_0 == `[runner [runner_args]] name`
+export const arg0 = isShimTarget ? Deno.env.get('DENO_SHIM_ARG0') : undefined; // note: DENO_SHIM_ARG0 == `[runner [runner_args]] name`
 /** * raw argument text string for current process (needed for modern Windows argument processing, but generally not useful for POSIX) */
-// ... use already expanded argument text (re-quoted) when present to avoid double-expansions for sub-processes
-export const argsText = Deno.env.get('DENO_SHIM_ARGx') || Deno.env.get('DENO_SHIM_ARGS');
+export const argsTextRaw = Deno.env.get('DENO_SHIM_ARGS');
+/** * already expanded argument text (re-quoted); when present, avoids double-expansions for sub-processes */
+export const argsTextExpanded = Deno.env.get('DENO_SHIM_ARGx');
+export const argsText = argsTextExpanded || argsTextRaw;
+
 // ... ToDO: add `alreadyExpanded` boolean to correctly avoid re-expansion for `args()`
 
 /** * array of 'shell'-expanded arguments; simple pass-through of `Deno.args` for non-Windows platforms */
 export const args = () => {
 	if (!isWinOS) return Deno.args; // pass-through of `Deno.args` for non-Windows platforms
-	return xArgs.args(argsText || Deno.args);
+	return xArgs.args(argsText || Deno.args); // ToDO: add type ArgsOptions = { suppressExpansion: boolean } == { suppressExpansion: false }
 };
 
 /** * path string of main script file (best guess from all available sources) */
 export const path = (() => {
 	const denoExec = Deno.execPath();
-	const denoMain = Deno.mainModule;
 	const nameFromArg0 = arg0 ? xArgs.tokenizeCLText(arg0).pop() : undefined;
 	return nameFromArg0
 		? nameFromArg0
 		: !Path.basename(denoExec).match(/^deno([.]exe)?$/)
 		? denoExec
-		: denoMain;
+		: Deno.mainModule;
 })();
 
 /** * name of main script file (best guess from all available sources) */
@@ -53,3 +56,14 @@ export const shim = {
 	/** * executable path of secondary shim (when needed; generally defined only for Windows) */
 	EXEC: Deno.env.get('DENO_SHIM_EXEC'),
 };
+
+// consume/reset SHIM environment variables to avoid interpretation by a sub-process
+Deno.env.set('DENO_SHIM_ARG0', '');
+// ... ARGS, ARGx, and URL could be avoided if `GetCommandLine()` is available and full text control of sub-process arguments is enabled
+Deno.env.set('DENO_SHIM_ARGS', '');
+Deno.env.set('DENO_SHIM_ARGx', '');
+Deno.env.set('DENO_SHIM_URL', '');
+// ... EXEC is really an implementation detail (for maximum command line content flexibility within a no-'Terminate batch job (Y/N)?' formulated batch file)
+Deno.env.set('DENO_SHIM_EXEC', '');
+// ... PIPE is used to allow passage of ENV variable and CWD changes back up to the parent SHIM process (needed for utilities like `cdd`, `source`, etc.)
+Deno.env.set('DENO_SHIM_PIPE', '');

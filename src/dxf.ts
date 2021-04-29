@@ -45,7 +45,7 @@ const runOptions: Deno.RunOptions = (() => {
 			stderr: 'inherit',
 			stdin: 'inherit',
 			stdout: 'inherit',
-			// env: { DENO_SHIM_0: targetPath, DENO_SHIM_ARGS: targetArgs },
+			// env: { DENO_SHIM_ARG0: targetPath, DENO_SHIM_ARGS: targetArgs },
 		};
 	} else {
 		// console.info('Using `deno` formatting');
@@ -56,7 +56,7 @@ const runOptions: Deno.RunOptions = (() => {
 			stderr: 'inherit',
 			stdin: 'inherit',
 			stdout: 'inherit',
-			// env: { DENO_SHIM_0: targetPath, DENO_SHIM_ARGS: targetArgs },
+			// env: { DENO_SHIM_ARG0: targetPath, DENO_SHIM_ARGS: targetArgs },
 		};
 	}
 	return options;
