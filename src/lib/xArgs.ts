@@ -137,7 +137,11 @@ export function splitByBareWSo(s: string): Array<string> {
 
 const TokenReS = {
 	bareWS: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQWSReS}+))(\\s+)?(.*$)`, 'msu'), // == (tokenFragment)(bareWS)?(restOfString),
-	quote: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`, 'msu'), // == (tokenFragment)(restOfString)
+	quoteBasic: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`, 'msu'), // == (tokenFragment)(restOfString)
+	quote: new RegExp(
+		`^((?:${DQStringReS}|[$]${SQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`,
+		'msu',
+	), // == (tokenFragment)(restOfString)
 };
 
 export function shiftCLTextToken(
@@ -246,15 +250,15 @@ export function tokenizeCLText(
 	return arr;
 }
 
-export function deQuote(
+export function deQuoteBasic(
 	s: string,
 ) {
 	// de-quote string
 	// * supports both single and double quotes
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
-	// console.warn({ _: 'deQuote()', s });
-	const tokenRe = TokenReS.quote; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
+	// console.warn({ _: 'deQuoteBasic()', s });
+	const tokenRe = TokenReS.quoteBasic; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
 	let text = '';
 	while (s) {
 		const m = s.match(tokenRe);
@@ -266,6 +270,49 @@ export function deQuote(
 					const qChar = matchStr[0];
 					const spl = matchStr.split(qChar);
 					matchStr = spl[1];
+				}
+			}
+			text += matchStr;
+			s = m[2]; // (tailOfString)
+		} else {
+			text += s;
+			s = '';
+		}
+	}
+	return text;
+}
+
+function expandANSIString(s: string) {
+	console.warn('expandANSIString()', { s });
+	return JSON.parse('"' + s.replace(/\"/g, '\\"') + '"');
+}
+
+export function deQuote(
+	s: string,
+) {
+	// de-quote string
+	// * supports both single and double quotes
+	// * supports ANSI-C quotes
+	// * no character escape sequences are recognized
+	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
+	console.warn('deQuote()', { s });
+	const tokenRe = TokenReS.quote; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
+	let text = '';
+	while (s) {
+		const m = s.match(tokenRe);
+		if (m) {
+			console.warn('deQuote()', { m });
+			let matchStr = m[1];
+			if (matchStr.length > 0) {
+				if (matchStr[0] === DQ || matchStr[0] === SQ) {
+					// "..." or '...'
+					const qChar = matchStr[0];
+					const spl = matchStr.split(qChar);
+					matchStr = spl[1];
+				} else if ((matchStr.length > 1) && matchStr[0] === '$' && matchStr[1] === SQ) {
+					// $'...'
+					const spl = matchStr.split(SQ);
+					matchStr = expandANSIString(spl[1]);
 				}
 			}
 			text += matchStr;
@@ -566,7 +613,7 @@ export function globToReS(s: string) {
 - Quotes (single or double) are used to protect braces, tildes, and globs from expansion;
 	unbalanced quotes are allowed (and parsed as if completed by the end of the string).
   Otherwise, no character escape sequences are recognized.
-- Brace expansion is fully implemented (including nested braces and "brace bomb" protections).
+- Brace expansion is fully implemented (including nested braces and ["brace bomb"](https://github.com/micromatch/braces/blob/master/README.md#brace-matching-pitfalls) protections).
 - Glob expansion supports `globstar` and full extended glob syntax.
 
 Uses the [*braces*](https://github.com/micromatch/braces) and [*picomatch*](https://github.com/micromatch/picomatch) JS modules.
