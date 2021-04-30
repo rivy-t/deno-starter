@@ -33,16 +33,24 @@ if (!targetPath) {
 	Deno.exit(1);
 } else {
 	// console.warn(Me.name, { targetPath });
-	if (!fs.existsSync(targetPath)) {
-		console.error(`${Me.name}: err!: target ('${targetPath}') does not exist`);
-		Deno.exit(1);
-	}
+	// if (!fs.existsSync(targetPath)) {
+	// 	console.error(`${Me.name}: err!: target ('${targetPath}') does not exist`);
+	// 	Deno.exit(1);
+	// }
 	const iteratedArgTail = (await Promise.all(tailOfArgExpansion.flatMap(async (it) => {
 		const arr: string[] = [];
 		for await (const a of it) arr.push(a);
 		return arr;
 	}))).flat();
 	// console.warn(Me.name, { tailOfArgExpansion, iteratedArgTail });
+
+	let shimURL;
+	// try {
+	shimURL = (new URL(targetPath, 'file://' + Deno.cwd())).href;
+	// } catch {
+	// 	shimURL = '';
+	// }
+	console.warn('shimURL', shimURL);
 
 	const targetArgs = [
 		...iteratedArgTail,
@@ -57,10 +65,10 @@ if (!targetPath) {
 		env: {
 			DENO_SHIM_ARG0: `${Me.arg0 ? Me.arg0 : ['deno', ...denoOptions].join(' ')} ${targetPath}`,
 			DENO_SHIM_ARGS: targetArgs,
-			DENO_SHIM_URL: Path.toFileUrl(Path.resolve(targetPath)).href,
+			DENO_SHIM_URL: shimURL,
 		},
 	};
-	// console.warn(me.name, { runOptions });
+	console.warn(Me.name, { runOptions });
 	const process = Deno.run(runOptions);
 	const status = await process.status();
 	Deno.exit(status.success ? 0 : status.code);

@@ -658,7 +658,7 @@ export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrem
 				const next = await argExpansion.next();
 				// const tail = [argExpansion]
 				yield {
-					arg: current.value,
+					arg: deQuote(current.value),
 					tailOfArgExpansion: [
 						...(!next.done
 							? [
@@ -694,7 +694,7 @@ export function* argsItSync(argsText: string): IterableIterator<ArgIncrementSync
 			const argExpansion = argExpansions[idx];
 			for (let jdx = 0; jdx < argExpansion.length; jdx++) {
 				yield {
-					arg: argExpansion[jdx],
+					arg: deQuote(argExpansion[jdx]),
 					tailOfArgExpansion: [argExpansion.slice(jdx + 1), ...argExpansions.slice(idx + 1)],
 					tailOfArgsText: argsText,
 				};
