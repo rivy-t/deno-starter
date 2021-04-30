@@ -110,8 +110,8 @@ const QReS = `[${DQ}${SQ}]`; // double or single quote character
 // const nonGlobQReS = `(?:(?!${globCharsReS}|${QReS}).)`;
 const nonGlobQSepReS = `(?:(?!${globCharsReS}|${QReS}|${sepReS}).)`;
 
-const nonQReS = `(?:(?!${QReS}).)`; // non-quote, non-whitespace character
-const nonQWSReS = `(?:(?!${QReS}|\\s).)`; // non-quote, non-whitespace character
+const cNonQReS = `(?:(?!${QReS}).)`; // non-(double or single)-quote character
+const cNonQWSReS = `(?:(?!${QReS}|\\s).)`; // non-quote, non-whitespace character
 
 export function splitByBareWSo(s: string): Array<string> {
 	// parse string into tokens separated by unquoted-whitespace
@@ -121,7 +121,7 @@ export function splitByBareWSo(s: string): Array<string> {
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'splitByBareWSo()', s });
-	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+)*)(.*$)`, 'msu');
+	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQWSReS}+)*)(.*$)`, 'msu');
 	while (s) {
 		const m = s.match(tokenRe);
 		if (m) {
@@ -136,8 +136,8 @@ export function splitByBareWSo(s: string): Array<string> {
 }
 
 const TokenReS = {
-	bareWS: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQWSReS}+))(\\s+)?(.*$)`, 'msu'),
-	brace: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, ''),
+	bareWS: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQWSReS}+))(\\s+)?(.*$)`, 'msu'), // == (tokenFragment)(bareWS)?(restOfString),
+	quote: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`, 'msu'), // == (tokenFragment)(restOfString)
 };
 
 export function shiftCLTextToken(
@@ -174,7 +174,7 @@ export function shiftCLTextToken(
 				foundFullToken = true;
 			}
 		} else {
-			// possible?
+			// possible branch?
 			foundFullToken = true;
 			token += s;
 			s = '';
@@ -244,6 +244,38 @@ export function tokenizeCLText(
 		}
 	}
 	return arr;
+}
+
+export function deQuote(
+	s: string,
+) {
+	// de-quote string
+	// * supports both single and double quotes
+	// * no character escape sequences are recognized
+	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
+	// console.warn({ _: 'deQuote()', s });
+	const tokenRe = TokenReS.quote; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
+	let text = '';
+	while (s) {
+		const m = s.match(tokenRe);
+		if (m) {
+			let matchStr = m[1];
+			if (matchStr.length > 0) {
+				if (matchStr[0] === DQ || matchStr[0] === SQ) {
+					// "..." or '...'
+					const qChar = matchStr[0];
+					const spl = matchStr.split(qChar);
+					matchStr = spl[1];
+				}
+			}
+			text += matchStr;
+			s = m[2]; // (tailOfString)
+		} else {
+			text += s;
+			s = '';
+		}
+	}
+	return text;
 }
 
 export function tildeExpand(s: string): string {
@@ -488,7 +520,7 @@ export function parseGlob(s: string) {
 }
 
 export function globToReS(s: string) {
-	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${nonQReS}+))(.*?$)`, '');
+	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`, '');
 	let text = '';
 	while (s) {
 		const m = s.match(tokenRe);
@@ -524,7 +556,7 @@ export function globToReS(s: string) {
 	});
 	// console.warn({ _: 'globToReS', parsed });
 	// deno-lint-ignore no-explicit-any
-	return ((parsed as unknown) as any).output;
+	return ((parsed as unknown) as any).output as string;
 }
 
 // `args`
@@ -556,6 +588,7 @@ export function args(argsText: string | string[]) {
 		.flatMap(Braces.expand)
 		.map(tildeExpand)
 		.flatMap(filenameExpandSync)
+		.map(deQuote)
 		.concat(raw);
 }
 
