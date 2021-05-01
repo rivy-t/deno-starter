@@ -287,6 +287,48 @@ function expandANSIString(s: string) {
 	return JSON.parse('"' + s.replace(/\"/g, '\\"') + '"');
 }
 
+// spell-checker: ignore ANSIC
+
+const ANSICDecodeTable: Record<string, string> = {};
+ANSICDecodeTable['\\'] = '\\';
+ANSICDecodeTable["'"] = "'";
+ANSICDecodeTable['a'] = '\a';
+ANSICDecodeTable['b'] = '\b';
+ANSICDecodeTable['e'] = '\e';
+ANSICDecodeTable['E'] = '\e';
+ANSICDecodeTable['f'] = '\f';
+ANSICDecodeTable['n'] = '\n';
+ANSICDecodeTable['r'] = '\r';
+ANSICDecodeTable['t'] = '\t';
+ANSICDecodeTable['v'] = '\v';
+// octal
+let i: number;
+for (i = 0o0; i <= 0o7; i++) {
+	ANSICDecodeTable[i] = ANSICDecodeTable['0' + i] = ANSICDecodeTable['00' + i] = String
+		.fromCharCode(i);
+}
+for (i = 0o10; i <= 0o77; i++) {
+	ANSICDecodeTable[i] = ANSICDecodeTable['0' + i] = String.fromCharCode(i);
+}
+for (i = 0o100; i <= 0o777; i++) {
+	ANSICDecodeTable[i] = String.fromCharCode(i);
+}
+// hex
+for (i = 0x0; i <= 0xf; i++) {
+	ANSICDecodeTable['x' + i] = ANSICDecodeTable['x0' + i] = String.fromCharCode(i);
+}
+for (i = 0x10; i <= 0xff; i++) {
+	ANSICDecodeTable['x' + i] = String.fromCharCode(i);
+}
+
+function decodeANSIC(s: string) {
+	s.replace(
+		/\\([0-7]{1,3}|[abeEfnrtv]|x[0-9a-fA-F]{2}|c.)/gmsu,
+		(substring) => ANSICDecodeTable[substring],
+	);
+	return s;
+}
+
 export function deQuote(
 	s: string,
 ) {
@@ -312,7 +354,7 @@ export function deQuote(
 				} else if ((matchStr.length > 1) && matchStr[0] === '$' && matchStr[1] === SQ) {
 					// $'...'
 					const spl = matchStr.split(SQ);
-					matchStr = expandANSIString(spl[1]);
+					matchStr = decodeANSIC(spl[1]);
 				}
 			}
 			text += matchStr;
