@@ -46,11 +46,11 @@ if (!targetPath) {
 
 	let shimURL;
 	// try {
-	shimURL = (new URL(targetPath, 'file://' + Deno.cwd())).href;
+	shimURL = (new URL(targetPath, 'file://' + Deno.cwd() + '/')).href;
 	// } catch {
 	// 	shimURL = '';
 	// }
-	console.warn('shimURL', shimURL);
+	console.warn('dxr', { CWD: Deno.cwd(), targetPath, shimURL });
 
 	const targetArgs = [
 		...iteratedArgTail,
