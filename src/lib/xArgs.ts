@@ -61,7 +61,7 @@ import * as PicomatchT from 'https://cdn.jsdelivr.net/gh/DefinitelyTyped/Definit
 import PicomatchM from 'https://jspm.dev/npm:picomatch@2.2.2';
 // const Braces = BracesM as typeof BracesT;
 // const Micromatch = MicromatchM as typeof MicromatchT;
-const Picomatch = PicomatchM as typeof PicomatchT;
+const Picomatch = PicomatchM as typeof PicomatchT; // noSonar ; disable "type assertion not necessary"; needed for correct typings as 'picomatch' develops
 
 // import Braces from 'http://localhost/braces@3.0.2?bundle';
 // import Micromatch from 'http://localhost/micromatch@4.0.2?bundle';
