@@ -62,7 +62,7 @@ const expansion = braceExpand('{a,b} text string');
 export function expand(s: string) {
 	// brace expand a string
 	const arr = [];
-	s.replace(/^\s+/msu, ''); // trim leading whitespace
+	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	// console.warn({ _: 'braceExpand()', s });
 	let text = '';
 	while (s) {
