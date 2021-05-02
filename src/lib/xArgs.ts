@@ -97,6 +97,8 @@ const SQStringReS = `${SQ}[^${SQ}]*(?:${SQ}|$)`; // single-quoted string (unbala
 // const DQStringStrictReS = '"[^"]*"'; // double-quoted string (quote balance is required)
 // const SQStringStrictReS = "'[^']*'"; // single-quoted string (quote balance is required)
 
+const ANSICStringReS = '[$]' + SQStringReS;
+
 // const pathSepRe = /[\\/]/;
 const globChars = ['?', '*', '[', ']'];
 const globCharsReS = globChars.map((c) => '\\' + c).join('|');
@@ -135,16 +137,16 @@ export function splitByBareWSo(s: string): Array<string> {
 	return arr;
 }
 
-const TokenReS = {
+const WordReS = {
 	bareWS: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQWSReS}+))(\\s+)?(.*$)`, 'msu'), // == (tokenFragment)(bareWS)?(restOfString),
 	quoteBasic: new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`, 'msu'), // == (tokenFragment)(restOfString)
 	quote: new RegExp(
-		`^((?:${DQStringReS}|[$]${SQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`,
+		`^((?:${ANSICStringReS}|${DQStringReS}|${SQStringReS}|${cNonQReS}+))(.*?$)`,
 		'msu',
 	), // == (tokenFragment)(restOfString)
 };
 
-export function shiftCLTextToken(
+export function shiftCLTextWord(
 	s: string,
 	options: { autoQuote: boolean } = { autoQuote: true },
 ): [string, string] {
@@ -154,22 +156,25 @@ export function shiftCLTextToken(
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
 	const initialS = s;
-	// console.warn({ _: 'shiftCLTextToken()', s, options, initialS });
+	// console.warn({ _: 'shiftCLTextWord()', s, options, initialS });
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
-	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
+	const wordRe = WordReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let foundFullToken = false;
 	let token = '';
 	while (s && !foundFullToken) {
-		const m = s.match(tokenRe);
+		const m = s.match(wordRe);
 		if (m) {
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
 				const firstChar = matchStr[0];
-				// "..." or '...'?
 				if (firstChar === DQ || firstChar === SQ) {
+					// "..." or '...'
 					if (autoQuote && matchStr[matchStr.length - 1] !== firstChar) {
 						matchStr += firstChar;
 					}
+					// } else if ((matchStr.length > 1) && firstChar === '$' && matchStr[1] === SQ) {
+					// 	// $'...'
+					// 	matchStr = decodeANSIC(matchStr.split(SQ)[1]);
 				}
 			}
 			token += matchStr;
@@ -184,11 +189,11 @@ export function shiftCLTextToken(
 			s = '';
 		}
 	}
-	assert(!initialS || (s !== initialS), 'non-progression of `shiftCLTextToken()`'); // assert progress has been made o/w panic
+	assert(!initialS || (s !== initialS), 'non-progression of `shiftCLTextWord()`'); // assert progress has been made o/w panic
 	return [token, s];
 }
 
-export function tokenizeCLTextByShift(
+export function wordSplitCLTextByShift(
 	s: string,
 	options: { autoQuote: boolean } = { autoQuote: true },
 ): Array<string> {
@@ -196,19 +201,19 @@ export function tokenizeCLTextByShift(
 	// * supports both single and double quotes
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
-	// * note: by bench-test, this (`tokenizeCLTextByShift()`) is approx 10% slower than `tokenizeCLText()` (~3.3µs vs ~2.9µs)
+	// * note: by bench-test, this (`wordSplitCLTextByShift()`) is approx 10% slower than `wordSplitCLText()` (~3.3µs vs ~2.9µs)
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
 	while (s) {
-		const [token, restOfString] = shiftCLTextToken(s, options);
+		const [token, restOfString] = shiftCLTextWord(s, options);
 		arr.push(token);
-		assert(s !== restOfString, 'non-progression of `tokenizeCLTextByShift()`'); // assert progress has been made o/w panic
+		assert(s !== restOfString, 'non-progression of `wordSplitCLTextByShift()`'); // assert progress has been made o/w panic
 		s = restOfString;
 	}
 	return arr;
 }
 
-export function tokenizeCLText(
+export function wordSplitCLText(
 	s: string,
 	options: { autoQuote: boolean } = { autoQuote: true },
 ): Array<string> {
@@ -219,20 +224,23 @@ export function tokenizeCLText(
 	const { autoQuote } = options;
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
-	// console.warn({ _: 'tokenizeCLText()', s });
-	const tokenRe = TokenReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
+	// console.warn({ _: 'wordSplitCLText()', s });
+	const wordRe = WordReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let text = '';
 	while (s) {
-		const m = s.match(tokenRe);
+		const m = s.match(wordRe);
 		if (m) {
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
 				const firstChar = matchStr[0];
-				// "..." or '...'?
 				if (firstChar === DQ || firstChar === SQ) {
+					// "..." or '...'
 					if (autoQuote && matchStr[matchStr.length - 1] !== firstChar) {
 						matchStr += firstChar;
 					}
+					// } else if ((matchStr.length > 1) && firstChar === '$' && matchStr[1] === SQ) {
+					// 	// $'...'
+					// 	matchStr = decodeANSIC(matchStr.split(SQ)[1]);
 				}
 			}
 			text += matchStr;
@@ -250,81 +258,117 @@ export function tokenizeCLText(
 	return arr;
 }
 
-export function deQuoteBasic(
-	s: string,
-) {
-	// de-quote string
-	// * supports both single and double quotes
-	// * no character escape sequences are recognized
-	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
-	// console.warn({ _: 'deQuoteBasic()', s });
-	const tokenRe = TokenReS.quoteBasic; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
-	let text = '';
-	while (s) {
-		const m = s.match(tokenRe);
-		if (m) {
-			let matchStr = m[1];
-			if (matchStr.length > 0) {
-				if (matchStr[0] === DQ || matchStr[0] === SQ) {
-					// "..." or '...'
-					const qChar = matchStr[0];
-					const spl = matchStr.split(qChar);
-					matchStr = spl[1];
-				}
-			}
-			text += matchStr;
-			s = m[2]; // (tailOfString)
-		} else {
-			text += s;
-			s = '';
-		}
-	}
-	return text;
-}
-
-function expandANSIString(s: string) {
-	console.warn('expandANSIString()', { s });
-	return JSON.parse('"' + s.replace(/\"/g, '\\"') + '"');
-}
+// export function deQuoteBasic(
+// 	s: string,
+// ) {
+// 	// de-quote string
+// 	// * supports both single and double quotes
+// 	// * no character escape sequences are recognized
+// 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
+// 	// console.warn({ _: 'deQuoteBasic()', s });
+// 	const tokenRe = WordReS.quoteBasic; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
+// 	let text = '';
+// 	while (s) {
+// 		const m = s.match(tokenRe);
+// 		if (m) {
+// 			let matchStr = m[1];
+// 			if (matchStr.length > 0) {
+// 				if (matchStr[0] === DQ || matchStr[0] === SQ) {
+// 					// "..." or '...'
+// 					const qChar = matchStr[0];
+// 					const spl = matchStr.split(qChar);
+// 					matchStr = spl[1];
+// 				}
+// 			}
+// 			text += matchStr;
+// 			s = m[2]; // (tailOfString)
+// 		} else {
+// 			text += s;
+// 			s = '';
+// 		}
+// 	}
+// 	return text;
+// }
 
 // spell-checker: ignore ANSIC
 
+// ref: <https://stackoverflow.com/questions/8936984/uint8array-to-string-in-javascript>
+// ref: <https://stackoverflow.com/questions/17191945/conversion-between-utf-8-arraybuffer-and-string/22373135>
+// ref: <https://stackoverflow.com/questions/13356493/decode-utf-8-with-javascript/22373061>
+// ref: <https://flaviocopes.com/javascript-unicode> @@ <https://archive.is/hZMLw>
+// ref: <https://www.gnu.org/software/bash/manual/html_node/ANSI_002dC-Quoting.html> @@ <https://archive.is/SeXLl>
+// ref: <https://en.wikipedia.org/wiki/Escape_sequences_in_C> @@ <https://archive.is/8OPBU>
+// ref: <https://kevin.burke.dev/kevin/node-js-string-encoding> @@ <https://archive.is/JGXQg>
+// ref: <https://mathiasbynens.be/notes/javascript-unicode> @@ <https://archive.is/Uqi1y>
+// ref: <https://mathiasbynens.be/notes/javascript-encoding> @@ <https://archive.is/yNnof>
+// ref: <http://speakingjs.com/es5/ch24.html> @@ <https://archive.is/X7YJf>
+// ref: <https://www.whoishostingthis.com/resources/ascii> @@ <https://archive.is/92sIR>
 const ANSICDecodeTable: Record<string, string> = {};
 ANSICDecodeTable['\\'] = '\\';
 ANSICDecodeTable["'"] = "'";
-ANSICDecodeTable['a'] = '\a';
+ANSICDecodeTable['?'] = '?';
+ANSICDecodeTable['a'] = '\x07';
 ANSICDecodeTable['b'] = '\b';
-ANSICDecodeTable['e'] = '\e';
-ANSICDecodeTable['E'] = '\e';
+ANSICDecodeTable['e'] = '\x1b';
+ANSICDecodeTable['E'] = '\x1b'; // bash-ism
 ANSICDecodeTable['f'] = '\f';
 ANSICDecodeTable['n'] = '\n';
 ANSICDecodeTable['r'] = '\r';
 ANSICDecodeTable['t'] = '\t';
 ANSICDecodeTable['v'] = '\v';
-// octal
-let i: number;
-for (i = 0o0; i <= 0o7; i++) {
-	ANSICDecodeTable[i] = ANSICDecodeTable['0' + i] = ANSICDecodeTable['00' + i] = String
-		.fromCharCode(i);
-}
-for (i = 0o10; i <= 0o77; i++) {
-	ANSICDecodeTable[i] = ANSICDecodeTable['0' + i] = String.fromCharCode(i);
-}
-for (i = 0o100; i <= 0o777; i++) {
-	ANSICDecodeTable[i] = String.fromCharCode(i);
-}
-// hex
-for (i = 0x0; i <= 0xf; i++) {
-	ANSICDecodeTable['x' + i] = ANSICDecodeTable['x0' + i] = String.fromCharCode(i);
-}
-for (i = 0x10; i <= 0xff; i++) {
-	ANSICDecodeTable['x' + i] = String.fromCharCode(i);
+// control characters
+{
+	let i;
+	const baseCharCode = '@'.charCodeAt(0);
+	for (i = 0; i <= 0x1f; i++) {
+		const iToChar = String.fromCharCode(baseCharCode + i);
+		ANSICDecodeTable['c' + iToChar.toLowerCase()] = ANSICDecodeTable['c' + iToChar.toUpperCase()] =
+			String.fromCharCode(i);
+	}
+	ANSICDecodeTable['c?'] = '\x7f';
 }
 
+// console.warn('xArgs', { ANSICDecodeTable });
+
 function decodeANSIC(s: string) {
-	s.replace(
-		/\\([0-7]{1,3}|[abeEfnrtv]|x[0-9a-fA-F]{2}|c.)/gmsu,
-		(substring) => ANSICDecodeTable[substring],
+	// * return value is always a valid UTF-8 string (lossy with 'Replacement Character's, as needed)
+	// console.warn('xArgs.decodeANSIC()', { s });
+	// note: sequential hex/octal codes are collected as one and then decoded as a UTF-8 string (lossy method using 'Replacement Character')
+	s = s.replace(
+		// spell-checker:disable-next
+		/\\([abeEfnrtv]|c.|u[0-9a-fA-F]{1,4}|U[0-9a-fA-F]{1,8}|(?:(?:[0-7]{1,3}|x[0-9a-fA-F]{2})(?:\\([0-7]{1,3}|x[0-9a-fA-F]{2}))*))/gmsu,
+		(escapeString) => {
+			const escapeCode = escapeString.slice(1);
+			const escapeCodeType = escapeCode[0];
+			let decoded = '';
+			if ((escapeCodeType === 'u') || (escapeCodeType === 'U')) {
+				const decodedCharCode = parseInt(escapeCode.slice(1), 16);
+				decoded = String.fromCharCode(decodedCharCode);
+			} else if ((escapeCodeType === 'x') || (escapeCodeType.match(/[0-9]/))) {
+				// hex (`\x..`) or octal (`\nnn`) sequences may result in a non-UTF string
+				// * all sequential escapes are collected as one into a Uint8Array and the converted to UTF-8 via a no-error lossy conversion
+				const splitSep = '\\';
+				const codesText = escapeString.split(splitSep).slice(1);
+				const codesRaw = codesText.map((codeText) => {
+					const parseBase = (codeText[0] === 'x') ? 16 : 8;
+					return parseInt(codeText[0] === 'x' ? codeText.slice(1) : codeText, parseBase);
+				});
+				const codes = new Uint8Array(codesRaw);
+				decoded = new TextDecoder().decode(codes);
+				console.warn('xArgs.decodeANSIC', { escapeString, codesText, codesRaw, codes, decoded });
+			} else {
+				decoded = ANSICDecodeTable[escapeCode.toLowerCase()];
+			}
+
+			console.warn('xArgs.decodeANSIC()', {
+				escapeString,
+				escapeCode,
+				escapeCodeType,
+				decoded: decoded,
+			});
+
+			return decoded ? decoded : escapeString;
+		},
 	);
 	return s;
 }
@@ -337,13 +381,13 @@ export function deQuote(
 	// * supports ANSI-C quotes
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
-	console.warn('deQuote()', { s });
-	const tokenRe = TokenReS.quote; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
+	console.warn('xArgs.deQuote()', { s });
+	const tokenRe = WordReS.quote; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
 	let text = '';
 	while (s) {
 		const m = s.match(tokenRe);
 		if (m) {
-			console.warn('deQuote()', { m });
+			console.warn('xArgs.deQuote()', { m });
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
 				if (matchStr[0] === DQ || matchStr[0] === SQ) {
@@ -354,6 +398,7 @@ export function deQuote(
 				} else if ((matchStr.length > 1) && matchStr[0] === '$' && matchStr[1] === SQ) {
 					// $'...'
 					const spl = matchStr.split(SQ);
+					console.warn('xArgs.deQuote()', { s, matchStr, spl });
 					matchStr = decodeANSIC(spl[1]);
 				}
 			}
@@ -411,6 +456,7 @@ export async function* filenameExpandIter(s: string): AsyncIterableIterator<stri
 			const globEscapedPrefix = escapeRegExp(normalizedPrefix).replace(/\\\\|\//g, '[\\\\/]');
 			// some paths are resolved to paths with trailing separators (eg, network paths) and some are not
 			// const trailingSep = globEscapedPrefix.endsWith('[\\\\/]');
+			// deno-lint-ignore no-explicit-any
 			const maxDepth = (parsed.globScanTokens as unknown as any).reduce(
 				(acc: number, value: { value: string; depth: number; isGlob: boolean }) =>
 					acc + (value.isGlob ? value.depth : 0),
@@ -460,6 +506,7 @@ export function* filenameExpandIterSync(s: string) {
 			const globEscapedPrefix = escapeRegExp(normalizedPrefix).replace(/\\\\|\//g, '[\\\\/]');
 			// some paths are resolved to paths with trailing separators (eg, network paths) and some are not
 			// const trailingSep = globEscapedPrefix.endsWith('[\\\\/]');
+			// deno-lint-ignore no-explicit-any
 			const maxD = (parsed.globScanTokens as unknown as any).reduce(
 				(acc: number, value: { value: string; depth: number; isGlob: boolean }) =>
 					acc + (value.isGlob ? value.depth : 0),
@@ -543,9 +590,9 @@ export function parseGlob(s: string) {
 		const m = s.match(re);
 		// console.warn({ _: 'parseGlob', s, m });
 		if (m) {
-			prefix += m && m[1] ? m[1] : '';
-			glob = m && m[2];
-			s = m && m[1] && m[2] ? m[2] : '';
+			prefix += m[1] ? m[1] : '';
+			glob = m[2];
+			s = m[1] && m[2] ? m[2] : '';
 		} else {
 			glob = s || '';
 			s = '';
@@ -668,7 +715,7 @@ const expansion: string[] = args(argsText);
 ```
 */
 export function args(argsText: string | string[]) {
-	const arr = Array.isArray(argsText) ? argsText : tokenizeCLText(argsText);
+	const arr = Array.isArray(argsText) ? argsText : wordSplitCLText(argsText);
 	const idx = arr.findIndex((v) => v === endExpansionToken);
 	const expand = arr.length ? (arr.slice(0, (idx < 0 ? undefined : (idx + 1)))) : [];
 	const raw = (arr.length && (idx > 0) && (idx < arr.length)) ? arr.slice(idx + 1) : [];
@@ -730,7 +777,7 @@ export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrem
 	let continueExpansions = true;
 	while (argsText) {
 		let argText = '';
-		[argText, argsText] = shiftCLTextToken(argsText);
+		[argText, argsText] = shiftCLTextWord(argsText);
 		if (argText === endExpansionToken) continueExpansions = false;
 		const argExpansions = continueExpansions
 			? [argText]
@@ -768,11 +815,11 @@ export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrem
 }
 // `argItSync`
 export function* argsItSync(argsText: string): IterableIterator<ArgIncrementSync> {
-	let continueExpansions = false;
+	const continueExpansions = false;
 	while (argsText) {
 		let argText = '';
-		[argText, argsText] = shiftCLTextToken(argsText);
-		if (argText === endExpansionToken) continueExpansions = false;
+		[argText, argsText] = shiftCLTextWord(argsText);
+		// if (argText === endExpansionToken) continueExpansions = false;
 		const argExpansions = continueExpansions
 			? [argText]
 				.flatMap(Braces.expand)

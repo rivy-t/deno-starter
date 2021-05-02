@@ -22,7 +22,7 @@ const SQ = "'";
 // const DQStringStrictReS = '"[^"]*"'; // double-quoted string (quote balance is required)
 // const SQStringStrictReS = "'[^']*'"; // single-quoted string (quote balance is required)
 
-function dequote(s?: string) {
+function deQuote(s?: string) {
 	// ToDO: refactor/refine function
 	if (!s) return s;
 	let m = s.match(new RegExp(`${DQ}([^${DQ}]*)(?:${DQ}|$)`, 'msu'));
@@ -34,7 +34,7 @@ function dequote(s?: string) {
 
 // needs ~ for best CLI operations
 // ToDO: add conversion to URL (robustly; handling thrown error if present) o/w Path.toFileUrl(Path.resolve(...))
-export const shimTargetURL = dequote(Deno.env.get('DENO_SHIM_URL'));
+export const shimTargetURL = deQuote(Deno.env.get('DENO_SHIM_URL'));
 console.warn({ shimTargetURL });
 const isShimTarget = (shimTargetURL === Deno.mainModule); // ToDO: use `isShimTarget` to gate SHIM_ARGS/ARGx
 /** * executable string which initiated execution of the current process */
@@ -58,7 +58,7 @@ export const args = () => {
 /** * path string of main script file (best guess from all available sources) */
 export const path = (() => {
 	const denoExec = Deno.execPath();
-	const nameFromArg0 = arg0 ? xArgs.tokenizeCLText(arg0).pop() : undefined;
+	const nameFromArg0 = arg0 ? xArgs.wordSplitCLText(arg0).pop() : undefined;
 	return nameFromArg0
 		? nameFromArg0
 		: !Path.basename(denoExec).match(/^deno([.]exe)?$/)
