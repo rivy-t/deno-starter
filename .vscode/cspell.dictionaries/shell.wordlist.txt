@@ -1,6 +1,8 @@
 * POSIX
 TMPDIR
 csh
+globstar
+nullglob
 passwd
 pipefail
 sh
@@ -11,6 +13,7 @@ APPDATA
 HOMEDRIVE
 HOMEPATH
 LOCALAPPDATA
+PATHEXT
 USERDOMAIN
 USERNAME
 USERPROFILE
@@ -22,6 +25,7 @@ preversion
 * utilities
 chglog
 commitlint
+dprint
 grep
 markdownlint
 rollup

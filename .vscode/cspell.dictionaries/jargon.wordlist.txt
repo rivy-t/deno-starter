@@ -15,6 +15,7 @@ enqueue
 executable
 executables
 falsey
+glob
 hardfloat
 hardlink
 hardlinks
