@@ -5,13 +5,13 @@ import * as Me from './lib/xProcess.ts';
 
 // console.warn(Me.name, { Me });
 
-if (Deno.build.os === 'windows' && !Me.arg0) {
-	console.warn(
-		Me.name +
-			': warn: diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
-		{ Me },
-	);
-}
+// if (Deno.build.os === 'windows' && !Me.arg0) {
+// 	console.warn(
+// 		Me.name +
+// 			': warn: diminished capacity; full function requires an enhanced runner (use `dxr` or install with `dxi`)',
+// 		{ Me },
+// 	);
+// }
 
 const { arg: targetPath, tailOfArgExpansion, tailOfArgsText } = await (async () => {
 	const it = xArgs.argsIt(Me.argsText || '');
@@ -37,7 +37,7 @@ if (!targetPath) {
 	} catch {
 		targetURL = '';
 	}
-	console.warn(Me.name, { CWD: Deno.cwd(), targetPath, targetURL });
+	// console.warn(Me.name, { CWD: Deno.cwd(), targetPath, targetURL });
 
 	const targetArgs = [
 		...iteratedArgTail,
@@ -55,7 +55,7 @@ if (!targetPath) {
 			DENO_SHIM_URL: targetURL,
 		},
 	};
-	console.warn(Me.name, { runOptions });
+	// console.warn(Me.name, { runOptions });
 	const process = Deno.run(runOptions);
 	const status = await process.status();
 	Deno.exit(status.success ? 0 : status.code);
