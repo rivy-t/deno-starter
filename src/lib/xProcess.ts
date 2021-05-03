@@ -35,7 +35,7 @@ function deQuote(s?: string) {
 // needs ~ for best CLI operations
 // ToDO: add conversion to URL (robustly; handling thrown error if present) o/w Path.toFileUrl(Path.resolve(...))
 export const shimTargetURL = deQuote(Deno.env.get('DENO_SHIM_URL'));
-console.warn({ shimTargetURL });
+// console.warn('xProcess', { shimTargetURL });
 const isShimTarget = (shimTargetURL === Deno.mainModule); // ToDO: use `isShimTarget` to gate SHIM_ARGS/ARGx
 /** * executable string which initiated execution of the current process */
 export const arg0 = isShimTarget ? Deno.env.get('DENO_SHIM_ARG0') : undefined; // note: DENO_SHIM_ARG0 == `[runner [runner_args]] name`

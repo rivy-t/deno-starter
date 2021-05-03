@@ -97,7 +97,7 @@ export async function* walk(
 		skip = undefined,
 	}: WalkOptions = {},
 ): AsyncIterableIterator<WalkEntry> {
-	// console.warn('walk()', { root, options: { match, maxDepth }, CWD: Deno.cwd() });
+	// console.warn('xWalk.walk()', { root, options: { match, maxDepth }, CWD: Deno.cwd() });
 	if (maxDepth < 0) {
 		return;
 	}
@@ -108,7 +108,7 @@ export async function* walk(
 		return;
 	}
 	try {
-		// console.warn('walk()', { root, options: { match, maxDepth } });
+		// console.warn('xWalk.walk()', { root, options: { match, maxDepth } });
 		for await (const entry of Deno.readDir(root)) {
 			assert(entry.name != null);
 			let path = join(root, entry.name);

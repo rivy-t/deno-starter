@@ -122,7 +122,7 @@ export function splitByBareWSo(s: string): Array<string> {
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
-	// console.warn({ _: 'splitByBareWSo()', s });
+	// console.warn('xArgs.splitByBareWSo()', { s });
 	const tokenRe = new RegExp(`^((?:${DQStringReS}|${SQStringReS}|${cNonQWSReS}+)*)(.*$)`, 'msu');
 	while (s) {
 		const m = s.match(tokenRe);
@@ -156,7 +156,7 @@ export function shiftCLTextWord(
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
 	const { autoQuote } = options;
 	const initialS = s;
-	// console.warn({ _: 'shiftCLTextWord()', s, options, initialS });
+	// console.warn('xArgs.shiftCLTextWord()', { s, options, initialS });
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace // ToDO: remove? allow leading WS in first token?
 	const wordRe = WordReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let foundFullToken = false;
@@ -224,7 +224,7 @@ export function wordSplitCLText(
 	const { autoQuote } = options;
 	const arr: Array<string> = [];
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
-	// console.warn({ _: 'wordSplitCLText()', s });
+	// console.warn('xArgs.wordSplitCLText()', { s });
 	const wordRe = WordReS.bareWS; // == (tokenFragment)(bareWS)?(restOfString)
 	let text = '';
 	while (s) {
@@ -265,7 +265,7 @@ export function wordSplitCLText(
 // 	// * supports both single and double quotes
 // 	// * no character escape sequences are recognized
 // 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
-// 	// console.warn({ _: 'deQuoteBasic()', s });
+// 	// console.warn('xArgs.deQuoteBasic()', { s });
 // 	const tokenRe = WordReS.quoteBasic; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
 // 	let text = '';
 // 	while (s) {
@@ -355,17 +355,17 @@ function decodeANSIC(s: string) {
 				});
 				const codes = new Uint8Array(codesRaw);
 				decoded = new TextDecoder().decode(codes);
-				console.warn('xArgs.decodeANSIC', { escapeString, codesText, codesRaw, codes, decoded });
+				// console.warn('xArgs.decodeANSIC', { escapeString, codesText, codesRaw, codes, decoded });
 			} else {
 				decoded = ANSICDecodeTable[escapeCode.toLowerCase()];
 			}
 
-			console.warn('xArgs.decodeANSIC()', {
-				escapeString,
-				escapeCode,
-				escapeCodeType,
-				decoded: decoded,
-			});
+			// console.warn('xArgs.decodeANSIC()', {
+			// 	escapeString,
+			// 	escapeCode,
+			// 	escapeCodeType,
+			// 	decoded: decoded,
+			// });
 
 			return decoded ? decoded : escapeString;
 		},
@@ -381,13 +381,13 @@ export function deQuote(
 	// * supports ANSI-C quotes
 	// * no character escape sequences are recognized
 	// * unbalanced quotes are allowed (parsed as if EOL is a completing quote)
-	console.warn('xArgs.deQuote()', { s });
+	// console.warn('xArgs.deQuote()', { s });
 	const tokenRe = WordReS.quote; // == (DQ/SQ/non-Q-tokenFragment)(tailOfString)
 	let text = '';
 	while (s) {
 		const m = s.match(tokenRe);
 		if (m) {
-			console.warn('xArgs.deQuote()', { m });
+			// console.warn('xArgs.deQuote()', { m });
 			let matchStr = m[1];
 			if (matchStr.length > 0) {
 				if (matchStr[0] === DQ || matchStr[0] === SQ) {
@@ -398,7 +398,7 @@ export function deQuote(
 				} else if ((matchStr.length > 1) && matchStr[0] === '$' && matchStr[1] === SQ) {
 					// $'...'
 					const spl = matchStr.split(SQ);
-					console.warn('xArgs.deQuote()', { s, matchStr, spl });
+					// console.warn('xArgs.deQuote()', { s, matchStr, spl });
 					matchStr = decodeANSIC(spl[1]);
 				}
 			}
@@ -417,7 +417,7 @@ export function tildeExpand(s: string): string {
 	// * any leading whitespace is removed
 	// ToDO?: handle `~USERNAME` for other users
 	s = s.replace(/^\s+/msu, ''); // trim leading whitespace
-	// console.warn({ _: 'tildeExpand()', s });
+	// console.warn('xArgs.tildeExpand()', { s });
 	// const sepReS = portablePathSepReS;
 	const username = Deno.env.get('USER') || Deno.env.get('USERNAME') || '';
 	const usernameReS = username.replace(/(.)/gmsu, '\\$1');
@@ -443,12 +443,12 @@ export async function* filenameExpandIter(s: string): AsyncIterableIterator<stri
 	const nullglob = false;
 	const parsed = parseGlob(s);
 
-	// console.warn({ _: 'filenameExpandIter()', parsed });
+	// console.warn('xArgs.filenameExpandIter()', { parsed });
 
 	let found = false;
 	if (parsed.glob) {
 		const resolvedPrefix = Path.resolve(parsed.prefix);
-		// console.warn('filenameExpandIter', { parsed, resolvedPrefix });
+		// console.warn('xArgs.filenameExpandIter()', { parsed, resolvedPrefix });
 		if (await exists(resolvedPrefix)) {
 			// normalize prefix to have a trailing separator
 			const normalizedPrefix = resolvedPrefix +
@@ -467,7 +467,7 @@ export async function* filenameExpandIter(s: string): AsyncIterableIterator<stri
 					parsed.globAsReS + '$',
 				isWinOS ? 'imsu' : 'msu',
 			);
-			// console.warn('filenameExpandIter', { normalizedPrefix, globEscapedPrefix, maxDepth, re });
+			// console.warn('xArgs.filenameExpandIter()', { normalizedPrefix, globEscapedPrefix, maxDepth, re });
 			// note: `walk` match re is compared to the full path during the walk
 			const walkIt = walk(resolvedPrefix, {
 				match: [re],
@@ -493,12 +493,12 @@ export function* filenameExpandIterSync(s: string) {
 	const nullglob = false;
 	const parsed = parseGlob(s);
 
-	// console.warn({ _: 'filenameExpandIter()', parsed });
+	// console.warn('xArgs.filenameExpandIter()', { parsed });
 
 	let found = false;
 	if (parsed.glob) {
 		const resolvedPrefix = Path.resolve(parsed.prefix);
-		// console.warn('filenameExpandIter', { parsed, resolvedPrefix });
+		// console.warn('xArgs.filenameExpandIter()', { parsed, resolvedPrefix });
 		if (existsSync(resolvedPrefix)) {
 			// normalize prefix to have a trailing separator
 			const normalizedPrefix = resolvedPrefix +
@@ -517,7 +517,7 @@ export function* filenameExpandIterSync(s: string) {
 					parsed.globAsReS + '$',
 				isWinOS ? 'imsu' : 'msu',
 			);
-			// console.warn('filenameExpandIter', { normalizedPrefix, globEscapedPrefix, maxD, re });
+			// console.warn('xArgs.filenameExpandIter()', { normalizedPrefix, globEscapedPrefix, maxD, re });
 			// note: `walkSync` match re is compared to the full path during the walk
 			const walkIt = walkSync(resolvedPrefix, {
 				match: [re],
@@ -571,7 +571,7 @@ export function parseGlob(s: string) {
 	let prefix = '';
 	let glob = '';
 
-	// console.warn({ _: 'parseNonGlobPathPrefix', globCharsReS, SEP: Path.SEP, SEP_PATTERN: Path.SEP_PATTERN });
+	// console.warn('xArgs.parseNonGlobPathPrefix()', { globCharsReS, SEP: Path.SEP, SEP_PATTERN: Path.SEP_PATTERN });
 
 	// for 'windows' or portable, strip any leading `\\?\` as a prefix
 	if (!options.os || options.os === 'windows') {
@@ -585,10 +585,10 @@ export function parseGlob(s: string) {
 	const re = new RegExp(
 		`^((?:${DQStringReS}|${SQStringReS}|${nonGlobQSepReS}+)*(?:${sepReS}+|$))(.*$)`,
 	);
-	// console.warn({ _: 'parseGlob', re });
+	// console.warn('xArgs.parseGlob()', { re });
 	while (s) {
 		const m = s.match(re);
-		// console.warn({ _: 'parseGlob', s, m });
+		// console.warn('xArgs.parseGlob()', { s, m });
 		if (m) {
 			prefix += m[1] ? m[1] : '';
 			glob = m[2];
@@ -597,13 +597,13 @@ export function parseGlob(s: string) {
 			glob = s || '';
 			s = '';
 		}
-		// console.warn({ _: 'parseGlob', prefix, glob });
+		// console.warn('xArgs.parseGlob()', { prefix, glob });
 	}
 
 	const pJoin = Path.join(prefix, glob);
 	const pJoinToPosix = pathToPosix(pJoin);
-	// console.warn({
-	// 	_: 'parseGlob',
+	// console.warn('xArgs.parseGlob()',
+	//  {
 	// 	prefix,
 	// 	glob,
 	// 	pJoin,
@@ -612,9 +612,9 @@ export function parseGlob(s: string) {
 	// 	pJoinToPosixParsed: Path.parse(pJoinToPosix),
 	// });
 	const globAsReS = glob && globToReS(glob);
-	// console.warn({ _: 'parseGlob', globAsReS });
+	// console.warn('xArgs.parseGlob()', { globAsReS });
 	// const globScan: any = Picomatch.scan(Path.join(prefix, glob), {
-	// console.warn({ _: 'parseGlob', prefix, glob, pathJoin: Path.posix.join(prefix, glob) });
+	// console.warn('xArgs.parseGlob()', { prefix, glob, pathJoin: Path.posix.join(prefix, glob) });
 	// deno-lint-ignore no-explicit-any ## 'picomatch' has incomplete typing
 	const globScan: any = Picomatch.scan(pJoinToPosix, {
 		windows: true,
@@ -679,7 +679,7 @@ export function globToReS(s: string) {
 	// convert PATTERN to POSIX-path-style by replacing all backslashes with slashes (backslash is *not* used as an escape)
 	text = text.replace(/\\/g, '/');
 
-	// console.warn({ _: 'globToReS', text });
+	// console.warn('xArgs.globToReS()', { text });
 
 	// windows = true => match backslash and slash as path separators
 	const parsed = Picomatch.parse(text, {
@@ -690,7 +690,7 @@ export function globToReS(s: string) {
 		posix: true,
 		nocase: isWinOS,
 	});
-	// console.warn({ _: 'globToReS', parsed });
+	// console.warn('xArgs.globToReS()', { parsed });
 	// deno-lint-ignore no-explicit-any
 	return ((parsed as unknown) as any).output as string;
 }
@@ -719,7 +719,7 @@ export function args(argsText: string | string[]) {
 	const idx = arr.findIndex((v) => v === endExpansionToken);
 	const expand = arr.length ? (arr.slice(0, (idx < 0 ? undefined : (idx + 1)))) : [];
 	const raw = (arr.length && (idx > 0) && (idx < arr.length)) ? arr.slice(idx + 1) : [];
-	// console.warn('args()', { arr, idx, expand, raw });
+	// console.warn('xArgs.args()', { arr, idx, expand, raw });
 	return expand
 		.flatMap(Braces.expand)
 		.map(tildeExpand)
