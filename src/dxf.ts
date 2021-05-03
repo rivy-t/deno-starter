@@ -1,13 +1,10 @@
-// spell-checker:ignore (vars) arr globstar gmsu nullglob PATHEXT ; (utils) dprint dprintrc
-
-// import * as Path from 'https://deno.land/std@0.83.0/path/mod.ts';
+// spell-checker:ignore (vars) arr gmsu ; (utils) dprint dprintrc
 
 import { exists, existsSync } from 'https://deno.land/std@0.83.0/fs/exists.ts';
 import { expandGlob, expandGlobSync } from 'https://deno.land/std@0.83.0/fs/expand_glob.ts';
 import { walk, walkSync } from 'https://deno.land/std@0.83.0/fs/walk.ts';
 const fs = { exists, existsSync, expandGlob, expandGlobSync, walk, walkSync };
 
-import { splitByBareWS } from './lib/xArgs.ts';
 import * as Me from './lib/xProcess.ts';
 
 // const isWinOS = Deno.build.os === 'windows';
@@ -26,43 +23,55 @@ if (Deno.build.os === 'windows' && !Me.arg0) {
 	);
 }
 
-const args = splitByBareWS(Me.argsText || '');
+const args = Me.args();
 
-// console.warn(me.name, { args, args });
+// console.warn(Me.name, { args, args });
 
 const runOptions: Deno.RunOptions = (() => {
 	let options: Deno.RunOptions;
 	const dprintConfigPaths = ['.dprint.json', 'dprint.json', '.dprintrc.json'];
 	const dprintConfigPath = dprintConfigPaths.filter(fs.existsSync);
 	if (dprintConfigPath) {
-		// console.info('Using `dprint` formatting');
+		// console.info(Me.name, 'Using `dprint` formatting');
 		const dprintConfig = dprintConfigPath ? ['--config', dprintConfigPath[0]] : [];
 		const dprintConfigArgs = [...dprintConfig, ...args];
-		const cmd = ['dprint', 'fmt', ...dprintConfigArgs, ...args];
-		// console.info({ cmd });
+		const cmdPath = 'dprint';
+		const cmdArgs = ['fmt', ...dprintConfigArgs, ...args];
+		const cmd = [cmdPath, ...cmdArgs];
+		// console.warn(Me.name, { cmd });
 		options = {
 			cmd,
 			stderr: 'inherit',
 			stdin: 'inherit',
 			stdout: 'inherit',
-			// env: { DENO_SHIM_ARG0: targetPath, DENO_SHIM_ARGS: targetArgs },
+			// env: {
+			// 	DENO_SHIM_ARG0: cmdPath,
+			// 	DENO_SHIM_ARGx: cmdArgs.join(' '),
+			// 	DENO_SHIM_URL: cmdPath,
+			// },
 		};
 	} else {
-		// console.info('Using `deno` formatting');
-		const cmd = ['deno', 'fmt', ...args];
-		// console.info({ cmd });
+		// console.info(Me.name, 'Using `deno` formatting');
+		const cmdPath = 'deno';
+		const cmdArgs = ['fmt', ...args];
+		const cmd = [cmdPath, ...cmdArgs];
+		// console.warn(Me.name, { cmd });
 		options = {
 			cmd,
 			stderr: 'inherit',
 			stdin: 'inherit',
 			stdout: 'inherit',
-			// env: { DENO_SHIM_ARG0: targetPath, DENO_SHIM_ARGS: targetArgs },
+			// env: {
+			// 	DENO_SHIM_ARG0: cmdPath,
+			// 	DENO_SHIM_ARGx: cmdArgs.join(' '),
+			// 	DENO_SHIM_URL: cmdPath,
+			// },
 		};
 	}
 	return options;
 })();
 
-// console.warn(me.name, { runOptions });
+// console.warn(Me.name, { runOptions });
 const process = Deno.run(runOptions);
 const status = await process.status();
 Deno.exit(status.success ? 0 : status.code);
