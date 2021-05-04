@@ -28,7 +28,8 @@ if (!targetPath) {
 		const arr: string[] = [];
 		for await (const a of it) arr.push(a);
 		return arr;
-	}))).flat();
+	})))
+		.flat();
 	// console.warn(Me.name, { tailOfArgExpansion, iteratedArgTail });
 
 	let targetURL;
@@ -39,10 +40,7 @@ if (!targetPath) {
 	}
 	// console.warn(Me.name, { CWD: Deno.cwd(), targetPath, targetURL });
 
-	const targetArgs = [
-		...iteratedArgTail,
-		tailOfArgsText,
-	].join(' ');
+	const targetArgs = [...iteratedArgTail, tailOfArgsText].join(' ');
 	const denoOptions = ['run', '-A'];
 	const runOptions: Deno.RunOptions = {
 		cmd: ['deno', ...denoOptions, targetPath, targetArgs],

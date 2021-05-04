@@ -78,25 +78,22 @@ function comparePath(a: WalkEntry, b: WalkEntry): number {
  *        console.log(file);
  *      }
  */
-export async function* expandGlob(
-	glob: string,
-	{
-		root = Deno.cwd(),
-		exclude = [],
-		includeDirs = true,
-		extended = false,
-		globstar = false,
-		// dotglob = true,
-		caseSensitive = isWindows ? false : true,
-	}: ExpandGlobOptions = {},
-): AsyncIterableIterator<WalkEntry> {
+export async function* expandGlob(glob: string, {
+	root = Deno.cwd(),
+	exclude = [],
+	includeDirs = true,
+	extended = false,
+	globstar = false,
+	// dotglob = true,
+	caseSensitive = isWindows ? false : true,
+}: ExpandGlobOptions = {}): AsyncIterableIterator<WalkEntry> {
 	const globOptions: GlobOptions = { extended, globstar };
 	const absRoot = isAbsolute(root) ? normalize(root) : joinGlobs([Deno.cwd(), root], globOptions);
 	const resolveFromRoot = (path: string): string =>
 		isAbsolute(path) ? normalize(path) : joinGlobs([absRoot, path], globOptions);
-	const excludePatterns = exclude
-		.map(resolveFromRoot)
-		.map((s: string): RegExp => globToRegExp(s, globOptions));
+	const excludePatterns = exclude.map(resolveFromRoot).map((s: string): RegExp =>
+		globToRegExp(s, globOptions)
+	);
 	const shouldInclude = (path: string): boolean =>
 		!excludePatterns.some((p: RegExp): boolean => !!path.match(p));
 	const { segments, hasTrailingSep, winRoot } = split(resolveFromRoot(glob));
@@ -140,7 +137,9 @@ export async function* expandGlob(
 			match: [
 				new RegExp(
 					globToRegExp(joinGlobs([walkInfo.path, globSegment], globOptions), globOptions),
-					caseSensitive ? '' : 'i',
+					caseSensitive
+						? ''
+						: 'i',
 				),
 			],
 			skip: excludePatterns,
@@ -176,25 +175,22 @@ export async function* expandGlob(
  *        console.log(file);
  *      }
  */
-export function* expandGlobSync(
-	glob: string,
-	{
-		root = Deno.cwd(),
-		exclude = [],
-		includeDirs = true,
-		extended = false,
-		globstar = false,
-		// dotglob = true,
-		caseSensitive = isWindows ? false : true,
-	}: ExpandGlobOptions = {},
-): IterableIterator<WalkEntry> {
+export function* expandGlobSync(glob: string, {
+	root = Deno.cwd(),
+	exclude = [],
+	includeDirs = true,
+	extended = false,
+	globstar = false,
+	// dotglob = true,
+	caseSensitive = isWindows ? false : true,
+}: ExpandGlobOptions = {}): IterableIterator<WalkEntry> {
 	const globOptions: GlobOptions = { extended, globstar };
 	const absRoot = isAbsolute(root) ? normalize(root) : joinGlobs([Deno.cwd(), root], globOptions);
 	const resolveFromRoot = (path: string): string =>
 		isAbsolute(path) ? normalize(path) : joinGlobs([absRoot, path], globOptions);
-	const excludePatterns = exclude
-		.map(resolveFromRoot)
-		.map((s: string): RegExp => globToRegExp(s, globOptions));
+	const excludePatterns = exclude.map(resolveFromRoot).map((s: string): RegExp =>
+		globToRegExp(s, globOptions)
+	);
 	const shouldInclude = (path: string): boolean =>
 		!excludePatterns.some((p: RegExp): boolean => !!path.match(p));
 	const { segments, hasTrailingSep, winRoot } = split(resolveFromRoot(glob));
@@ -238,7 +234,9 @@ export function* expandGlobSync(
 			match: [
 				new RegExp(
 					globToRegExp(joinGlobs([walkInfo.path, globSegment], globOptions), globOptions),
-					caseSensitive ? '' : 'i',
+					caseSensitive
+						? ''
+						: 'i',
 				),
 			],
 			skip: excludePatterns,

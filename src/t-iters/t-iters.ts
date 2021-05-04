@@ -20,17 +20,11 @@ export function itpLongestCommonPrefix(list: Iterable<string>) {
 }
 
 export function isAsyncIter(obj: unknown): obj is AsyncIterator<unknown> {
-	return (
-		typeof obj === 'object' &&
-		obj !== null &&
-		// deno-lint-ignore no-explicit-any
-		typeof (obj as any).next === 'function'
-	);
+	return (typeof obj === 'object' && obj !== null && // deno-lint-ignore no-explicit-any
+	typeof (obj as any).next === 'function');
 }
 export function canAsyncIter(obj: unknown): obj is AsyncIterable<unknown> {
-	return (
-		typeof obj === 'object' && obj !== null && Symbol.asyncIterator in obj
-	);
+	return (typeof obj === 'object' && obj !== null && Symbol.asyncIterator in obj);
 }
 
 export async function* asyncIt<T>(it: AsyncIterable<T> | Iterable<T>): AsyncIterable<T> {
@@ -63,7 +57,8 @@ export function* zipSync<T>(...iterables: Iterable<T>[]): Iterable<T[]> {
 }
 
 export function lazyLongestCommonPrefixSync(list: Iterable<string>) {
-	return Lazy.from(zipSync(...list))
+	return Lazy
+		.from(zipSync(...list))
 		.where((NthChars) => NthChars.every((c) => c === NthChars[0]))
 		.select((NthChars) => NthChars[0])
 		.toArray()
@@ -79,7 +74,8 @@ export async function lazyLongestCommonPrefix(list: Iterable<string> | AsyncIter
 		}
 		return a;
 	})();
-	return Lazy.from(zipSync(...itList))
+	return Lazy
+		.from(zipSync(...itList))
 		.where((NthChars) => NthChars.every((c) => c === NthChars[0]))
 		.select((NthChars) => NthChars[0])
 		.toArray()

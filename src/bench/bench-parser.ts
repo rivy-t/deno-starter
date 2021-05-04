@@ -120,37 +120,28 @@ bench({
 performance.mark('setup:stop');
 performance.measure('setup', 'setup:start', 'setup:stop');
 
-log.debug(
-	`setup done (duration: ${
-		(() => {
-			const duration = performance.getEntriesByName('setup')[0].duration;
-			const [unit, n] = (duration > 1000) ? ['s', duration / 1000] : ['ms', duration];
-			return (new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(n)) + ' ' +
-				unit;
-		})()
-	})`,
-);
+log.debug(`setup done (duration: ${
+	(() => {
+		const duration = performance.getEntriesByName('setup')[0].duration;
+		const [unit, n] = (duration > 1000) ? ['s', duration / 1000] : ['ms', duration];
+		return (new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(n)) + ' ' + unit;
+	})()
+})`);
 
 log.debug('starting benchmarking');
 
 performance.mark('bench:start');
 
-await runBenchmarks(
-	{ silent: true, skip: /_long/ },
-	prettyBenchmarkProgress(),
-).then(
+await runBenchmarks({ silent: true, skip: /_long/ }, prettyBenchmarkProgress()).then(
 	prettyBenchmarkResult(),
 );
 
 performance.mark('bench:stop');
 performance.measure('bench', 'bench:start', 'bench:stop');
-log.debug(
-	`benchmarking done (duration: ${
-		(() => {
-			const duration = performance.getEntriesByName('bench')[0].duration;
-			const [unit, n] = (duration > 1000) ? ['s', duration / 1000] : ['ms', duration];
-			return (new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(n)) + ' ' +
-				unit;
-		})()
-	})`,
-);
+log.debug(`benchmarking done (duration: ${
+	(() => {
+		const duration = performance.getEntriesByName('bench')[0].duration;
+		const [unit, n] = (duration > 1000) ? ['s', duration / 1000] : ['ms', duration];
+		return (new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 }).format(n)) + ' ' + unit;
+	})()
+})`);

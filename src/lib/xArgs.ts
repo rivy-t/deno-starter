@@ -373,9 +373,7 @@ function decodeANSIC(s: string) {
 	return s;
 }
 
-export function deQuote(
-	s: string,
-) {
+export function deQuote(s: string) {
 	// de-quote string
 	// * supports both single and double quotes
 	// * supports ANSI-C quotes
@@ -463,16 +461,12 @@ export async function* filenameExpandIter(s: string): AsyncIterableIterator<stri
 				0,
 			);
 			const re = new RegExp(
-				'^' + globEscapedPrefix +
-					parsed.globAsReS + '$',
+				'^' + globEscapedPrefix + parsed.globAsReS + '$',
 				isWinOS ? 'imsu' : 'msu',
 			);
 			// console.warn('xArgs.filenameExpandIter()', { normalizedPrefix, globEscapedPrefix, maxDepth, re });
 			// note: `walk` match re is compared to the full path during the walk
-			const walkIt = walk(resolvedPrefix, {
-				match: [re],
-				maxDepth: maxDepth ? maxDepth : 1,
-			});
+			const walkIt = walk(resolvedPrefix, { match: [re], maxDepth: maxDepth ? maxDepth : 1 });
 			for await (const e of walkIt) {
 				const p = e.path.replace(new RegExp('^' + globEscapedPrefix), '');
 				if (p) {
@@ -513,16 +507,12 @@ export function* filenameExpandIterSync(s: string) {
 				0,
 			);
 			const re = new RegExp(
-				'^' + globEscapedPrefix +
-					parsed.globAsReS + '$',
+				'^' + globEscapedPrefix + parsed.globAsReS + '$',
 				isWinOS ? 'imsu' : 'msu',
 			);
 			// console.warn('xArgs.filenameExpandIter()', { normalizedPrefix, globEscapedPrefix, maxD, re });
 			// note: `walkSync` match re is compared to the full path during the walk
-			const walkIt = walkSync(resolvedPrefix, {
-				match: [re],
-				maxDepth: maxD ? maxD : 1,
-			});
+			const walkIt = walkSync(resolvedPrefix, { match: [re], maxDepth: maxD ? maxD : 1 });
 			for (const e of walkIt) {
 				const p = e.path.replace(new RegExp('^' + globEscapedPrefix), '');
 				if (p) {
@@ -720,11 +710,7 @@ export function args(argsText: string | string[]) {
 	const expand = arr.length ? (arr.slice(0, (idx < 0 ? undefined : (idx + 1)))) : [];
 	const raw = (arr.length && (idx > 0) && (idx < arr.length)) ? arr.slice(idx + 1) : [];
 	// console.warn('xArgs.args()', { arr, idx, expand, raw });
-	return expand
-		.flatMap(Braces.expand)
-		.map(tildeExpand)
-		.flatMap(filenameExpandSync)
-		.map(deQuote)
+	return expand.flatMap(Braces.expand).map(tildeExpand).flatMap(filenameExpandSync).map(deQuote)
 		.concat(raw);
 }
 
@@ -780,10 +766,7 @@ export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrem
 		[argText, argsText] = shiftCLTextWord(argsText);
 		if (argText === endExpansionToken) continueExpansions = false;
 		const argExpansions = continueExpansions
-			? [argText]
-				.flatMap(Braces.expand)
-				.map(tildeExpand)
-				.map(filenameExpandIter)
+			? [argText].flatMap(Braces.expand).map(tildeExpand).map(filenameExpandIter)
 			: [(async function* () {
 				yield argText;
 			})()];
@@ -797,12 +780,10 @@ export async function* argsIt(argsText: string): AsyncIterableIterator<ArgIncrem
 					arg: deQuote(current.value),
 					tailOfArgExpansion: [
 						...(!next.done
-							? [
-								(async function* () {
-									yield next.value;
-									for await (const e of argExpansion) yield e;
-								})(),
-							]
+							? [(async function* () {
+								yield next.value;
+								for await (const e of argExpansion) yield e;
+							})()]
 							: []),
 						...argExpansions.slice(idx + 1),
 					],
@@ -821,10 +802,7 @@ export function* argsItSync(argsText: string): IterableIterator<ArgIncrementSync
 		[argText, argsText] = shiftCLTextWord(argsText);
 		// if (argText === endExpansionToken) continueExpansions = false;
 		const argExpansions = continueExpansions
-			? [argText]
-				.flatMap(Braces.expand)
-				.map(tildeExpand)
-				.map(filenameExpandSync)
+			? [argText].flatMap(Braces.expand).map(tildeExpand).map(filenameExpandSync)
 			: [[argText]];
 		for (let idx = 0; idx < argExpansions.length; idx++) {
 			const argExpansion = argExpansions[idx];
