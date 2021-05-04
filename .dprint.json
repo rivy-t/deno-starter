@@ -10,16 +10,22 @@
 		"deno": true,
 		// * customize preferences (overrides of some Deno formatting choices)
 		// ref: <https://github.com/dprint/dprint-plugin-typescript/blob/44b6cf562e511a308f4a7183dc98fb19cdf21d07/src/configuration/builder.rs#L51>
-		// ref: <https://github.com/denoland/deno/blob/f46e39c5c5/cli/tools/fmt.rs#L311>
 		"lineWidth": 100,
+		"preferSingleLine": true,
 		"quoteStyle": "preferSingle",
-		"module.sortImportDeclarations": "caseInsensitive",
-		"module.sortExportDeclarations": "caseInsensitive",
+		//
 		"ignoreNodeCommentText": "dprint-ignore", // from Deno's "deno-fmt-ignore"
-		"ignoreFileCommentText": "dprint-ignore-file" // from Deno's "deno-fmt-ignore-file"
+		"ignoreFileCommentText": "dprint-ignore-file", // from Deno's "deno-fmt-ignore-file"
+		"memberExpression.linePerExpression": true,
+		"memberExpression.preferSingleLine": true,
+		"module.sortImportDeclarations": "caseInsensitive",
+		"module.sortExportDeclarations": "caseInsensitive"
 	},
 	"json": {},
-	"markdown": {},
+	"markdown": {
+		"textWrap": "always",
+		"lineWidth": 99999
+	},
 	"rustfmt": {},
 	"includes": ["**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,rs}"],
 	"excludes": [".history", "**/node_modules", "**/*-lock.json", "**/target", "**/vendor"],
