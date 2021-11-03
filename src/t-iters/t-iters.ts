@@ -21,7 +21,7 @@ export function itpLongestCommonPrefix(list: Iterable<string>) {
 
 export function isAsyncIter(obj: unknown): obj is AsyncIterator<unknown> {
 	return (typeof obj === 'object' && obj !== null && // deno-lint-ignore no-explicit-any
-	typeof (obj as any).next === 'function');
+			typeof (obj as any).next === 'function');
 }
 export function canAsyncIter(obj: unknown): obj is AsyncIterable<unknown> {
 	return (typeof obj === 'object' && obj !== null && Symbol.asyncIterator in obj);
